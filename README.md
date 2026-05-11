@@ -4,6 +4,54 @@
 
 SCALE-Sim is a simulator for systolic array based accelerators supporting Deep Neural Network layers such as Convolution, Fully Connected, and any layer that uses GEMMs (e.g., Attention).
 
+## What Changed In This Fork
+
+This repository has been extended for a computer architecture class project on
+Multi-Query Attention (MQA) inference and a custom KV-stationary systolic-array
+idea.
+
+What is new relative to vanilla SCALE-Sim:
+
+- Baseline MQA support through a helper topology generator that emits a
+  two-GEMM MNK workload for `Q @ K.T` and `softmax(QK) @ V`
+- An analytical KV-stationary model for comparing a custom architecture against
+  the baseline GEMM-style SCALE-Sim mapping
+- A numerical correctness check for the KV-stationary online-softmax algorithm
+  against standard NumPy attention
+- A comparison sweep script that reports estimated cycles, DRAM traffic, and
+  arithmetic intensity across sequence lengths
+- A plotting script for visualizing the comparison outputs
+
+Important modeling boundary:
+
+- SCALE-Sim itself is still used for the baseline GEMM-style execution path.
+- The KV-stationary architecture is not natively modeled by SCALE-Sim in this
+  fork.
+- The KV-stationary results come from a separate analytical extension and are
+  not claimed to be cycle-accurate.
+
+MQA-specific helper files added at the repo root:
+
+- `mqa_correctness.py`
+- `baseline_mqa_model.py`
+- `kv_stationary_model.py`
+- `generate_scalesim_topology.py`
+- `compare.py`
+- `plot_results.py`
+- `README_MQA.md`
+
+Quick start for the added MQA workflow:
+
+```bash
+pip3 install -r requirements.txt
+python3 mqa_correctness.py
+python3 generate_scalesim_topology.py
+python3 compare.py
+python3 plot_results.py
+```
+
+For more detail on the MQA flow, see `README_MQA.md`.
+
 
 ## Features of SCALE-sim Releases
 
@@ -257,5 +305,4 @@ v2 Contributers/Collaborators
 * Paul Whatmough
 * Vineet Nadella
 * Sachit Kuhar
-
 
