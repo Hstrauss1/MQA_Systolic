@@ -4,33 +4,65 @@
 
 SCALE-Sim is a simulator for systolic array based accelerators supporting Deep Neural Network layers such as Convolution, Fully Connected, and any layer that uses GEMMs (e.g., Attention).
 
-## What Changed In This Fork
+## MQA Fork Overview
 
-This repository has been extended for a computer architecture class project on
-Multi-Query Attention (MQA) inference and a custom KV-stationary systolic-array
-idea.
+This fork extends SCALE-Sim for a class project on Multi-Query Attention (MQA)
+decode and a custom KV-stationary systolic-array concept. The goal is to
+compare a standard GEMM-style attention mapping against a streaming design that
+keeps `K` and `V` resident while queries move through the fabric.
 
-What is new relative to vanilla SCALE-Sim:
+### What This Fork Adds
 
-- Baseline MQA support through a helper topology generator that emits a
-  two-GEMM MNK workload for `Q @ K.T` and `softmax(QK) @ V`
-- An analytical KV-stationary model for comparing a custom architecture against
-  the baseline GEMM-style SCALE-Sim mapping
-- A numerical correctness check for the KV-stationary online-softmax algorithm
-  against standard NumPy attention
-- A comparison sweep script that reports estimated cycles, DRAM traffic, and
-  arithmetic intensity across sequence lengths
-- A plotting script for visualizing the comparison outputs
+- Baseline MQA support through a helper topology generator for
+  `Q @ K.T` and `softmax(QK) @ V`
+- A separate analytical KV-stationary model for performance estimation
+- A numerical correctness check for the online-softmax streaming formulation
+- Sweep and plotting scripts for cycles, DRAM traffic, and arithmetic intensity
 
-Important modeling boundary:
+### Design Walkthrough
 
-- SCALE-Sim itself is still used for the baseline GEMM-style execution path.
+#### 1. Running attention inside one PE
+
+Each attention PE consumes the running max `Min`, normalization term `Lin`, and
+partial output vector `Oin`. It computes a fresh score `Qi * Ki`, updates the
+online-softmax state, and emits the next `Mout`, `Lout`, and `Oout`.
+
+![Running Attention PE](./documentation/resources/mqa-designs/AttentionPE.png "Running Attention PE")
+
+#### 2. Single-query systolic traversal
+
+A single query vector streams left-to-right across the MAC chain. Each column
+contributes one key/value pair, and the intermediate output vector is updated
+as the running softmax state advances through the array.
+
+![K dot V Systolic Operations](./documentation/resources/mqa-designs/SystolicSingle.png "K dot V Systolic Operations")
+
+#### 3. Multi-head execution view
+
+The same stationary `K/V` structure can be viewed across multiple query heads.
+Heads reuse the shared key/value context while maintaining their own running
+softmax and output accumulation.
+
+![K dot V Multi-Headed MQA](./documentation/resources/mqa-designs/MultiHeaded.png "K dot V Multi-Headed MQA")
+
+#### 4. Final output vector
+
+After the stream finishes, the accumulated output vector is normalized by the
+final softmax denominator `L` to produce the completed attention output.
+
+![Final Output Vector](./documentation/resources/mqa-designs/FinalOutVector.png "Final Output Vector")
+
+### Modeling Boundary
+
+- SCALE-Sim is still used for the baseline GEMM-style execution path.
 - The KV-stationary architecture is not natively modeled by SCALE-Sim in this
   fork.
-- The KV-stationary results come from a separate analytical extension and are
-  not claimed to be cycle-accurate.
+- KV-stationary results come from a separate analytical extension and are not
+  claimed to be cycle-accurate.
+- The correctness check validates the online-softmax math against NumPy, not a
+  hardware RTL implementation.
 
-MQA-specific helper files added at the repo root:
+### MQA Helper Files
 
 - `mqa_correctness.py`
 - `baseline_mqa_model.py`
@@ -40,7 +72,7 @@ MQA-specific helper files added at the repo root:
 - `plot_results.py`
 - `README_MQA.md`
 
-Quick start for the added MQA workflow:
+### Quick Start
 
 ```bash
 pip3 install -r requirements.txt
@@ -50,7 +82,7 @@ python3 compare.py
 python3 plot_results.py
 ```
 
-For more detail on the MQA flow, see `README_MQA.md`.
+For more detail on the MQA workflow, see `README_MQA.md`.
 
 
 ## Features of SCALE-sim Releases
@@ -305,4 +337,3 @@ v2 Contributers/Collaborators
 * Paul Whatmough
 * Vineet Nadella
 * Sachit Kuhar
-
