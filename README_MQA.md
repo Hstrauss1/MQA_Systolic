@@ -9,6 +9,8 @@ Important modeling boundary:
   topology CSV and the `-i gemm` option.
 - The KV-stationary architecture is evaluated with a separate analytical model.
 - The KV-stationary model is not cycle-accurate.
+- In the 2D KV-stationary model, rows are parallel query lanes and columns are
+  KV-stationary token lanes.
 - The correctness script checks numerical equivalence of the online-softmax
   algorithm against NumPy attention. It does not compare against SCALE-Sim
   output.
@@ -18,7 +20,7 @@ Important modeling boundary:
 - `mqa_correctness.py`: NumPy reference attention and online-softmax
   KV-stationary correctness check
 - `baseline_mqa_model.py`: simple analytical two-GEMM baseline model
-- `kv_stationary_model.py`: simple analytical KV-stationary model
+- `kv_stationary_model.py`: analytical 2D KV-stationary systolic-style model
 - `generate_scalesim_topology.py`: writes a SCALE-Sim GEMM topology CSV
 - `compare.py`: sweeps sequence length and saves `results.csv`
 - `plot_results.py`: plots the saved comparison results using matplotlib
