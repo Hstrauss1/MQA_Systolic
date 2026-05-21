@@ -58,12 +58,17 @@ def build_result_row(T: int) -> Dict[str, float]:
         "T": T,
         "baseline_cycles": baseline_cycles,
         "kv_stationary_cycles": kv_cycles,
+        "kv_stationary_fill_cycles": kv_stationary["pipeline_fill_cycles"],
+        "kv_stationary_steady_cycles": kv_stationary["steady_state_cycles"],
+        "kv_stationary_drain_cycles": kv_stationary["drain_cycles"],
         "baseline_dram_MB": baseline_dram_mb,
         "kv_stationary_dram_MB": kv_dram_mb,
         "memory_reduction_ratio": baseline_dram_mb / kv_dram_mb,
         "speedup_estimate": baseline_cycles / kv_cycles,
         "baseline_AI": baseline["arithmetic_intensity"],
         "kv_stationary_AI": kv_stationary["arithmetic_intensity"],
+        "kv_stationary_utilization": kv_stationary["pe_utilization"],
+        "kv_stationary_q_per_cycle": kv_stationary["query_throughput_q_per_cycle"],
     }
 
 
@@ -72,12 +77,17 @@ def format_table(rows: List[Dict[str, float]]) -> str:
         "T",
         "baseline_cycles",
         "kv_stationary_cycles",
+        "kv_stationary_fill_cycles",
+        "kv_stationary_steady_cycles",
+        "kv_stationary_drain_cycles",
         "baseline_dram_MB",
         "kv_stationary_dram_MB",
         "memory_reduction_ratio",
         "speedup_estimate",
         "baseline_AI",
         "kv_stationary_AI",
+        "kv_stationary_utilization",
+        "kv_stationary_q_per_cycle",
     ]
     formatted_rows = []
     for row in rows:
@@ -86,12 +96,17 @@ def format_table(rows: List[Dict[str, float]]) -> str:
                 f"{int(row['T'])}",
                 f"{int(row['baseline_cycles'])}",
                 f"{int(row['kv_stationary_cycles'])}",
+                f"{int(row['kv_stationary_fill_cycles'])}",
+                f"{int(row['kv_stationary_steady_cycles'])}",
+                f"{int(row['kv_stationary_drain_cycles'])}",
                 f"{row['baseline_dram_MB']:.4f}",
                 f"{row['kv_stationary_dram_MB']:.4f}",
                 f"{row['memory_reduction_ratio']:.4f}",
                 f"{row['speedup_estimate']:.4f}",
                 f"{row['baseline_AI']:.4f}",
                 f"{row['kv_stationary_AI']:.4f}",
+                f"{row['kv_stationary_utilization']:.4f}",
+                f"{row['kv_stationary_q_per_cycle']:.6f}",
             ]
         )
 
@@ -115,12 +130,17 @@ def write_results_csv(rows: List[Dict[str, float]], output_path: Path) -> None:
         "T",
         "baseline_cycles",
         "kv_stationary_cycles",
+        "kv_stationary_fill_cycles",
+        "kv_stationary_steady_cycles",
+        "kv_stationary_drain_cycles",
         "baseline_dram_MB",
         "kv_stationary_dram_MB",
         "memory_reduction_ratio",
         "speedup_estimate",
         "baseline_AI",
         "kv_stationary_AI",
+        "kv_stationary_utilization",
+        "kv_stationary_q_per_cycle",
     ]
     with output_path.open("w", newline="", encoding="utf-8") as csvfile:
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
