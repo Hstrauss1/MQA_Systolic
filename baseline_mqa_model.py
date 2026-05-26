@@ -21,17 +21,25 @@ def baseline_mqa_metrics(
     array_cols: int,
     bytes_per_element: int,
     memory_bandwidth_bytes_per_cycle: int,
+    batch_size: int = 1,
+    query_tokens: int = 1,
 ) -> Dict[str, float]:
-    """Estimate the two-GEMM baseline costs for MQA decode."""
-    qk_macs = H * T * d
-    av_macs = H * T * d
+    """Estimate the two-GEMM baseline costs for MQA.
+
+    With batch_size B: B independent sequences are decoded simultaneously.
+    Each sequence has its own KV cache (K/V shared across heads per sequence).
+    With query_tokens Q_T: each head attends Q_T query tokens over T KV tokens.
+    Q_T=1 is decode; Q_T=T is full prefill.
+    """
+    qk_macs = H * batch_size * query_tokens * T * d
+    av_macs = H * batch_size * query_tokens * T * d
     total_macs = qk_macs + av_macs
 
-    q_reads = H * d * bytes_per_element
-    k_reads = H * T * d * bytes_per_element
-    v_reads = H * T * d * bytes_per_element
-    score_write_read = H * T * bytes_per_element * 2
-    output_writes = H * d * bytes_per_element
+    q_reads = H * batch_size * query_tokens * d * bytes_per_element
+    k_reads = batch_size * T * d * bytes_per_element
+    v_reads = batch_size * T * d * bytes_per_element
+    score_write_read = H * batch_size * query_tokens * T * bytes_per_element * 2
+    output_writes = H * batch_size * query_tokens * d * bytes_per_element
     total_dram_bytes = q_reads + k_reads + v_reads + score_write_read + output_writes
 
     ideal_compute_cycles = math.ceil(total_macs / (array_rows * array_cols))
