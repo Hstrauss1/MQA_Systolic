@@ -1,0 +1,13 @@
+ART:
+    version: '0.4'
+    tables:
+      - name: kv_systolic_array.PE[0..63].mac
+        area: 1.0
+      - name: kv_systolic_array.PE[0..63].q_spad
+        area: 1.0
+      - name: kv_systolic_array.PE[0..63].k_spad
+        area: 1.0
+      - name: kv_systolic_array.PE[0..63].o_spad
+        area: 1.0
+      - name: kv_systolic_array.kv_dram
+        area: 1.0

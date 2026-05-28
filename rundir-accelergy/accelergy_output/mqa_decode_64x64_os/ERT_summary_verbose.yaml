@@ -1,0 +1,3055 @@
+ERT_summary:
+    version: '0.4'
+    table_summary:
+      - name: systolic_array.PE[0..4095].mac
+        actions:
+          - name: mac_random
+            energy: 1.0
+          - name: mac_gated
+            energy: 1.0
+          - name: idle
+            energy: 0.0
+          - name: leak
+            energy: 0.0
+        primitive_estimation(s):
+          - systolic_array.PE[0..4095].mac:
+                estimator: MQAEstimator
+      - name: systolic_array.PE[0..4095].ifmap_spad
+        actions:
+          - name: read
+            average_energy: 1.0
+            max_energy: 1.0
+            min_energy: 1.0
+          - name: write
+            average_energy: 1.0
+            max_energy: 1.0
+            min_energy: 1.0
+          - name: update
+            average_energy: 1.0
+            max_energy: 1.0
+            min_energy: 1.0
+          - name: idle
+            energy: 0.0
+          - name: leak
+            energy: 0.0
+        primitive_estimation(s):
+          - systolic_array.PE[0..4095].ifmap_spad:
+                estimator: MQAEstimator
+      - name: systolic_array.PE[0..4095].weights_spad
+        actions:
+          - name: read
+            average_energy: 1.0
+            max_energy: 1.0
+            min_energy: 1.0
+          - name: write
+            average_energy: 1.0
+            max_energy: 1.0
+            min_energy: 1.0
+          - name: update
+            average_energy: 1.0
+            max_energy: 1.0
+            min_energy: 1.0
+          - name: idle
+            energy: 0.0
+          - name: leak
+            energy: 0.0
+        primitive_estimation(s):
+          - systolic_array.PE[0..4095].weights_spad:
+                estimator: MQAEstimator
+      - name: systolic_array.PE[0..4095].psum_spad
+        actions:
+          - name: read
+            average_energy: 1.0
+            max_energy: 1.0
+            min_energy: 1.0
+          - name: write
+            average_energy: 1.0
+            max_energy: 1.0
+            min_energy: 1.0
+          - name: update
+            average_energy: 1.0
+            max_energy: 1.0
+            min_energy: 1.0
+          - name: idle
+            energy: 0.0
+          - name: leak
+            energy: 0.0
+        primitive_estimation(s):
+          - systolic_array.PE[0..4095].psum_spad:
+                estimator: MQAEstimator
+      - name: systolic_array.weights_dram
+        actions:
+          - name: read
+            energy: 2240.0
+          - name: write
+            energy: 2240.0
+          - name: idle
+            energy: 0.0
+          - name: leak
+            energy: 0.0
+        primitive_estimation(s):
+          - systolic_array.weights_dram:
+                estimator: MQAEstimator
+      - name: systolic_array.ifmap_dram
+        actions:
+          - name: read
+            energy: 2240.0
+          - name: write
+            energy: 2240.0
+          - name: idle
+            energy: 0.0
+          - name: leak
+            energy: 0.0
+        primitive_estimation(s):
+          - systolic_array.ifmap_dram:
+                estimator: MQAEstimator
+      - name: systolic_array.psum_dram
+        actions:
+          - name: read
+            energy: 2240.0
+          - name: write
+            energy: 2240.0
+          - name: idle
+            energy: 0.0
+          - name: leak
+            energy: 0.0
+        primitive_estimation(s):
+          - systolic_array.psum_dram:
+                estimator: MQAEstimator
+      - name: systolic_array.weights_glb
+        actions:
+          - name: fill
+            average_energy: 272.135
+            max_energy: 272.335
+            min_energy: 271.935
+          - name: read
+            average_energy: 287.817
+            max_energy: 288.017
+            min_energy: 287.617
+          - name: update
+            average_energy: 272.135
+            max_energy: 272.335
+            min_energy: 271.935
+          - name: idle
+            energy: 0.0
+        primitive_estimation(s):
+          - action_name: fill
+            arguments:
+                data_delta: 0
+                address_delta: 0
+            energy: 271.935
+            subaction_estimations:
+              - subcomponent_name: buffet_collection.buffet[0].scoreboard
+                subaction_name: write
+                arguments:
+                    address_delta: 1
+                    data_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy: 1.0
+                scale_energy_by: 1.0
+                interpreted_energy: 1.0
+                percentage: 0.37%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+                subaction_name: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 0.0
+                interpreted_energy: 0.0
+                percentage: 0.0%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+                subaction_name: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 0.0
+                interpreted_energy: 0.0
+                percentage: 0.0%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+                subaction_name: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 0.0
+                interpreted_energy: 0.0
+                percentage: 0.0%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+                subaction_name: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 0.0
+                interpreted_energy: 0.0
+                percentage: 0.0%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.storage
+                subaction_name: write
+                arguments:
+                    data_delta: 0
+                    address_delta: 0
+                    global_cycle_seconds: 1e-09
+                energy: 270.83492307692313
+                scale_energy_by: 1.0
+                interpreted_energy: 270.83492307692313
+                percentage: 100.0%
+                estimator: MQAEstimator
+              - subcomponent_name: address_generators[0]
+                subaction_name: count
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.037%
+                estimator: MQAEstimator
+          - action_name: fill
+            arguments:
+                data_delta: 1
+                address_delta: 0
+            energy: 272.135
+            subaction_estimations:
+              - subcomponent_name: buffet_collection.buffet[0].scoreboard
+                subaction_name: write
+                arguments:
+                    address_delta: 1
+                    data_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy: 1.0
+                scale_energy_by: 1.0
+                interpreted_energy: 1.0
+                percentage: 0.37%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+                subaction_name: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.037%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+                subaction_name: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.037%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+                subaction_name: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 0.0
+                interpreted_energy: 0.0
+                percentage: 0.0%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+                subaction_name: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 0.0
+                interpreted_energy: 0.0
+                percentage: 0.0%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.storage
+                subaction_name: write
+                arguments:
+                    data_delta: 1
+                    address_delta: 0
+                    global_cycle_seconds: 1e-09
+                energy: 270.83492307692313
+                scale_energy_by: 1.0
+                interpreted_energy: 270.83492307692313
+                percentage: 100.0%
+                estimator: MQAEstimator
+              - subcomponent_name: address_generators[0]
+                subaction_name: count
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.037%
+                estimator: MQAEstimator
+          - action_name: fill
+            arguments:
+                data_delta: 0
+                address_delta: 1
+            energy: 272.135
+            subaction_estimations:
+              - subcomponent_name: buffet_collection.buffet[0].scoreboard
+                subaction_name: write
+                arguments:
+                    address_delta: 1
+                    data_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy: 1.0
+                scale_energy_by: 1.0
+                interpreted_energy: 1.0
+                percentage: 0.37%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+                subaction_name: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 0.0
+                interpreted_energy: 0.0
+                percentage: 0.0%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+                subaction_name: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 0.0
+                interpreted_energy: 0.0
+                percentage: 0.0%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+                subaction_name: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.037%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+                subaction_name: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.037%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.storage
+                subaction_name: write
+                arguments:
+                    data_delta: 0
+                    address_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy: 270.83492307692313
+                scale_energy_by: 1.0
+                interpreted_energy: 270.83492307692313
+                percentage: 100.0%
+                estimator: MQAEstimator
+              - subcomponent_name: address_generators[0]
+                subaction_name: count
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.037%
+                estimator: MQAEstimator
+          - action_name: fill
+            arguments:
+                data_delta: 1
+                address_delta: 1
+            energy: 272.335
+            subaction_estimations:
+              - subcomponent_name: buffet_collection.buffet[0].scoreboard
+                subaction_name: write
+                arguments:
+                    address_delta: 1
+                    data_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy: 1.0
+                scale_energy_by: 1.0
+                interpreted_energy: 1.0
+                percentage: 0.37%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+                subaction_name: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.037%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+                subaction_name: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.037%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+                subaction_name: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.037%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+                subaction_name: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.037%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.storage
+                subaction_name: write
+                arguments:
+                    data_delta: 1
+                    address_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy: 270.83492307692313
+                scale_energy_by: 1.0
+                interpreted_energy: 270.83492307692313
+                percentage: 99.0%
+                estimator: MQAEstimator
+              - subcomponent_name: address_generators[0]
+                subaction_name: count
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.037%
+                estimator: MQAEstimator
+          - action_name: read
+            arguments:
+                data_delta: 0
+                address_delta: 0
+            energy: 287.617
+            subaction_estimations:
+              - subcomponent_name: buffet_collection.buffet[0].scoreboard
+                subaction_name: read
+                arguments:
+                    address_delta: 1
+                    data_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy: 1.0
+                scale_energy_by: 1.0
+                interpreted_energy: 1.0
+                percentage: 0.35%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].scoreboard
+                subaction_name: write
+                arguments:
+                    address_delta: 1
+                    data_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy: 1.0
+                scale_energy_by: 1.0
+                interpreted_energy: 1.0
+                percentage: 0.35%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+                subaction_name: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 0.0
+                interpreted_energy: 0.0
+                percentage: 0.0%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+                subaction_name: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 0.0
+                interpreted_energy: 0.0
+                percentage: 0.0%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+                subaction_name: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 0.0
+                interpreted_energy: 0.0
+                percentage: 0.0%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+                subaction_name: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 0.0
+                interpreted_energy: 0.0
+                percentage: 0.0%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.storage
+                subaction_name: read
+                arguments:
+                    data_delta: 0
+                    address_delta: 0
+                    global_cycle_seconds: 1e-09
+                energy: 285.5173076923077
+                scale_energy_by: 1.0
+                interpreted_energy: 285.5173076923077
+                percentage: 99.0%
+                estimator: MQAEstimator
+              - subcomponent_name: address_generators[1]
+                subaction_name: count
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.035%
+                estimator: MQAEstimator
+          - action_name: read
+            arguments:
+                data_delta: 1
+                address_delta: 0
+            energy: 287.817
+            subaction_estimations:
+              - subcomponent_name: buffet_collection.buffet[0].scoreboard
+                subaction_name: read
+                arguments:
+                    address_delta: 1
+                    data_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy: 1.0
+                scale_energy_by: 1.0
+                interpreted_energy: 1.0
+                percentage: 0.35%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].scoreboard
+                subaction_name: write
+                arguments:
+                    address_delta: 1
+                    data_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy: 1.0
+                scale_energy_by: 1.0
+                interpreted_energy: 1.0
+                percentage: 0.35%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+                subaction_name: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.035%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+                subaction_name: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.035%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+                subaction_name: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 0.0
+                interpreted_energy: 0.0
+                percentage: 0.0%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+                subaction_name: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 0.0
+                interpreted_energy: 0.0
+                percentage: 0.0%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.storage
+                subaction_name: read
+                arguments:
+                    data_delta: 1
+                    address_delta: 0
+                    global_cycle_seconds: 1e-09
+                energy: 285.5173076923077
+                scale_energy_by: 1.0
+                interpreted_energy: 285.5173076923077
+                percentage: 99.0%
+                estimator: MQAEstimator
+              - subcomponent_name: address_generators[1]
+                subaction_name: count
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.035%
+                estimator: MQAEstimator
+          - action_name: read
+            arguments:
+                data_delta: 0
+                address_delta: 1
+            energy: 287.817
+            subaction_estimations:
+              - subcomponent_name: buffet_collection.buffet[0].scoreboard
+                subaction_name: read
+                arguments:
+                    address_delta: 1
+                    data_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy: 1.0
+                scale_energy_by: 1.0
+                interpreted_energy: 1.0
+                percentage: 0.35%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].scoreboard
+                subaction_name: write
+                arguments:
+                    address_delta: 1
+                    data_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy: 1.0
+                scale_energy_by: 1.0
+                interpreted_energy: 1.0
+                percentage: 0.35%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+                subaction_name: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 0.0
+                interpreted_energy: 0.0
+                percentage: 0.0%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+                subaction_name: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 0.0
+                interpreted_energy: 0.0
+                percentage: 0.0%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+                subaction_name: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.035%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+                subaction_name: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.035%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.storage
+                subaction_name: read
+                arguments:
+                    data_delta: 0
+                    address_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy: 285.5173076923077
+                scale_energy_by: 1.0
+                interpreted_energy: 285.5173076923077
+                percentage: 99.0%
+                estimator: MQAEstimator
+              - subcomponent_name: address_generators[1]
+                subaction_name: count
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.035%
+                estimator: MQAEstimator
+          - action_name: read
+            arguments:
+                data_delta: 1
+                address_delta: 1
+            energy: 288.017
+            subaction_estimations:
+              - subcomponent_name: buffet_collection.buffet[0].scoreboard
+                subaction_name: read
+                arguments:
+                    address_delta: 1
+                    data_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy: 1.0
+                scale_energy_by: 1.0
+                interpreted_energy: 1.0
+                percentage: 0.35%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].scoreboard
+                subaction_name: write
+                arguments:
+                    address_delta: 1
+                    data_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy: 1.0
+                scale_energy_by: 1.0
+                interpreted_energy: 1.0
+                percentage: 0.35%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+                subaction_name: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.035%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+                subaction_name: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.035%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+                subaction_name: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.035%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+                subaction_name: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.035%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.storage
+                subaction_name: read
+                arguments:
+                    data_delta: 1
+                    address_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy: 285.5173076923077
+                scale_energy_by: 1.0
+                interpreted_energy: 285.5173076923077
+                percentage: 99.0%
+                estimator: MQAEstimator
+              - subcomponent_name: address_generators[1]
+                subaction_name: count
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.035%
+                estimator: MQAEstimator
+          - action_name: update
+            arguments:
+                data_delta: 0
+                address_delta: 0
+            energy: 271.935
+            subaction_estimations:
+              - subcomponent_name: buffet_collection.buffet[0].scoreboard
+                subaction_name: write
+                arguments:
+                    address_delta: 1
+                    data_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy: 1.0
+                scale_energy_by: 1.0
+                interpreted_energy: 1.0
+                percentage: 0.37%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+                subaction_name: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 0.0
+                interpreted_energy: 0.0
+                percentage: 0.0%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+                subaction_name: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 0.0
+                interpreted_energy: 0.0
+                percentage: 0.0%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+                subaction_name: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 0.0
+                interpreted_energy: 0.0
+                percentage: 0.0%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+                subaction_name: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 0.0
+                interpreted_energy: 0.0
+                percentage: 0.0%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.storage
+                subaction_name: write
+                arguments:
+                    data_delta: 0
+                    address_delta: 0
+                    global_cycle_seconds: 1e-09
+                energy: 270.83492307692313
+                scale_energy_by: 1.0
+                interpreted_energy: 270.83492307692313
+                percentage: 100.0%
+                estimator: MQAEstimator
+              - subcomponent_name: address_generators[2]
+                subaction_name: count
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.037%
+                estimator: MQAEstimator
+          - action_name: update
+            arguments:
+                data_delta: 1
+                address_delta: 0
+            energy: 272.135
+            subaction_estimations:
+              - subcomponent_name: buffet_collection.buffet[0].scoreboard
+                subaction_name: write
+                arguments:
+                    address_delta: 1
+                    data_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy: 1.0
+                scale_energy_by: 1.0
+                interpreted_energy: 1.0
+                percentage: 0.37%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+                subaction_name: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.037%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+                subaction_name: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.037%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+                subaction_name: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 0.0
+                interpreted_energy: 0.0
+                percentage: 0.0%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+                subaction_name: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 0.0
+                interpreted_energy: 0.0
+                percentage: 0.0%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.storage
+                subaction_name: write
+                arguments:
+                    data_delta: 1
+                    address_delta: 0
+                    global_cycle_seconds: 1e-09
+                energy: 270.83492307692313
+                scale_energy_by: 1.0
+                interpreted_energy: 270.83492307692313
+                percentage: 100.0%
+                estimator: MQAEstimator
+              - subcomponent_name: address_generators[2]
+                subaction_name: count
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.037%
+                estimator: MQAEstimator
+          - action_name: update
+            arguments:
+                data_delta: 0
+                address_delta: 1
+            energy: 272.135
+            subaction_estimations:
+              - subcomponent_name: buffet_collection.buffet[0].scoreboard
+                subaction_name: write
+                arguments:
+                    address_delta: 1
+                    data_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy: 1.0
+                scale_energy_by: 1.0
+                interpreted_energy: 1.0
+                percentage: 0.37%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+                subaction_name: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 0.0
+                interpreted_energy: 0.0
+                percentage: 0.0%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+                subaction_name: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 0.0
+                interpreted_energy: 0.0
+                percentage: 0.0%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+                subaction_name: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.037%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+                subaction_name: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.037%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.storage
+                subaction_name: write
+                arguments:
+                    data_delta: 0
+                    address_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy: 270.83492307692313
+                scale_energy_by: 1.0
+                interpreted_energy: 270.83492307692313
+                percentage: 100.0%
+                estimator: MQAEstimator
+              - subcomponent_name: address_generators[2]
+                subaction_name: count
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.037%
+                estimator: MQAEstimator
+          - action_name: update
+            arguments:
+                data_delta: 1
+                address_delta: 1
+            energy: 272.335
+            subaction_estimations:
+              - subcomponent_name: buffet_collection.buffet[0].scoreboard
+                subaction_name: write
+                arguments:
+                    address_delta: 1
+                    data_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy: 1.0
+                scale_energy_by: 1.0
+                interpreted_energy: 1.0
+                percentage: 0.37%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+                subaction_name: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.037%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+                subaction_name: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.037%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+                subaction_name: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.037%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+                subaction_name: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.037%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.storage
+                subaction_name: write
+                arguments:
+                    data_delta: 1
+                    address_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy: 270.83492307692313
+                scale_energy_by: 1.0
+                interpreted_energy: 270.83492307692313
+                percentage: 99.0%
+                estimator: MQAEstimator
+              - subcomponent_name: address_generators[2]
+                subaction_name: count
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.037%
+                estimator: MQAEstimator
+          - action_name: idle
+            arguments: {}
+            energy: 0.0
+            subaction_estimations:
+              - subcomponent_name: buffet_collection.buffet[0..0].scoreboard
+                subaction_name: idle
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.0
+                scale_energy_by: 1.0
+                interpreted_energy: 0.0
+                percentage: 0%
+                estimator: MQAEstimator
+              - subcomponent_name: 
+                    buffet_collection.buffet[0..0].data_fifos[0..2]
+                subaction_name: idle
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.0
+                scale_energy_by: 1.0
+                interpreted_energy: 0.0
+                percentage: 0%
+                estimator: MQAEstimator
+              - subcomponent_name: 
+                    buffet_collection.buffet[0..0].addr_fifos[0..2]
+                subaction_name: idle
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.0
+                scale_energy_by: 1.0
+                interpreted_energy: 0.0
+                percentage: 0%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.storage
+                subaction_name: idle
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.0
+                scale_energy_by: 1.0
+                interpreted_energy: 0.0
+                percentage: 0%
+                estimator: MQAEstimator
+      - name: systolic_array.ifmap_glb
+        actions:
+          - name: fill
+            average_energy: 59.1135
+            max_energy: 59.3135
+            min_energy: 58.9135
+          - name: read
+            average_energy: 76.5574
+            max_energy: 76.7574
+            min_energy: 76.3574
+          - name: update
+            average_energy: 59.1135
+            max_energy: 59.3135
+            min_energy: 58.9135
+          - name: idle
+            energy: 0.0
+        primitive_estimation(s):
+          - action_name: fill
+            arguments:
+                data_delta: 0
+                address_delta: 0
+            energy: 58.9135
+            subaction_estimations:
+              - subcomponent_name: buffet_collection.buffet[0].scoreboard
+                subaction_name: write
+                arguments:
+                    address_delta: 1
+                    data_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy: 1.0
+                scale_energy_by: 1.0
+                interpreted_energy: 1.0
+                percentage: 1.7%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+                subaction_name: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 0.0
+                interpreted_energy: 0.0
+                percentage: 0.0%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+                subaction_name: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 0.0
+                interpreted_energy: 0.0
+                percentage: 0.0%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+                subaction_name: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 0.0
+                interpreted_energy: 0.0
+                percentage: 0.0%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+                subaction_name: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 0.0
+                interpreted_energy: 0.0
+                percentage: 0.0%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.storage
+                subaction_name: write
+                arguments:
+                    data_delta: 0
+                    address_delta: 0
+                    global_cycle_seconds: 1e-09
+                energy: 57.81346153846154
+                scale_energy_by: 1.0
+                interpreted_energy: 57.81346153846154
+                percentage: 98.0%
+                estimator: MQAEstimator
+              - subcomponent_name: address_generators[0]
+                subaction_name: count
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.17%
+                estimator: MQAEstimator
+          - action_name: fill
+            arguments:
+                data_delta: 1
+                address_delta: 0
+            energy: 59.1135
+            subaction_estimations:
+              - subcomponent_name: buffet_collection.buffet[0].scoreboard
+                subaction_name: write
+                arguments:
+                    address_delta: 1
+                    data_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy: 1.0
+                scale_energy_by: 1.0
+                interpreted_energy: 1.0
+                percentage: 1.7%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+                subaction_name: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.17%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+                subaction_name: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.17%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+                subaction_name: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 0.0
+                interpreted_energy: 0.0
+                percentage: 0.0%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+                subaction_name: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 0.0
+                interpreted_energy: 0.0
+                percentage: 0.0%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.storage
+                subaction_name: write
+                arguments:
+                    data_delta: 1
+                    address_delta: 0
+                    global_cycle_seconds: 1e-09
+                energy: 57.81346153846154
+                scale_energy_by: 1.0
+                interpreted_energy: 57.81346153846154
+                percentage: 98.0%
+                estimator: MQAEstimator
+              - subcomponent_name: address_generators[0]
+                subaction_name: count
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.17%
+                estimator: MQAEstimator
+          - action_name: fill
+            arguments:
+                data_delta: 0
+                address_delta: 1
+            energy: 59.1135
+            subaction_estimations:
+              - subcomponent_name: buffet_collection.buffet[0].scoreboard
+                subaction_name: write
+                arguments:
+                    address_delta: 1
+                    data_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy: 1.0
+                scale_energy_by: 1.0
+                interpreted_energy: 1.0
+                percentage: 1.7%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+                subaction_name: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 0.0
+                interpreted_energy: 0.0
+                percentage: 0.0%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+                subaction_name: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 0.0
+                interpreted_energy: 0.0
+                percentage: 0.0%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+                subaction_name: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.17%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+                subaction_name: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.17%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.storage
+                subaction_name: write
+                arguments:
+                    data_delta: 0
+                    address_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy: 57.81346153846154
+                scale_energy_by: 1.0
+                interpreted_energy: 57.81346153846154
+                percentage: 98.0%
+                estimator: MQAEstimator
+              - subcomponent_name: address_generators[0]
+                subaction_name: count
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.17%
+                estimator: MQAEstimator
+          - action_name: fill
+            arguments:
+                data_delta: 1
+                address_delta: 1
+            energy: 59.3135
+            subaction_estimations:
+              - subcomponent_name: buffet_collection.buffet[0].scoreboard
+                subaction_name: write
+                arguments:
+                    address_delta: 1
+                    data_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy: 1.0
+                scale_energy_by: 1.0
+                interpreted_energy: 1.0
+                percentage: 1.7%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+                subaction_name: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.17%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+                subaction_name: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.17%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+                subaction_name: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.17%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+                subaction_name: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.17%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.storage
+                subaction_name: write
+                arguments:
+                    data_delta: 1
+                    address_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy: 57.81346153846154
+                scale_energy_by: 1.0
+                interpreted_energy: 57.81346153846154
+                percentage: 97.0%
+                estimator: MQAEstimator
+              - subcomponent_name: address_generators[0]
+                subaction_name: count
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.17%
+                estimator: MQAEstimator
+          - action_name: read
+            arguments:
+                data_delta: 0
+                address_delta: 0
+            energy: 76.3574
+            subaction_estimations:
+              - subcomponent_name: buffet_collection.buffet[0].scoreboard
+                subaction_name: read
+                arguments:
+                    address_delta: 1
+                    data_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy: 1.0
+                scale_energy_by: 1.0
+                interpreted_energy: 1.0
+                percentage: 1.3%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].scoreboard
+                subaction_name: write
+                arguments:
+                    address_delta: 1
+                    data_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy: 1.0
+                scale_energy_by: 1.0
+                interpreted_energy: 1.0
+                percentage: 1.3%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+                subaction_name: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 0.0
+                interpreted_energy: 0.0
+                percentage: 0.0%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+                subaction_name: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 0.0
+                interpreted_energy: 0.0
+                percentage: 0.0%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+                subaction_name: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 0.0
+                interpreted_energy: 0.0
+                percentage: 0.0%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+                subaction_name: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 0.0
+                interpreted_energy: 0.0
+                percentage: 0.0%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.storage
+                subaction_name: read
+                arguments:
+                    data_delta: 0
+                    address_delta: 0
+                    global_cycle_seconds: 1e-09
+                energy: 74.2574076923077
+                scale_energy_by: 1.0
+                interpreted_energy: 74.2574076923077
+                percentage: 97.0%
+                estimator: MQAEstimator
+              - subcomponent_name: address_generators[1]
+                subaction_name: count
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.13%
+                estimator: MQAEstimator
+          - action_name: read
+            arguments:
+                data_delta: 1
+                address_delta: 0
+            energy: 76.5574
+            subaction_estimations:
+              - subcomponent_name: buffet_collection.buffet[0].scoreboard
+                subaction_name: read
+                arguments:
+                    address_delta: 1
+                    data_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy: 1.0
+                scale_energy_by: 1.0
+                interpreted_energy: 1.0
+                percentage: 1.3%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].scoreboard
+                subaction_name: write
+                arguments:
+                    address_delta: 1
+                    data_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy: 1.0
+                scale_energy_by: 1.0
+                interpreted_energy: 1.0
+                percentage: 1.3%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+                subaction_name: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.13%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+                subaction_name: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.13%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+                subaction_name: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 0.0
+                interpreted_energy: 0.0
+                percentage: 0.0%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+                subaction_name: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 0.0
+                interpreted_energy: 0.0
+                percentage: 0.0%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.storage
+                subaction_name: read
+                arguments:
+                    data_delta: 1
+                    address_delta: 0
+                    global_cycle_seconds: 1e-09
+                energy: 74.2574076923077
+                scale_energy_by: 1.0
+                interpreted_energy: 74.2574076923077
+                percentage: 97.0%
+                estimator: MQAEstimator
+              - subcomponent_name: address_generators[1]
+                subaction_name: count
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.13%
+                estimator: MQAEstimator
+          - action_name: read
+            arguments:
+                data_delta: 0
+                address_delta: 1
+            energy: 76.5574
+            subaction_estimations:
+              - subcomponent_name: buffet_collection.buffet[0].scoreboard
+                subaction_name: read
+                arguments:
+                    address_delta: 1
+                    data_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy: 1.0
+                scale_energy_by: 1.0
+                interpreted_energy: 1.0
+                percentage: 1.3%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].scoreboard
+                subaction_name: write
+                arguments:
+                    address_delta: 1
+                    data_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy: 1.0
+                scale_energy_by: 1.0
+                interpreted_energy: 1.0
+                percentage: 1.3%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+                subaction_name: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 0.0
+                interpreted_energy: 0.0
+                percentage: 0.0%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+                subaction_name: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 0.0
+                interpreted_energy: 0.0
+                percentage: 0.0%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+                subaction_name: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.13%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+                subaction_name: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.13%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.storage
+                subaction_name: read
+                arguments:
+                    data_delta: 0
+                    address_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy: 74.2574076923077
+                scale_energy_by: 1.0
+                interpreted_energy: 74.2574076923077
+                percentage: 97.0%
+                estimator: MQAEstimator
+              - subcomponent_name: address_generators[1]
+                subaction_name: count
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.13%
+                estimator: MQAEstimator
+          - action_name: read
+            arguments:
+                data_delta: 1
+                address_delta: 1
+            energy: 76.7574
+            subaction_estimations:
+              - subcomponent_name: buffet_collection.buffet[0].scoreboard
+                subaction_name: read
+                arguments:
+                    address_delta: 1
+                    data_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy: 1.0
+                scale_energy_by: 1.0
+                interpreted_energy: 1.0
+                percentage: 1.3%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].scoreboard
+                subaction_name: write
+                arguments:
+                    address_delta: 1
+                    data_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy: 1.0
+                scale_energy_by: 1.0
+                interpreted_energy: 1.0
+                percentage: 1.3%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+                subaction_name: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.13%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+                subaction_name: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.13%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+                subaction_name: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.13%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+                subaction_name: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.13%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.storage
+                subaction_name: read
+                arguments:
+                    data_delta: 1
+                    address_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy: 74.2574076923077
+                scale_energy_by: 1.0
+                interpreted_energy: 74.2574076923077
+                percentage: 97.0%
+                estimator: MQAEstimator
+              - subcomponent_name: address_generators[1]
+                subaction_name: count
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.13%
+                estimator: MQAEstimator
+          - action_name: update
+            arguments:
+                data_delta: 0
+                address_delta: 0
+            energy: 58.9135
+            subaction_estimations:
+              - subcomponent_name: buffet_collection.buffet[0].scoreboard
+                subaction_name: write
+                arguments:
+                    address_delta: 1
+                    data_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy: 1.0
+                scale_energy_by: 1.0
+                interpreted_energy: 1.0
+                percentage: 1.7%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+                subaction_name: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 0.0
+                interpreted_energy: 0.0
+                percentage: 0.0%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+                subaction_name: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 0.0
+                interpreted_energy: 0.0
+                percentage: 0.0%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+                subaction_name: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 0.0
+                interpreted_energy: 0.0
+                percentage: 0.0%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+                subaction_name: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 0.0
+                interpreted_energy: 0.0
+                percentage: 0.0%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.storage
+                subaction_name: write
+                arguments:
+                    data_delta: 0
+                    address_delta: 0
+                    global_cycle_seconds: 1e-09
+                energy: 57.81346153846154
+                scale_energy_by: 1.0
+                interpreted_energy: 57.81346153846154
+                percentage: 98.0%
+                estimator: MQAEstimator
+              - subcomponent_name: address_generators[2]
+                subaction_name: count
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.17%
+                estimator: MQAEstimator
+          - action_name: update
+            arguments:
+                data_delta: 1
+                address_delta: 0
+            energy: 59.1135
+            subaction_estimations:
+              - subcomponent_name: buffet_collection.buffet[0].scoreboard
+                subaction_name: write
+                arguments:
+                    address_delta: 1
+                    data_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy: 1.0
+                scale_energy_by: 1.0
+                interpreted_energy: 1.0
+                percentage: 1.7%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+                subaction_name: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.17%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+                subaction_name: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.17%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+                subaction_name: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 0.0
+                interpreted_energy: 0.0
+                percentage: 0.0%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+                subaction_name: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 0.0
+                interpreted_energy: 0.0
+                percentage: 0.0%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.storage
+                subaction_name: write
+                arguments:
+                    data_delta: 1
+                    address_delta: 0
+                    global_cycle_seconds: 1e-09
+                energy: 57.81346153846154
+                scale_energy_by: 1.0
+                interpreted_energy: 57.81346153846154
+                percentage: 98.0%
+                estimator: MQAEstimator
+              - subcomponent_name: address_generators[2]
+                subaction_name: count
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.17%
+                estimator: MQAEstimator
+          - action_name: update
+            arguments:
+                data_delta: 0
+                address_delta: 1
+            energy: 59.1135
+            subaction_estimations:
+              - subcomponent_name: buffet_collection.buffet[0].scoreboard
+                subaction_name: write
+                arguments:
+                    address_delta: 1
+                    data_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy: 1.0
+                scale_energy_by: 1.0
+                interpreted_energy: 1.0
+                percentage: 1.7%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+                subaction_name: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 0.0
+                interpreted_energy: 0.0
+                percentage: 0.0%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+                subaction_name: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 0.0
+                interpreted_energy: 0.0
+                percentage: 0.0%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+                subaction_name: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.17%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+                subaction_name: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.17%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.storage
+                subaction_name: write
+                arguments:
+                    data_delta: 0
+                    address_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy: 57.81346153846154
+                scale_energy_by: 1.0
+                interpreted_energy: 57.81346153846154
+                percentage: 98.0%
+                estimator: MQAEstimator
+              - subcomponent_name: address_generators[2]
+                subaction_name: count
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.17%
+                estimator: MQAEstimator
+          - action_name: update
+            arguments:
+                data_delta: 1
+                address_delta: 1
+            energy: 59.3135
+            subaction_estimations:
+              - subcomponent_name: buffet_collection.buffet[0].scoreboard
+                subaction_name: write
+                arguments:
+                    address_delta: 1
+                    data_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy: 1.0
+                scale_energy_by: 1.0
+                interpreted_energy: 1.0
+                percentage: 1.7%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+                subaction_name: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.17%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+                subaction_name: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.17%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+                subaction_name: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.17%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+                subaction_name: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.17%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.storage
+                subaction_name: write
+                arguments:
+                    data_delta: 1
+                    address_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy: 57.81346153846154
+                scale_energy_by: 1.0
+                interpreted_energy: 57.81346153846154
+                percentage: 97.0%
+                estimator: MQAEstimator
+              - subcomponent_name: address_generators[2]
+                subaction_name: count
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.17%
+                estimator: MQAEstimator
+          - action_name: idle
+            arguments: {}
+            energy: 0.0
+            subaction_estimations:
+              - subcomponent_name: buffet_collection.buffet[0..0].scoreboard
+                subaction_name: idle
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.0
+                scale_energy_by: 1.0
+                interpreted_energy: 0.0
+                percentage: 0%
+                estimator: MQAEstimator
+              - subcomponent_name: 
+                    buffet_collection.buffet[0..0].data_fifos[0..2]
+                subaction_name: idle
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.0
+                scale_energy_by: 1.0
+                interpreted_energy: 0.0
+                percentage: 0%
+                estimator: MQAEstimator
+              - subcomponent_name: 
+                    buffet_collection.buffet[0..0].addr_fifos[0..2]
+                subaction_name: idle
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.0
+                scale_energy_by: 1.0
+                interpreted_energy: 0.0
+                percentage: 0%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.storage
+                subaction_name: idle
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.0
+                scale_energy_by: 1.0
+                interpreted_energy: 0.0
+                percentage: 0%
+                estimator: MQAEstimator
+      - name: systolic_array.psum_glb
+        actions:
+          - name: fill
+            average_energy: 59.1135
+            max_energy: 59.3135
+            min_energy: 58.9135
+          - name: read
+            average_energy: 76.5574
+            max_energy: 76.7574
+            min_energy: 76.3574
+          - name: update
+            average_energy: 59.1135
+            max_energy: 59.3135
+            min_energy: 58.9135
+          - name: idle
+            energy: 0.0
+        primitive_estimation(s):
+          - action_name: fill
+            arguments:
+                data_delta: 0
+                address_delta: 0
+            energy: 58.9135
+            subaction_estimations:
+              - subcomponent_name: buffet_collection.buffet[0].scoreboard
+                subaction_name: write
+                arguments:
+                    address_delta: 1
+                    data_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy: 1.0
+                scale_energy_by: 1.0
+                interpreted_energy: 1.0
+                percentage: 1.7%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+                subaction_name: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 0.0
+                interpreted_energy: 0.0
+                percentage: 0.0%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+                subaction_name: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 0.0
+                interpreted_energy: 0.0
+                percentage: 0.0%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+                subaction_name: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 0.0
+                interpreted_energy: 0.0
+                percentage: 0.0%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+                subaction_name: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 0.0
+                interpreted_energy: 0.0
+                percentage: 0.0%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.storage
+                subaction_name: write
+                arguments:
+                    data_delta: 0
+                    address_delta: 0
+                    global_cycle_seconds: 1e-09
+                energy: 57.81346153846154
+                scale_energy_by: 1.0
+                interpreted_energy: 57.81346153846154
+                percentage: 98.0%
+                estimator: MQAEstimator
+              - subcomponent_name: address_generators[0]
+                subaction_name: count
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.17%
+                estimator: MQAEstimator
+          - action_name: fill
+            arguments:
+                data_delta: 1
+                address_delta: 0
+            energy: 59.1135
+            subaction_estimations:
+              - subcomponent_name: buffet_collection.buffet[0].scoreboard
+                subaction_name: write
+                arguments:
+                    address_delta: 1
+                    data_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy: 1.0
+                scale_energy_by: 1.0
+                interpreted_energy: 1.0
+                percentage: 1.7%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+                subaction_name: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.17%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+                subaction_name: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.17%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+                subaction_name: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 0.0
+                interpreted_energy: 0.0
+                percentage: 0.0%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+                subaction_name: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 0.0
+                interpreted_energy: 0.0
+                percentage: 0.0%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.storage
+                subaction_name: write
+                arguments:
+                    data_delta: 1
+                    address_delta: 0
+                    global_cycle_seconds: 1e-09
+                energy: 57.81346153846154
+                scale_energy_by: 1.0
+                interpreted_energy: 57.81346153846154
+                percentage: 98.0%
+                estimator: MQAEstimator
+              - subcomponent_name: address_generators[0]
+                subaction_name: count
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.17%
+                estimator: MQAEstimator
+          - action_name: fill
+            arguments:
+                data_delta: 0
+                address_delta: 1
+            energy: 59.1135
+            subaction_estimations:
+              - subcomponent_name: buffet_collection.buffet[0].scoreboard
+                subaction_name: write
+                arguments:
+                    address_delta: 1
+                    data_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy: 1.0
+                scale_energy_by: 1.0
+                interpreted_energy: 1.0
+                percentage: 1.7%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+                subaction_name: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 0.0
+                interpreted_energy: 0.0
+                percentage: 0.0%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+                subaction_name: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 0.0
+                interpreted_energy: 0.0
+                percentage: 0.0%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+                subaction_name: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.17%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+                subaction_name: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.17%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.storage
+                subaction_name: write
+                arguments:
+                    data_delta: 0
+                    address_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy: 57.81346153846154
+                scale_energy_by: 1.0
+                interpreted_energy: 57.81346153846154
+                percentage: 98.0%
+                estimator: MQAEstimator
+              - subcomponent_name: address_generators[0]
+                subaction_name: count
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.17%
+                estimator: MQAEstimator
+          - action_name: fill
+            arguments:
+                data_delta: 1
+                address_delta: 1
+            energy: 59.3135
+            subaction_estimations:
+              - subcomponent_name: buffet_collection.buffet[0].scoreboard
+                subaction_name: write
+                arguments:
+                    address_delta: 1
+                    data_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy: 1.0
+                scale_energy_by: 1.0
+                interpreted_energy: 1.0
+                percentage: 1.7%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+                subaction_name: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.17%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+                subaction_name: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.17%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+                subaction_name: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.17%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+                subaction_name: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.17%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.storage
+                subaction_name: write
+                arguments:
+                    data_delta: 1
+                    address_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy: 57.81346153846154
+                scale_energy_by: 1.0
+                interpreted_energy: 57.81346153846154
+                percentage: 97.0%
+                estimator: MQAEstimator
+              - subcomponent_name: address_generators[0]
+                subaction_name: count
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.17%
+                estimator: MQAEstimator
+          - action_name: read
+            arguments:
+                data_delta: 0
+                address_delta: 0
+            energy: 76.3574
+            subaction_estimations:
+              - subcomponent_name: buffet_collection.buffet[0].scoreboard
+                subaction_name: read
+                arguments:
+                    address_delta: 1
+                    data_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy: 1.0
+                scale_energy_by: 1.0
+                interpreted_energy: 1.0
+                percentage: 1.3%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].scoreboard
+                subaction_name: write
+                arguments:
+                    address_delta: 1
+                    data_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy: 1.0
+                scale_energy_by: 1.0
+                interpreted_energy: 1.0
+                percentage: 1.3%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+                subaction_name: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 0.0
+                interpreted_energy: 0.0
+                percentage: 0.0%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+                subaction_name: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 0.0
+                interpreted_energy: 0.0
+                percentage: 0.0%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+                subaction_name: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 0.0
+                interpreted_energy: 0.0
+                percentage: 0.0%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+                subaction_name: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 0.0
+                interpreted_energy: 0.0
+                percentage: 0.0%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.storage
+                subaction_name: read
+                arguments:
+                    data_delta: 0
+                    address_delta: 0
+                    global_cycle_seconds: 1e-09
+                energy: 74.2574076923077
+                scale_energy_by: 1.0
+                interpreted_energy: 74.2574076923077
+                percentage: 97.0%
+                estimator: MQAEstimator
+              - subcomponent_name: address_generators[1]
+                subaction_name: count
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.13%
+                estimator: MQAEstimator
+          - action_name: read
+            arguments:
+                data_delta: 1
+                address_delta: 0
+            energy: 76.5574
+            subaction_estimations:
+              - subcomponent_name: buffet_collection.buffet[0].scoreboard
+                subaction_name: read
+                arguments:
+                    address_delta: 1
+                    data_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy: 1.0
+                scale_energy_by: 1.0
+                interpreted_energy: 1.0
+                percentage: 1.3%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].scoreboard
+                subaction_name: write
+                arguments:
+                    address_delta: 1
+                    data_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy: 1.0
+                scale_energy_by: 1.0
+                interpreted_energy: 1.0
+                percentage: 1.3%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+                subaction_name: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.13%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+                subaction_name: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.13%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+                subaction_name: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 0.0
+                interpreted_energy: 0.0
+                percentage: 0.0%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+                subaction_name: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 0.0
+                interpreted_energy: 0.0
+                percentage: 0.0%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.storage
+                subaction_name: read
+                arguments:
+                    data_delta: 1
+                    address_delta: 0
+                    global_cycle_seconds: 1e-09
+                energy: 74.2574076923077
+                scale_energy_by: 1.0
+                interpreted_energy: 74.2574076923077
+                percentage: 97.0%
+                estimator: MQAEstimator
+              - subcomponent_name: address_generators[1]
+                subaction_name: count
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.13%
+                estimator: MQAEstimator
+          - action_name: read
+            arguments:
+                data_delta: 0
+                address_delta: 1
+            energy: 76.5574
+            subaction_estimations:
+              - subcomponent_name: buffet_collection.buffet[0].scoreboard
+                subaction_name: read
+                arguments:
+                    address_delta: 1
+                    data_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy: 1.0
+                scale_energy_by: 1.0
+                interpreted_energy: 1.0
+                percentage: 1.3%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].scoreboard
+                subaction_name: write
+                arguments:
+                    address_delta: 1
+                    data_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy: 1.0
+                scale_energy_by: 1.0
+                interpreted_energy: 1.0
+                percentage: 1.3%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+                subaction_name: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 0.0
+                interpreted_energy: 0.0
+                percentage: 0.0%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+                subaction_name: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 0.0
+                interpreted_energy: 0.0
+                percentage: 0.0%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+                subaction_name: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.13%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+                subaction_name: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.13%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.storage
+                subaction_name: read
+                arguments:
+                    data_delta: 0
+                    address_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy: 74.2574076923077
+                scale_energy_by: 1.0
+                interpreted_energy: 74.2574076923077
+                percentage: 97.0%
+                estimator: MQAEstimator
+              - subcomponent_name: address_generators[1]
+                subaction_name: count
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.13%
+                estimator: MQAEstimator
+          - action_name: read
+            arguments:
+                data_delta: 1
+                address_delta: 1
+            energy: 76.7574
+            subaction_estimations:
+              - subcomponent_name: buffet_collection.buffet[0].scoreboard
+                subaction_name: read
+                arguments:
+                    address_delta: 1
+                    data_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy: 1.0
+                scale_energy_by: 1.0
+                interpreted_energy: 1.0
+                percentage: 1.3%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].scoreboard
+                subaction_name: write
+                arguments:
+                    address_delta: 1
+                    data_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy: 1.0
+                scale_energy_by: 1.0
+                interpreted_energy: 1.0
+                percentage: 1.3%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+                subaction_name: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.13%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+                subaction_name: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.13%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+                subaction_name: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.13%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+                subaction_name: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.13%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.storage
+                subaction_name: read
+                arguments:
+                    data_delta: 1
+                    address_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy: 74.2574076923077
+                scale_energy_by: 1.0
+                interpreted_energy: 74.2574076923077
+                percentage: 97.0%
+                estimator: MQAEstimator
+              - subcomponent_name: address_generators[1]
+                subaction_name: count
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.13%
+                estimator: MQAEstimator
+          - action_name: update
+            arguments:
+                data_delta: 0
+                address_delta: 0
+            energy: 58.9135
+            subaction_estimations:
+              - subcomponent_name: buffet_collection.buffet[0].scoreboard
+                subaction_name: write
+                arguments:
+                    address_delta: 1
+                    data_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy: 1.0
+                scale_energy_by: 1.0
+                interpreted_energy: 1.0
+                percentage: 1.7%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+                subaction_name: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 0.0
+                interpreted_energy: 0.0
+                percentage: 0.0%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+                subaction_name: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 0.0
+                interpreted_energy: 0.0
+                percentage: 0.0%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+                subaction_name: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 0.0
+                interpreted_energy: 0.0
+                percentage: 0.0%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+                subaction_name: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 0.0
+                interpreted_energy: 0.0
+                percentage: 0.0%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.storage
+                subaction_name: write
+                arguments:
+                    data_delta: 0
+                    address_delta: 0
+                    global_cycle_seconds: 1e-09
+                energy: 57.81346153846154
+                scale_energy_by: 1.0
+                interpreted_energy: 57.81346153846154
+                percentage: 98.0%
+                estimator: MQAEstimator
+              - subcomponent_name: address_generators[2]
+                subaction_name: count
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.17%
+                estimator: MQAEstimator
+          - action_name: update
+            arguments:
+                data_delta: 1
+                address_delta: 0
+            energy: 59.1135
+            subaction_estimations:
+              - subcomponent_name: buffet_collection.buffet[0].scoreboard
+                subaction_name: write
+                arguments:
+                    address_delta: 1
+                    data_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy: 1.0
+                scale_energy_by: 1.0
+                interpreted_energy: 1.0
+                percentage: 1.7%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+                subaction_name: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.17%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+                subaction_name: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.17%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+                subaction_name: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 0.0
+                interpreted_energy: 0.0
+                percentage: 0.0%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+                subaction_name: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 0.0
+                interpreted_energy: 0.0
+                percentage: 0.0%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.storage
+                subaction_name: write
+                arguments:
+                    data_delta: 1
+                    address_delta: 0
+                    global_cycle_seconds: 1e-09
+                energy: 57.81346153846154
+                scale_energy_by: 1.0
+                interpreted_energy: 57.81346153846154
+                percentage: 98.0%
+                estimator: MQAEstimator
+              - subcomponent_name: address_generators[2]
+                subaction_name: count
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.17%
+                estimator: MQAEstimator
+          - action_name: update
+            arguments:
+                data_delta: 0
+                address_delta: 1
+            energy: 59.1135
+            subaction_estimations:
+              - subcomponent_name: buffet_collection.buffet[0].scoreboard
+                subaction_name: write
+                arguments:
+                    address_delta: 1
+                    data_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy: 1.0
+                scale_energy_by: 1.0
+                interpreted_energy: 1.0
+                percentage: 1.7%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+                subaction_name: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 0.0
+                interpreted_energy: 0.0
+                percentage: 0.0%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+                subaction_name: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 0.0
+                interpreted_energy: 0.0
+                percentage: 0.0%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+                subaction_name: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.17%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+                subaction_name: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.17%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.storage
+                subaction_name: write
+                arguments:
+                    data_delta: 0
+                    address_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy: 57.81346153846154
+                scale_energy_by: 1.0
+                interpreted_energy: 57.81346153846154
+                percentage: 98.0%
+                estimator: MQAEstimator
+              - subcomponent_name: address_generators[2]
+                subaction_name: count
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.17%
+                estimator: MQAEstimator
+          - action_name: update
+            arguments:
+                data_delta: 1
+                address_delta: 1
+            energy: 59.3135
+            subaction_estimations:
+              - subcomponent_name: buffet_collection.buffet[0].scoreboard
+                subaction_name: write
+                arguments:
+                    address_delta: 1
+                    data_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy: 1.0
+                scale_energy_by: 1.0
+                interpreted_energy: 1.0
+                percentage: 1.7%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+                subaction_name: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.17%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+                subaction_name: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.17%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+                subaction_name: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.17%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+                subaction_name: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.17%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.storage
+                subaction_name: write
+                arguments:
+                    data_delta: 1
+                    address_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy: 57.81346153846154
+                scale_energy_by: 1.0
+                interpreted_energy: 57.81346153846154
+                percentage: 97.0%
+                estimator: MQAEstimator
+              - subcomponent_name: address_generators[2]
+                subaction_name: count
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.1
+                scale_energy_by: 1.0
+                interpreted_energy: 0.1
+                percentage: 0.17%
+                estimator: MQAEstimator
+          - action_name: idle
+            arguments: {}
+            energy: 0.0
+            subaction_estimations:
+              - subcomponent_name: buffet_collection.buffet[0..0].scoreboard
+                subaction_name: idle
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.0
+                scale_energy_by: 1.0
+                interpreted_energy: 0.0
+                percentage: 0%
+                estimator: MQAEstimator
+              - subcomponent_name: 
+                    buffet_collection.buffet[0..0].data_fifos[0..2]
+                subaction_name: idle
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.0
+                scale_energy_by: 1.0
+                interpreted_energy: 0.0
+                percentage: 0%
+                estimator: MQAEstimator
+              - subcomponent_name: 
+                    buffet_collection.buffet[0..0].addr_fifos[0..2]
+                subaction_name: idle
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.0
+                scale_energy_by: 1.0
+                interpreted_energy: 0.0
+                percentage: 0%
+                estimator: MQAEstimator
+              - subcomponent_name: buffet_collection.storage
+                subaction_name: idle
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy: 0.0
+                scale_energy_by: 1.0
+                interpreted_energy: 0.0
+                percentage: 0%
+                estimator: MQAEstimator

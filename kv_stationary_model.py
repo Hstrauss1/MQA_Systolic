@@ -180,6 +180,7 @@ def simulate_2d_kv_stationary_array(
     merge_extensions: int = 0,
     query_tokens: int = 1,
     debug_cycles: int = 3,
+    generate_tokens: int = 0,
 ) -> Dict[str, object]:
     """Simulate a 2D systolic-style KV-stationary attention array.
 
@@ -353,6 +354,31 @@ def simulate_2d_kv_stationary_array(
     )
     cycles_per_stage = column_dwell   # Q's dwell time at each column (also inter-row rate)
 
+    # --- Score delay buffer (lower MAC → upper PE alignment) -----------------
+    # When packet_stagger < upper_pe_cycles, scores arrive at the upper PE faster
+    # than it can drain them, causing an unbounded queue of (M, L, O) state vectors.
+    #
+    # Fix: insert a shallow scalar FIFO between the lower MAC output and the upper
+    # PE input.  The FIFO holds incoming scores for
+    #   delay = effective_stagger - packet_stagger  cycles
+    # before presenting them to the PE, so that the PE sees exactly one score every
+    # effective_stagger cycles — bounded by its own processing rate.
+    #
+    #   effective_stagger = max(packet_stagger, upper_pe_cycles)
+    #   score_buffer_depth = ceil(upper_pe_cycles / packet_stagger) - 1   (scalar entries)
+    #
+    # At lmc=16: stagger=8 ≥ upper_pe=7 → depth=0, no buffer needed.
+    # At lmc=22: stagger=6 < upper_pe=7 → depth=1, 1 score held per column.
+    # At lmc=128: stagger=1, upper_pe=7 → depth=6, 6 scores buffered per column.
+    #
+    # The buffer adds ZERO area cost beyond a handful of scalar registers per column.
+    # It does NOT change column_dwell (the first Q token is unaffected).
+    # It replaces packet_stagger with effective_stagger in the per-row scheduling term.
+    effective_stagger   = max(packet_stagger, upper_pe_cycles)
+    score_buffer_depth  = max(0, math.ceil(upper_pe_cycles / packet_stagger) - 1)
+    score_buffer_bytes_per_col = score_buffer_depth * bytes_per_element
+    score_buffer_bytes_total   = score_buffer_bytes_per_col * array_cols
+
     # On-chip K buffer: each PE stores 1 copy of K[t] (d elements).
     # Access bandwidth = lower_mac_count elements per cycle (lower_mac_count-ported or
     # lower_mac_count-banked register).  Storage is NOT multiplied by lower_mac_count.
@@ -429,26 +455,35 @@ def simulate_2d_kv_stationary_array(
     #   1. Q's left-to-right progress  (Q moves to next column after column_dwell cycles)
     #   2. Inter-row stagger           (K propagates one row every column_dwell cycles)
     #
-    # packet_stagger governs only WITHIN-ROW Q scheduling:
-    #   Each row's PE accepts a new Q packet every packet_stagger cycles.
+    # packet_stagger governs the lower MAC's raw output rate:
+    #   Each row's lower MAC unit emits a score every packet_stagger = ceil(d/lmc) cycles.
     #   With lower_mac_count=16 MACs: packet_stagger = 8.
     #   With lower_mac_count=1  MAC:  packet_stagger = column_dwell (no benefit).
     #   Has ZERO effect on single-decode (max_packets_per_row=1).
+    #
+    # effective_stagger governs actual upper PE scheduling:
+    #   effective_stagger = max(packet_stagger, upper_pe_cycles)
+    #   A score delay FIFO between the lower MAC and upper PE paces delivery so
+    #   the upper PE always sees exactly one score every effective_stagger cycles.
+    #   When packet_stagger >= upper_pe_cycles: effective_stagger = packet_stagger,
+    #   depth = 0 (no buffer needed).  At lmc=16: 8 ≥ 7, depth = 0.
+    #   When packet_stagger <  upper_pe_cycles: effective_stagger = upper_pe_cycles,
+    #   depth = ceil(upper_pe_cycles / packet_stagger) - 1 scalar scores per column.
     #
     # LATENCY (single packet per row):
     #   pipeline_depth_steps × column_dwell   (unchanged from 1-MAC model)
     #
     # TOTAL TILE CYCLES (P packets per row, R rows, C active cols):
-    #   (R + C - 1) × column_dwell + (P - 1) × packet_stagger
-    #   = pipeline_latency + (max_packets_per_row - 1) × packet_stagger
+    #   (R + C - 1) × column_dwell + (P - 1) × effective_stagger
+    #   = pipeline_latency + (max_packets_per_row - 1) × effective_stagger
     #
     # THROUGHPUT (continuously fed pipeline, many packets):
-    #   Bottleneck is the slower of: packet_stagger (within-row) or
+    #   Bottleneck is the slower of: effective_stagger (within-row, PE-limited) or
     #   column_dwell / max_packets_per_row (row-feeding rate).
-    #   throughput = max(packet_stagger, ceil(column_dwell / max_packets_per_row))
+    #   throughput = max(effective_stagger, ceil(column_dwell / max_packets_per_row))
     #
     throughput_cycles_per_token = max(
-        packet_stagger,
+        effective_stagger,
         math.ceil(column_dwell / max_packets_per_row),
     )
 
@@ -489,7 +524,7 @@ def simulate_2d_kv_stationary_array(
         tile_total_steps  = fill_steps + steady_steps + flush_steps + vertical_fill_steps_per_tile
         tile_compute_cycles = (
             (active_query_rows + active_cols - 1) * column_dwell
-            + (max_packets_per_row - 1) * packet_stagger
+            + (max_packets_per_row - 1) * effective_stagger
         )
 
         tile_kv_load_bytes = 2 * active_cols * d * bytes_per_element
@@ -540,6 +575,43 @@ def simulate_2d_kv_stationary_array(
     arithmetic_intensity = total_macs / total_dram_bytes
     # Throughput: total Q token-head pairs processed per hardware cycle.
     query_throughput = H * batch_size * query_tokens / total_cycles
+
+    # ── Autoregressive generation metrics ──────────────────────────────────
+    # KV-stat holds K/V in on-chip SRAM after initial load.  Each decode step
+    # only needs Q (read) and output (write) over DRAM; no KV reload.
+    # kv_load_once = one-time DRAM transfer of the full KV cache for this seq.
+    gen_kv_metrics: Dict[str, object] = {}
+    if generate_tokens > 0:
+        # Re-derive decode-step costs with query_tokens=1.
+        dec_q_bytes  = H * batch_size * 1 * d * bytes_per_element
+        dec_out_bytes = H * batch_size * 1 * d * bytes_per_element
+        dec_dram_per_step = dec_q_bytes + dec_out_bytes   # KV already in SRAM
+        dec_mem_cyc = math.ceil(dec_dram_per_step / memory_bandwidth_bytes_per_cycle)
+
+        # Compute cycles for a single decode step — same pipeline, query_tokens=1.
+        # Re-use the already-computed column_dwell; single packet traverses all columns.
+        dec_tile_count = math.ceil(T / array_cols)
+        dec_compute_per_tile = (active_query_rows + min(array_cols, T) - 1) * column_dwell
+        dec_compute_cycles = dec_compute_per_tile * dec_tile_count + total_merge_cycles
+        dec_cycles = max(dec_compute_cycles, dec_mem_cyc)
+
+        kv_load_once = kv_load_bytes          # initial KV DRAM transfer (already in current pass)
+        # Total DRAM for a G-token autoregressive run:
+        #   prefill_dram  (this pass, already loaded KV)
+        #   + G × per-step decode DRAM (Q + output only)
+        # Note: kv_load_once is already accounted for in total_dram_bytes (current pass).
+        total_gen_dram  = total_dram_bytes + generate_tokens * dec_dram_per_step
+        total_gen_cycles = total_cycles + generate_tokens * dec_cycles
+        gen_kv_metrics = {
+            "generate_tokens":             generate_tokens,
+            "kv_load_once_bytes":          kv_load_once,
+            "decode_dram_bytes_per_step":  dec_dram_per_step,
+            "decode_cycles_per_step":      dec_cycles,
+            "total_generate_dram_bytes":   total_gen_dram,
+            "total_generate_dram_mb":      total_gen_dram / (1024 * 1024),
+            "total_generate_cycles":       total_gen_cycles,
+            "dram_per_token_kb":           dec_dram_per_step / 1024,
+        }
 
     return {
         "H": H,
@@ -594,6 +666,15 @@ def simulate_2d_kv_stationary_array(
         "upper_pe_cycles_per_stage": upper_pe_cycles,
         "column_dwell": column_dwell,
         "packet_stagger": packet_stagger,
+        # Score delay buffer: paces lower MAC output to upper PE input.
+        # effective_stagger = max(packet_stagger, upper_pe_cycles).
+        # When stagger < upper_pe: a shallow scalar FIFO per column holds
+        # score_buffer_depth entries; row scheduling uses effective_stagger.
+        # When stagger >= upper_pe: depth=0, no buffer, effective_stagger=stagger.
+        "effective_stagger": effective_stagger,
+        "score_buffer_depth": score_buffer_depth,
+        "score_buffer_bytes_per_col": score_buffer_bytes_per_col,
+        "score_buffer_bytes_total": score_buffer_bytes_total,
         "cycles_per_stage": cycles_per_stage,   # = column_dwell
         # On-chip K buffer cost: each PE needs lower_mac_count copies of K[t]
         # so all MACs can read simultaneously (16 K streams per column PE).
@@ -627,6 +708,7 @@ def simulate_2d_kv_stationary_array(
         "arithmetic_intensity": arithmetic_intensity,
         "query_throughput_q_per_cycle": query_throughput,
         "debug_trace": debug_trace,
+        **gen_kv_metrics,
     }
 
 
@@ -645,6 +727,7 @@ def kv_stationary_metrics(
     head_parallelism: int = 1,
     merge_extensions: int = 0,
     query_tokens: int = 1,
+    generate_tokens: int = 0,
 ) -> Dict[str, object]:
     """Wrapper for the 2D KV-stationary array model."""
     return simulate_2d_kv_stationary_array(
@@ -662,6 +745,7 @@ def kv_stationary_metrics(
         head_parallelism=head_parallelism,
         merge_extensions=merge_extensions,
         query_tokens=query_tokens,
+        generate_tokens=generate_tokens,
     )
 
 

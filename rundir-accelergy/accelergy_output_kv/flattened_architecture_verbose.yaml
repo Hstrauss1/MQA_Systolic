@@ -1,0 +1,240 @@
+architecture:
+    version: '0.4'
+    local:
+      - name: kv_systolic_array.PE[0..63].mac
+        class: intmac
+        actions:
+          - name: mac_random
+            arguments:
+                global_cycle_seconds: 1e-09
+          - name: mac_gated
+            arguments:
+                global_cycle_seconds: 1e-09
+          - name: idle
+            arguments:
+                global_cycle_seconds: 1e-09
+          - name: leak
+            arguments:
+                global_cycle_seconds: 1e-09
+      - name: kv_systolic_array.PE[0..63].q_spad
+        class: regfile
+        actions:
+          - name: read
+            arguments:
+                data_delta: 0
+                address_delta: 0
+                global_cycle_seconds: 1e-09
+          - name: read
+            arguments:
+                data_delta: 1
+                address_delta: 0
+                global_cycle_seconds: 1e-09
+          - name: read
+            arguments:
+                data_delta: 0
+                address_delta: 1
+                global_cycle_seconds: 1e-09
+          - name: read
+            arguments:
+                data_delta: 1
+                address_delta: 1
+                global_cycle_seconds: 1e-09
+          - name: write
+            arguments:
+                data_delta: 0
+                address_delta: 0
+                global_cycle_seconds: 1e-09
+          - name: write
+            arguments:
+                data_delta: 1
+                address_delta: 0
+                global_cycle_seconds: 1e-09
+          - name: write
+            arguments:
+                data_delta: 0
+                address_delta: 1
+                global_cycle_seconds: 1e-09
+          - name: write
+            arguments:
+                data_delta: 1
+                address_delta: 1
+                global_cycle_seconds: 1e-09
+          - name: update
+            arguments:
+                data_delta: 0
+                address_delta: 0
+                global_cycle_seconds: 1e-09
+          - name: update
+            arguments:
+                data_delta: 1
+                address_delta: 0
+                global_cycle_seconds: 1e-09
+          - name: update
+            arguments:
+                data_delta: 0
+                address_delta: 1
+                global_cycle_seconds: 1e-09
+          - name: update
+            arguments:
+                data_delta: 1
+                address_delta: 1
+                global_cycle_seconds: 1e-09
+          - name: idle
+            arguments:
+                global_cycle_seconds: 1e-09
+          - name: leak
+            arguments:
+                global_cycle_seconds: 1e-09
+      - name: kv_systolic_array.PE[0..63].k_spad
+        class: regfile
+        actions:
+          - name: read
+            arguments:
+                data_delta: 0
+                address_delta: 0
+                global_cycle_seconds: 1e-09
+          - name: read
+            arguments:
+                data_delta: 1
+                address_delta: 0
+                global_cycle_seconds: 1e-09
+          - name: read
+            arguments:
+                data_delta: 0
+                address_delta: 1
+                global_cycle_seconds: 1e-09
+          - name: read
+            arguments:
+                data_delta: 1
+                address_delta: 1
+                global_cycle_seconds: 1e-09
+          - name: write
+            arguments:
+                data_delta: 0
+                address_delta: 0
+                global_cycle_seconds: 1e-09
+          - name: write
+            arguments:
+                data_delta: 1
+                address_delta: 0
+                global_cycle_seconds: 1e-09
+          - name: write
+            arguments:
+                data_delta: 0
+                address_delta: 1
+                global_cycle_seconds: 1e-09
+          - name: write
+            arguments:
+                data_delta: 1
+                address_delta: 1
+                global_cycle_seconds: 1e-09
+          - name: update
+            arguments:
+                data_delta: 0
+                address_delta: 0
+                global_cycle_seconds: 1e-09
+          - name: update
+            arguments:
+                data_delta: 1
+                address_delta: 0
+                global_cycle_seconds: 1e-09
+          - name: update
+            arguments:
+                data_delta: 0
+                address_delta: 1
+                global_cycle_seconds: 1e-09
+          - name: update
+            arguments:
+                data_delta: 1
+                address_delta: 1
+                global_cycle_seconds: 1e-09
+          - name: idle
+            arguments:
+                global_cycle_seconds: 1e-09
+          - name: leak
+            arguments:
+                global_cycle_seconds: 1e-09
+      - name: kv_systolic_array.PE[0..63].o_spad
+        class: regfile
+        actions:
+          - name: read
+            arguments:
+                data_delta: 0
+                address_delta: 0
+                global_cycle_seconds: 1e-09
+          - name: read
+            arguments:
+                data_delta: 1
+                address_delta: 0
+                global_cycle_seconds: 1e-09
+          - name: read
+            arguments:
+                data_delta: 0
+                address_delta: 1
+                global_cycle_seconds: 1e-09
+          - name: read
+            arguments:
+                data_delta: 1
+                address_delta: 1
+                global_cycle_seconds: 1e-09
+          - name: write
+            arguments:
+                data_delta: 0
+                address_delta: 0
+                global_cycle_seconds: 1e-09
+          - name: write
+            arguments:
+                data_delta: 1
+                address_delta: 0
+                global_cycle_seconds: 1e-09
+          - name: write
+            arguments:
+                data_delta: 0
+                address_delta: 1
+                global_cycle_seconds: 1e-09
+          - name: write
+            arguments:
+                data_delta: 1
+                address_delta: 1
+                global_cycle_seconds: 1e-09
+          - name: update
+            arguments:
+                data_delta: 0
+                address_delta: 0
+                global_cycle_seconds: 1e-09
+          - name: update
+            arguments:
+                data_delta: 1
+                address_delta: 0
+                global_cycle_seconds: 1e-09
+          - name: update
+            arguments:
+                data_delta: 0
+                address_delta: 1
+                global_cycle_seconds: 1e-09
+          - name: update
+            arguments:
+                data_delta: 1
+                address_delta: 1
+                global_cycle_seconds: 1e-09
+          - name: idle
+            arguments:
+                global_cycle_seconds: 1e-09
+          - name: leak
+            arguments:
+                global_cycle_seconds: 1e-09
+      - name: kv_systolic_array.kv_dram
+        class: DRAM
+        actions:
+          - name: read
+            arguments:
+                global_cycle_seconds: 1e-09
+          - name: write
+            arguments:
+                global_cycle_seconds: 1e-09
+          - name: idle
+            arguments:
+                global_cycle_seconds: 1e-09
+          - name: leak
+            arguments:
+                global_cycle_seconds: 1e-09

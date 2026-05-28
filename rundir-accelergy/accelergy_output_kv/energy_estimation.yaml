@@ -1,0 +1,518 @@
+energy_estimation:
+    version: '0.4'
+    components:
+      - name: kv_systolic_array.kv_dram
+        energy: 2367160320.0
+      - name: kv_systolic_array.PE[0].mac
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[0].q_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[0].k_spad
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[0].o_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[1].mac
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[1].q_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[1].k_spad
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[1].o_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[2].mac
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[2].q_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[2].k_spad
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[2].o_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[3].mac
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[3].q_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[3].k_spad
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[3].o_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[4].mac
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[4].q_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[4].k_spad
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[4].o_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[5].mac
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[5].q_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[5].k_spad
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[5].o_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[6].mac
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[6].q_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[6].k_spad
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[6].o_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[7].mac
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[7].q_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[7].k_spad
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[7].o_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[8].mac
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[8].q_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[8].k_spad
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[8].o_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[9].mac
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[9].q_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[9].k_spad
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[9].o_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[10].mac
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[10].q_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[10].k_spad
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[10].o_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[11].mac
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[11].q_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[11].k_spad
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[11].o_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[12].mac
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[12].q_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[12].k_spad
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[12].o_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[13].mac
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[13].q_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[13].k_spad
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[13].o_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[14].mac
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[14].q_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[14].k_spad
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[14].o_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[15].mac
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[15].q_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[15].k_spad
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[15].o_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[16].mac
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[16].q_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[16].k_spad
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[16].o_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[17].mac
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[17].q_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[17].k_spad
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[17].o_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[18].mac
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[18].q_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[18].k_spad
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[18].o_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[19].mac
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[19].q_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[19].k_spad
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[19].o_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[20].mac
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[20].q_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[20].k_spad
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[20].o_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[21].mac
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[21].q_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[21].k_spad
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[21].o_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[22].mac
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[22].q_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[22].k_spad
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[22].o_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[23].mac
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[23].q_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[23].k_spad
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[23].o_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[24].mac
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[24].q_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[24].k_spad
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[24].o_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[25].mac
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[25].q_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[25].k_spad
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[25].o_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[26].mac
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[26].q_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[26].k_spad
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[26].o_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[27].mac
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[27].q_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[27].k_spad
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[27].o_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[28].mac
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[28].q_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[28].k_spad
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[28].o_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[29].mac
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[29].q_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[29].k_spad
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[29].o_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[30].mac
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[30].q_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[30].k_spad
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[30].o_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[31].mac
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[31].q_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[31].k_spad
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[31].o_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[32].mac
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[32].q_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[32].k_spad
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[32].o_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[33].mac
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[33].q_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[33].k_spad
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[33].o_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[34].mac
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[34].q_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[34].k_spad
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[34].o_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[35].mac
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[35].q_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[35].k_spad
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[35].o_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[36].mac
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[36].q_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[36].k_spad
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[36].o_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[37].mac
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[37].q_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[37].k_spad
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[37].o_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[38].mac
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[38].q_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[38].k_spad
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[38].o_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[39].mac
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[39].q_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[39].k_spad
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[39].o_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[40].mac
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[40].q_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[40].k_spad
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[40].o_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[41].mac
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[41].q_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[41].k_spad
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[41].o_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[42].mac
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[42].q_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[42].k_spad
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[42].o_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[43].mac
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[43].q_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[43].k_spad
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[43].o_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[44].mac
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[44].q_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[44].k_spad
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[44].o_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[45].mac
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[45].q_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[45].k_spad
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[45].o_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[46].mac
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[46].q_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[46].k_spad
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[46].o_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[47].mac
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[47].q_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[47].k_spad
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[47].o_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[48].mac
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[48].q_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[48].k_spad
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[48].o_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[49].mac
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[49].q_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[49].k_spad
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[49].o_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[50].mac
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[50].q_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[50].k_spad
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[50].o_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[51].mac
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[51].q_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[51].k_spad
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[51].o_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[52].mac
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[52].q_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[52].k_spad
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[52].o_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[53].mac
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[53].q_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[53].k_spad
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[53].o_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[54].mac
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[54].q_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[54].k_spad
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[54].o_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[55].mac
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[55].q_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[55].k_spad
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[55].o_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[56].mac
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[56].q_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[56].k_spad
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[56].o_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[57].mac
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[57].q_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[57].k_spad
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[57].o_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[58].mac
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[58].q_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[58].k_spad
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[58].o_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[59].mac
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[59].q_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[59].k_spad
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[59].o_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[60].mac
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[60].q_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[60].k_spad
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[60].o_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[61].mac
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[61].q_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[61].k_spad
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[61].o_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[62].mac
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[62].q_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[62].k_spad
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[62].o_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[63].mac
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[63].q_spad
+        energy: 512.0
+      - name: kv_systolic_array.PE[63].k_spad
+        energy: 4194304.0
+      - name: kv_systolic_array.PE[63].o_spad
+        energy: 512.0
+    Total: 2904096768.0

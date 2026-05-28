@@ -1,0 +1,2208 @@
+architecture:
+    version: '0.4'
+    local:
+      - name: systolic_array.weights_glb
+        class: smartbuffer_SRAM
+        attributes:
+            bank_depth: 8388608
+            memory_depth: 8388608
+            memory_width: 32
+            n_banks: 1
+            n_buffets: 1
+            technology: "40nm"
+            global_cycle_seconds: 1e-09
+            action_latency_cycles: 1
+            cycle_seconds: 1e-09
+            n_instances: 1
+            n_rdwr_ports: 2
+            scoreboard_depth: 8388608.0
+            update_fifo_depth: 0
+        primitive_components:
+          - name: buffet_collection.buffet[0..0].scoreboard
+            class: regfile
+            attributes:
+                global_cycle_seconds: 1e-09
+                technology: "40nm"
+                depth: 8388608
+                width: 1
+                n_rdwr_ports: 1
+            area_scale: 1
+            energy_scale: 1
+          - name: buffet_collection.buffet[0..0].data_fifos[0..2]
+            class: FIFO
+            attributes:
+                datawidth: 32
+                global_cycle_seconds: 1e-09
+                technology: "40nm"
+                width: 16
+                depth: 4
+            area_scale: 1
+            energy_scale: 1
+          - name: buffet_collection.buffet[0..0].addr_fifos[0..2]
+            class: FIFO
+            attributes:
+                datawidth: 15.942385152878742
+                global_cycle_seconds: 1e-09
+                technology: "40nm"
+                width: 16
+                depth: 4
+            area_scale: 1
+            energy_scale: 1
+          - name: buffet_collection.storage
+            class: SRAM
+            attributes:
+                n_banks: 1
+                global_cycle_seconds: 1e-09
+                technology: "40nm"
+                width: 32
+                depth: 8388608
+                n_rdwr_ports: 2
+            area_scale: 1
+            energy_scale: 1
+          - name: address_generators[0..2]
+            class: counter
+            attributes:
+                global_cycle_seconds: 1e-09
+                technology: "40nm"
+                width: 15.942385152878742
+            area_scale: 1
+            energy_scale: 1
+        actions:
+          - name: fill
+            arguments:
+                data_delta: 0
+                address_delta: 0
+            primitive_actions:
+              - name: buffet_collection.buffet[0].scoreboard
+                action: write
+                arguments:
+                    address_delta: 1
+                    data_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].data_fifos[0]
+                action: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 0.0
+              - name: buffet_collection.buffet[0].data_fifos[0]
+                action: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 0.0
+              - name: buffet_collection.buffet[0].addr_fifos[0]
+                action: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 0.0
+              - name: buffet_collection.buffet[0].addr_fifos[0]
+                action: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 0.0
+              - name: buffet_collection.storage
+                action: write
+                arguments:
+                    data_delta: 0
+                    address_delta: 0
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: address_generators[0]
+                action: count
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+          - name: fill
+            arguments:
+                data_delta: 1
+                address_delta: 0
+            primitive_actions:
+              - name: buffet_collection.buffet[0].scoreboard
+                action: write
+                arguments:
+                    address_delta: 1
+                    data_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].data_fifos[0]
+                action: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].data_fifos[0]
+                action: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].addr_fifos[0]
+                action: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 0.0
+              - name: buffet_collection.buffet[0].addr_fifos[0]
+                action: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 0.0
+              - name: buffet_collection.storage
+                action: write
+                arguments:
+                    data_delta: 1
+                    address_delta: 0
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: address_generators[0]
+                action: count
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+          - name: fill
+            arguments:
+                data_delta: 0
+                address_delta: 1
+            primitive_actions:
+              - name: buffet_collection.buffet[0].scoreboard
+                action: write
+                arguments:
+                    address_delta: 1
+                    data_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].data_fifos[0]
+                action: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 0.0
+              - name: buffet_collection.buffet[0].data_fifos[0]
+                action: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 0.0
+              - name: buffet_collection.buffet[0].addr_fifos[0]
+                action: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].addr_fifos[0]
+                action: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.storage
+                action: write
+                arguments:
+                    data_delta: 0
+                    address_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: address_generators[0]
+                action: count
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+          - name: fill
+            arguments:
+                data_delta: 1
+                address_delta: 1
+            primitive_actions:
+              - name: buffet_collection.buffet[0].scoreboard
+                action: write
+                arguments:
+                    address_delta: 1
+                    data_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].data_fifos[0]
+                action: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].data_fifos[0]
+                action: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].addr_fifos[0]
+                action: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].addr_fifos[0]
+                action: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.storage
+                action: write
+                arguments:
+                    data_delta: 1
+                    address_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: address_generators[0]
+                action: count
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+          - name: read
+            arguments:
+                data_delta: 0
+                address_delta: 0
+            primitive_actions:
+              - name: buffet_collection.buffet[0].scoreboard
+                action: read
+                arguments:
+                    address_delta: 1
+                    data_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].scoreboard
+                action: write
+                arguments:
+                    address_delta: 1
+                    data_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].data_fifos[0]
+                action: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 0.0
+              - name: buffet_collection.buffet[0].data_fifos[0]
+                action: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 0.0
+              - name: buffet_collection.buffet[0].addr_fifos[0]
+                action: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 0.0
+              - name: buffet_collection.buffet[0].addr_fifos[0]
+                action: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 0.0
+              - name: buffet_collection.storage
+                action: read
+                arguments:
+                    data_delta: 0
+                    address_delta: 0
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: address_generators[1]
+                action: count
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+          - name: read
+            arguments:
+                data_delta: 1
+                address_delta: 0
+            primitive_actions:
+              - name: buffet_collection.buffet[0].scoreboard
+                action: read
+                arguments:
+                    address_delta: 1
+                    data_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].scoreboard
+                action: write
+                arguments:
+                    address_delta: 1
+                    data_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].data_fifos[0]
+                action: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].data_fifos[0]
+                action: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].addr_fifos[0]
+                action: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 0.0
+              - name: buffet_collection.buffet[0].addr_fifos[0]
+                action: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 0.0
+              - name: buffet_collection.storage
+                action: read
+                arguments:
+                    data_delta: 1
+                    address_delta: 0
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: address_generators[1]
+                action: count
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+          - name: read
+            arguments:
+                data_delta: 0
+                address_delta: 1
+            primitive_actions:
+              - name: buffet_collection.buffet[0].scoreboard
+                action: read
+                arguments:
+                    address_delta: 1
+                    data_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].scoreboard
+                action: write
+                arguments:
+                    address_delta: 1
+                    data_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].data_fifos[0]
+                action: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 0.0
+              - name: buffet_collection.buffet[0].data_fifos[0]
+                action: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 0.0
+              - name: buffet_collection.buffet[0].addr_fifos[0]
+                action: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].addr_fifos[0]
+                action: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.storage
+                action: read
+                arguments:
+                    data_delta: 0
+                    address_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: address_generators[1]
+                action: count
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+          - name: read
+            arguments:
+                data_delta: 1
+                address_delta: 1
+            primitive_actions:
+              - name: buffet_collection.buffet[0].scoreboard
+                action: read
+                arguments:
+                    address_delta: 1
+                    data_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].scoreboard
+                action: write
+                arguments:
+                    address_delta: 1
+                    data_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].data_fifos[0]
+                action: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].data_fifos[0]
+                action: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].addr_fifos[0]
+                action: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].addr_fifos[0]
+                action: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.storage
+                action: read
+                arguments:
+                    data_delta: 1
+                    address_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: address_generators[1]
+                action: count
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+          - name: update
+            arguments:
+                data_delta: 0
+                address_delta: 0
+            primitive_actions:
+              - name: buffet_collection.buffet[0].scoreboard
+                action: write
+                arguments:
+                    address_delta: 1
+                    data_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].data_fifos[0]
+                action: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 0.0
+              - name: buffet_collection.buffet[0].data_fifos[0]
+                action: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 0.0
+              - name: buffet_collection.buffet[0].addr_fifos[0]
+                action: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 0.0
+              - name: buffet_collection.buffet[0].addr_fifos[0]
+                action: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 0.0
+              - name: buffet_collection.storage
+                action: write
+                arguments:
+                    data_delta: 0
+                    address_delta: 0
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: address_generators[2]
+                action: count
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+          - name: update
+            arguments:
+                data_delta: 1
+                address_delta: 0
+            primitive_actions:
+              - name: buffet_collection.buffet[0].scoreboard
+                action: write
+                arguments:
+                    address_delta: 1
+                    data_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].data_fifos[0]
+                action: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].data_fifos[0]
+                action: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].addr_fifos[0]
+                action: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 0.0
+              - name: buffet_collection.buffet[0].addr_fifos[0]
+                action: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 0.0
+              - name: buffet_collection.storage
+                action: write
+                arguments:
+                    data_delta: 1
+                    address_delta: 0
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: address_generators[2]
+                action: count
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+          - name: update
+            arguments:
+                data_delta: 0
+                address_delta: 1
+            primitive_actions:
+              - name: buffet_collection.buffet[0].scoreboard
+                action: write
+                arguments:
+                    address_delta: 1
+                    data_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].data_fifos[0]
+                action: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 0.0
+              - name: buffet_collection.buffet[0].data_fifos[0]
+                action: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 0.0
+              - name: buffet_collection.buffet[0].addr_fifos[0]
+                action: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].addr_fifos[0]
+                action: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.storage
+                action: write
+                arguments:
+                    data_delta: 0
+                    address_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: address_generators[2]
+                action: count
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+          - name: update
+            arguments:
+                data_delta: 1
+                address_delta: 1
+            primitive_actions:
+              - name: buffet_collection.buffet[0].scoreboard
+                action: write
+                arguments:
+                    address_delta: 1
+                    data_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].data_fifos[0]
+                action: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].data_fifos[0]
+                action: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].addr_fifos[0]
+                action: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].addr_fifos[0]
+                action: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.storage
+                action: write
+                arguments:
+                    data_delta: 1
+                    address_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: address_generators[2]
+                action: count
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+          - name: idle
+            arguments: {}
+            primitive_actions:
+              - name: buffet_collection.buffet[0..0].scoreboard
+                action: idle
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0..0].data_fifos[0..2]
+                action: idle
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0..0].addr_fifos[0..2]
+                action: idle
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.storage
+                action: idle
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+      - name: systolic_array.ifmap_glb
+        class: smartbuffer_SRAM
+        attributes:
+            bank_depth: 524288
+            memory_depth: 524288
+            memory_width: 32
+            n_banks: 1
+            n_buffets: 1
+            technology: "40nm"
+            global_cycle_seconds: 1e-09
+            action_latency_cycles: 1
+            cycle_seconds: 1e-09
+            n_instances: 1
+            n_rdwr_ports: 2
+            scoreboard_depth: 524288.0
+            update_fifo_depth: 0
+        primitive_components:
+          - name: buffet_collection.buffet[0..0].scoreboard
+            class: regfile
+            attributes:
+                global_cycle_seconds: 1e-09
+                technology: "40nm"
+                depth: 524288
+                width: 1
+                n_rdwr_ports: 1
+            area_scale: 1
+            energy_scale: 1
+          - name: buffet_collection.buffet[0..0].data_fifos[0..2]
+            class: FIFO
+            attributes:
+                datawidth: 32
+                global_cycle_seconds: 1e-09
+                technology: "40nm"
+                width: 16
+                depth: 4
+            area_scale: 1
+            energy_scale: 1
+          - name: buffet_collection.buffet[0..0].addr_fifos[0..2]
+            class: FIFO
+            attributes:
+                datawidth: 13.16979643063896
+                global_cycle_seconds: 1e-09
+                technology: "40nm"
+                width: 16
+                depth: 4
+            area_scale: 1
+            energy_scale: 1
+          - name: buffet_collection.storage
+            class: SRAM
+            attributes:
+                n_banks: 1
+                global_cycle_seconds: 1e-09
+                technology: "40nm"
+                width: 32
+                depth: 524288
+                n_rdwr_ports: 2
+            area_scale: 1
+            energy_scale: 1
+          - name: address_generators[0..2]
+            class: counter
+            attributes:
+                global_cycle_seconds: 1e-09
+                technology: "40nm"
+                width: 13.16979643063896
+            area_scale: 1
+            energy_scale: 1
+        actions:
+          - name: fill
+            arguments:
+                data_delta: 0
+                address_delta: 0
+            primitive_actions:
+              - name: buffet_collection.buffet[0].scoreboard
+                action: write
+                arguments:
+                    address_delta: 1
+                    data_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].data_fifos[0]
+                action: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 0.0
+              - name: buffet_collection.buffet[0].data_fifos[0]
+                action: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 0.0
+              - name: buffet_collection.buffet[0].addr_fifos[0]
+                action: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 0.0
+              - name: buffet_collection.buffet[0].addr_fifos[0]
+                action: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 0.0
+              - name: buffet_collection.storage
+                action: write
+                arguments:
+                    data_delta: 0
+                    address_delta: 0
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: address_generators[0]
+                action: count
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+          - name: fill
+            arguments:
+                data_delta: 1
+                address_delta: 0
+            primitive_actions:
+              - name: buffet_collection.buffet[0].scoreboard
+                action: write
+                arguments:
+                    address_delta: 1
+                    data_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].data_fifos[0]
+                action: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].data_fifos[0]
+                action: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].addr_fifos[0]
+                action: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 0.0
+              - name: buffet_collection.buffet[0].addr_fifos[0]
+                action: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 0.0
+              - name: buffet_collection.storage
+                action: write
+                arguments:
+                    data_delta: 1
+                    address_delta: 0
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: address_generators[0]
+                action: count
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+          - name: fill
+            arguments:
+                data_delta: 0
+                address_delta: 1
+            primitive_actions:
+              - name: buffet_collection.buffet[0].scoreboard
+                action: write
+                arguments:
+                    address_delta: 1
+                    data_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].data_fifos[0]
+                action: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 0.0
+              - name: buffet_collection.buffet[0].data_fifos[0]
+                action: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 0.0
+              - name: buffet_collection.buffet[0].addr_fifos[0]
+                action: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].addr_fifos[0]
+                action: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.storage
+                action: write
+                arguments:
+                    data_delta: 0
+                    address_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: address_generators[0]
+                action: count
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+          - name: fill
+            arguments:
+                data_delta: 1
+                address_delta: 1
+            primitive_actions:
+              - name: buffet_collection.buffet[0].scoreboard
+                action: write
+                arguments:
+                    address_delta: 1
+                    data_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].data_fifos[0]
+                action: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].data_fifos[0]
+                action: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].addr_fifos[0]
+                action: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].addr_fifos[0]
+                action: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.storage
+                action: write
+                arguments:
+                    data_delta: 1
+                    address_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: address_generators[0]
+                action: count
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+          - name: read
+            arguments:
+                data_delta: 0
+                address_delta: 0
+            primitive_actions:
+              - name: buffet_collection.buffet[0].scoreboard
+                action: read
+                arguments:
+                    address_delta: 1
+                    data_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].scoreboard
+                action: write
+                arguments:
+                    address_delta: 1
+                    data_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].data_fifos[0]
+                action: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 0.0
+              - name: buffet_collection.buffet[0].data_fifos[0]
+                action: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 0.0
+              - name: buffet_collection.buffet[0].addr_fifos[0]
+                action: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 0.0
+              - name: buffet_collection.buffet[0].addr_fifos[0]
+                action: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 0.0
+              - name: buffet_collection.storage
+                action: read
+                arguments:
+                    data_delta: 0
+                    address_delta: 0
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: address_generators[1]
+                action: count
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+          - name: read
+            arguments:
+                data_delta: 1
+                address_delta: 0
+            primitive_actions:
+              - name: buffet_collection.buffet[0].scoreboard
+                action: read
+                arguments:
+                    address_delta: 1
+                    data_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].scoreboard
+                action: write
+                arguments:
+                    address_delta: 1
+                    data_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].data_fifos[0]
+                action: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].data_fifos[0]
+                action: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].addr_fifos[0]
+                action: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 0.0
+              - name: buffet_collection.buffet[0].addr_fifos[0]
+                action: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 0.0
+              - name: buffet_collection.storage
+                action: read
+                arguments:
+                    data_delta: 1
+                    address_delta: 0
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: address_generators[1]
+                action: count
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+          - name: read
+            arguments:
+                data_delta: 0
+                address_delta: 1
+            primitive_actions:
+              - name: buffet_collection.buffet[0].scoreboard
+                action: read
+                arguments:
+                    address_delta: 1
+                    data_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].scoreboard
+                action: write
+                arguments:
+                    address_delta: 1
+                    data_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].data_fifos[0]
+                action: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 0.0
+              - name: buffet_collection.buffet[0].data_fifos[0]
+                action: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 0.0
+              - name: buffet_collection.buffet[0].addr_fifos[0]
+                action: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].addr_fifos[0]
+                action: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.storage
+                action: read
+                arguments:
+                    data_delta: 0
+                    address_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: address_generators[1]
+                action: count
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+          - name: read
+            arguments:
+                data_delta: 1
+                address_delta: 1
+            primitive_actions:
+              - name: buffet_collection.buffet[0].scoreboard
+                action: read
+                arguments:
+                    address_delta: 1
+                    data_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].scoreboard
+                action: write
+                arguments:
+                    address_delta: 1
+                    data_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].data_fifos[0]
+                action: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].data_fifos[0]
+                action: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].addr_fifos[0]
+                action: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].addr_fifos[0]
+                action: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.storage
+                action: read
+                arguments:
+                    data_delta: 1
+                    address_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: address_generators[1]
+                action: count
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+          - name: update
+            arguments:
+                data_delta: 0
+                address_delta: 0
+            primitive_actions:
+              - name: buffet_collection.buffet[0].scoreboard
+                action: write
+                arguments:
+                    address_delta: 1
+                    data_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].data_fifos[0]
+                action: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 0.0
+              - name: buffet_collection.buffet[0].data_fifos[0]
+                action: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 0.0
+              - name: buffet_collection.buffet[0].addr_fifos[0]
+                action: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 0.0
+              - name: buffet_collection.buffet[0].addr_fifos[0]
+                action: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 0.0
+              - name: buffet_collection.storage
+                action: write
+                arguments:
+                    data_delta: 0
+                    address_delta: 0
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: address_generators[2]
+                action: count
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+          - name: update
+            arguments:
+                data_delta: 1
+                address_delta: 0
+            primitive_actions:
+              - name: buffet_collection.buffet[0].scoreboard
+                action: write
+                arguments:
+                    address_delta: 1
+                    data_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].data_fifos[0]
+                action: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].data_fifos[0]
+                action: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].addr_fifos[0]
+                action: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 0.0
+              - name: buffet_collection.buffet[0].addr_fifos[0]
+                action: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 0.0
+              - name: buffet_collection.storage
+                action: write
+                arguments:
+                    data_delta: 1
+                    address_delta: 0
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: address_generators[2]
+                action: count
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+          - name: update
+            arguments:
+                data_delta: 0
+                address_delta: 1
+            primitive_actions:
+              - name: buffet_collection.buffet[0].scoreboard
+                action: write
+                arguments:
+                    address_delta: 1
+                    data_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].data_fifos[0]
+                action: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 0.0
+              - name: buffet_collection.buffet[0].data_fifos[0]
+                action: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 0.0
+              - name: buffet_collection.buffet[0].addr_fifos[0]
+                action: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].addr_fifos[0]
+                action: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.storage
+                action: write
+                arguments:
+                    data_delta: 0
+                    address_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: address_generators[2]
+                action: count
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+          - name: update
+            arguments:
+                data_delta: 1
+                address_delta: 1
+            primitive_actions:
+              - name: buffet_collection.buffet[0].scoreboard
+                action: write
+                arguments:
+                    address_delta: 1
+                    data_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].data_fifos[0]
+                action: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].data_fifos[0]
+                action: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].addr_fifos[0]
+                action: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].addr_fifos[0]
+                action: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.storage
+                action: write
+                arguments:
+                    data_delta: 1
+                    address_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: address_generators[2]
+                action: count
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+          - name: idle
+            arguments: {}
+            primitive_actions:
+              - name: buffet_collection.buffet[0..0].scoreboard
+                action: idle
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0..0].data_fifos[0..2]
+                action: idle
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0..0].addr_fifos[0..2]
+                action: idle
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.storage
+                action: idle
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+      - name: systolic_array.psum_glb
+        class: smartbuffer_SRAM
+        attributes:
+            bank_depth: 524288
+            memory_depth: 524288
+            memory_width: 32
+            n_banks: 1
+            n_buffets: 1
+            technology: "40nm"
+            global_cycle_seconds: 1e-09
+            action_latency_cycles: 1
+            cycle_seconds: 1e-09
+            n_instances: 1
+            n_rdwr_ports: 2
+            scoreboard_depth: 524288.0
+            update_fifo_depth: 0
+        primitive_components:
+          - name: buffet_collection.buffet[0..0].scoreboard
+            class: regfile
+            attributes:
+                global_cycle_seconds: 1e-09
+                technology: "40nm"
+                depth: 524288
+                width: 1
+                n_rdwr_ports: 1
+            area_scale: 1
+            energy_scale: 1
+          - name: buffet_collection.buffet[0..0].data_fifos[0..2]
+            class: FIFO
+            attributes:
+                datawidth: 32
+                global_cycle_seconds: 1e-09
+                technology: "40nm"
+                width: 16
+                depth: 4
+            area_scale: 1
+            energy_scale: 1
+          - name: buffet_collection.buffet[0..0].addr_fifos[0..2]
+            class: FIFO
+            attributes:
+                datawidth: 13.16979643063896
+                global_cycle_seconds: 1e-09
+                technology: "40nm"
+                width: 16
+                depth: 4
+            area_scale: 1
+            energy_scale: 1
+          - name: buffet_collection.storage
+            class: SRAM
+            attributes:
+                n_banks: 1
+                global_cycle_seconds: 1e-09
+                technology: "40nm"
+                width: 32
+                depth: 524288
+                n_rdwr_ports: 2
+            area_scale: 1
+            energy_scale: 1
+          - name: address_generators[0..2]
+            class: counter
+            attributes:
+                global_cycle_seconds: 1e-09
+                technology: "40nm"
+                width: 13.16979643063896
+            area_scale: 1
+            energy_scale: 1
+        actions:
+          - name: fill
+            arguments:
+                data_delta: 0
+                address_delta: 0
+            primitive_actions:
+              - name: buffet_collection.buffet[0].scoreboard
+                action: write
+                arguments:
+                    address_delta: 1
+                    data_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].data_fifos[0]
+                action: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 0.0
+              - name: buffet_collection.buffet[0].data_fifos[0]
+                action: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 0.0
+              - name: buffet_collection.buffet[0].addr_fifos[0]
+                action: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 0.0
+              - name: buffet_collection.buffet[0].addr_fifos[0]
+                action: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 0.0
+              - name: buffet_collection.storage
+                action: write
+                arguments:
+                    data_delta: 0
+                    address_delta: 0
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: address_generators[0]
+                action: count
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+          - name: fill
+            arguments:
+                data_delta: 1
+                address_delta: 0
+            primitive_actions:
+              - name: buffet_collection.buffet[0].scoreboard
+                action: write
+                arguments:
+                    address_delta: 1
+                    data_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].data_fifos[0]
+                action: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].data_fifos[0]
+                action: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].addr_fifos[0]
+                action: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 0.0
+              - name: buffet_collection.buffet[0].addr_fifos[0]
+                action: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 0.0
+              - name: buffet_collection.storage
+                action: write
+                arguments:
+                    data_delta: 1
+                    address_delta: 0
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: address_generators[0]
+                action: count
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+          - name: fill
+            arguments:
+                data_delta: 0
+                address_delta: 1
+            primitive_actions:
+              - name: buffet_collection.buffet[0].scoreboard
+                action: write
+                arguments:
+                    address_delta: 1
+                    data_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].data_fifos[0]
+                action: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 0.0
+              - name: buffet_collection.buffet[0].data_fifos[0]
+                action: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 0.0
+              - name: buffet_collection.buffet[0].addr_fifos[0]
+                action: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].addr_fifos[0]
+                action: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.storage
+                action: write
+                arguments:
+                    data_delta: 0
+                    address_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: address_generators[0]
+                action: count
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+          - name: fill
+            arguments:
+                data_delta: 1
+                address_delta: 1
+            primitive_actions:
+              - name: buffet_collection.buffet[0].scoreboard
+                action: write
+                arguments:
+                    address_delta: 1
+                    data_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].data_fifos[0]
+                action: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].data_fifos[0]
+                action: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].addr_fifos[0]
+                action: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].addr_fifos[0]
+                action: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.storage
+                action: write
+                arguments:
+                    data_delta: 1
+                    address_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: address_generators[0]
+                action: count
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+          - name: read
+            arguments:
+                data_delta: 0
+                address_delta: 0
+            primitive_actions:
+              - name: buffet_collection.buffet[0].scoreboard
+                action: read
+                arguments:
+                    address_delta: 1
+                    data_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].scoreboard
+                action: write
+                arguments:
+                    address_delta: 1
+                    data_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].data_fifos[0]
+                action: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 0.0
+              - name: buffet_collection.buffet[0].data_fifos[0]
+                action: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 0.0
+              - name: buffet_collection.buffet[0].addr_fifos[0]
+                action: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 0.0
+              - name: buffet_collection.buffet[0].addr_fifos[0]
+                action: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 0.0
+              - name: buffet_collection.storage
+                action: read
+                arguments:
+                    data_delta: 0
+                    address_delta: 0
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: address_generators[1]
+                action: count
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+          - name: read
+            arguments:
+                data_delta: 1
+                address_delta: 0
+            primitive_actions:
+              - name: buffet_collection.buffet[0].scoreboard
+                action: read
+                arguments:
+                    address_delta: 1
+                    data_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].scoreboard
+                action: write
+                arguments:
+                    address_delta: 1
+                    data_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].data_fifos[0]
+                action: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].data_fifos[0]
+                action: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].addr_fifos[0]
+                action: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 0.0
+              - name: buffet_collection.buffet[0].addr_fifos[0]
+                action: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 0.0
+              - name: buffet_collection.storage
+                action: read
+                arguments:
+                    data_delta: 1
+                    address_delta: 0
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: address_generators[1]
+                action: count
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+          - name: read
+            arguments:
+                data_delta: 0
+                address_delta: 1
+            primitive_actions:
+              - name: buffet_collection.buffet[0].scoreboard
+                action: read
+                arguments:
+                    address_delta: 1
+                    data_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].scoreboard
+                action: write
+                arguments:
+                    address_delta: 1
+                    data_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].data_fifos[0]
+                action: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 0.0
+              - name: buffet_collection.buffet[0].data_fifos[0]
+                action: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 0.0
+              - name: buffet_collection.buffet[0].addr_fifos[0]
+                action: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].addr_fifos[0]
+                action: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.storage
+                action: read
+                arguments:
+                    data_delta: 0
+                    address_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: address_generators[1]
+                action: count
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+          - name: read
+            arguments:
+                data_delta: 1
+                address_delta: 1
+            primitive_actions:
+              - name: buffet_collection.buffet[0].scoreboard
+                action: read
+                arguments:
+                    address_delta: 1
+                    data_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].scoreboard
+                action: write
+                arguments:
+                    address_delta: 1
+                    data_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].data_fifos[0]
+                action: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].data_fifos[0]
+                action: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].addr_fifos[0]
+                action: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].addr_fifos[0]
+                action: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.storage
+                action: read
+                arguments:
+                    data_delta: 1
+                    address_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: address_generators[1]
+                action: count
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+          - name: update
+            arguments:
+                data_delta: 0
+                address_delta: 0
+            primitive_actions:
+              - name: buffet_collection.buffet[0].scoreboard
+                action: write
+                arguments:
+                    address_delta: 1
+                    data_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].data_fifos[0]
+                action: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 0.0
+              - name: buffet_collection.buffet[0].data_fifos[0]
+                action: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 0.0
+              - name: buffet_collection.buffet[0].addr_fifos[0]
+                action: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 0.0
+              - name: buffet_collection.buffet[0].addr_fifos[0]
+                action: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 0.0
+              - name: buffet_collection.storage
+                action: write
+                arguments:
+                    data_delta: 0
+                    address_delta: 0
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: address_generators[2]
+                action: count
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+          - name: update
+            arguments:
+                data_delta: 1
+                address_delta: 0
+            primitive_actions:
+              - name: buffet_collection.buffet[0].scoreboard
+                action: write
+                arguments:
+                    address_delta: 1
+                    data_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].data_fifos[0]
+                action: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].data_fifos[0]
+                action: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].addr_fifos[0]
+                action: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 0.0
+              - name: buffet_collection.buffet[0].addr_fifos[0]
+                action: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 0.0
+              - name: buffet_collection.storage
+                action: write
+                arguments:
+                    data_delta: 1
+                    address_delta: 0
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: address_generators[2]
+                action: count
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+          - name: update
+            arguments:
+                data_delta: 0
+                address_delta: 1
+            primitive_actions:
+              - name: buffet_collection.buffet[0].scoreboard
+                action: write
+                arguments:
+                    address_delta: 1
+                    data_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].data_fifos[0]
+                action: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 0.0
+              - name: buffet_collection.buffet[0].data_fifos[0]
+                action: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 0.0
+              - name: buffet_collection.buffet[0].addr_fifos[0]
+                action: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].addr_fifos[0]
+                action: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.storage
+                action: write
+                arguments:
+                    data_delta: 0
+                    address_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: address_generators[2]
+                action: count
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+          - name: update
+            arguments:
+                data_delta: 1
+                address_delta: 1
+            primitive_actions:
+              - name: buffet_collection.buffet[0].scoreboard
+                action: write
+                arguments:
+                    address_delta: 1
+                    data_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].data_fifos[0]
+                action: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].data_fifos[0]
+                action: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].addr_fifos[0]
+                action: push
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0].addr_fifos[0]
+                action: pop
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.storage
+                action: write
+                arguments:
+                    data_delta: 1
+                    address_delta: 1
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: address_generators[2]
+                action: count
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+          - name: idle
+            arguments: {}
+            primitive_actions:
+              - name: buffet_collection.buffet[0..0].scoreboard
+                action: idle
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0..0].data_fifos[0..2]
+                action: idle
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.buffet[0..0].addr_fifos[0..2]
+                action: idle
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+              - name: buffet_collection.storage
+                action: idle
+                arguments:
+                    global_cycle_seconds: 1e-09
+                energy_scale: 1.0
+      - name: systolic_array.PE[0..4095].mac
+        class: intmac
+        actions:
+          - name: mac_random
+            arguments:
+                global_cycle_seconds: 1e-09
+          - name: mac_gated
+            arguments:
+                global_cycle_seconds: 1e-09
+          - name: idle
+            arguments:
+                global_cycle_seconds: 1e-09
+          - name: leak
+            arguments:
+                global_cycle_seconds: 1e-09
+      - name: systolic_array.PE[0..4095].ifmap_spad
+        class: regfile
+        actions:
+          - name: read
+            arguments:
+                data_delta: 0
+                address_delta: 0
+                global_cycle_seconds: 1e-09
+          - name: read
+            arguments:
+                data_delta: 1
+                address_delta: 0
+                global_cycle_seconds: 1e-09
+          - name: read
+            arguments:
+                data_delta: 0
+                address_delta: 1
+                global_cycle_seconds: 1e-09
+          - name: read
+            arguments:
+                data_delta: 1
+                address_delta: 1
+                global_cycle_seconds: 1e-09
+          - name: write
+            arguments:
+                data_delta: 0
+                address_delta: 0
+                global_cycle_seconds: 1e-09
+          - name: write
+            arguments:
+                data_delta: 1
+                address_delta: 0
+                global_cycle_seconds: 1e-09
+          - name: write
+            arguments:
+                data_delta: 0
+                address_delta: 1
+                global_cycle_seconds: 1e-09
+          - name: write
+            arguments:
+                data_delta: 1
+                address_delta: 1
+                global_cycle_seconds: 1e-09
+          - name: update
+            arguments:
+                data_delta: 0
+                address_delta: 0
+                global_cycle_seconds: 1e-09
+          - name: update
+            arguments:
+                data_delta: 1
+                address_delta: 0
+                global_cycle_seconds: 1e-09
+          - name: update
+            arguments:
+                data_delta: 0
+                address_delta: 1
+                global_cycle_seconds: 1e-09
+          - name: update
+            arguments:
+                data_delta: 1
+                address_delta: 1
+                global_cycle_seconds: 1e-09
+          - name: idle
+            arguments:
+                global_cycle_seconds: 1e-09
+          - name: leak
+            arguments:
+                global_cycle_seconds: 1e-09
+      - name: systolic_array.PE[0..4095].weights_spad
+        class: regfile
+        actions:
+          - name: read
+            arguments:
+                data_delta: 0
+                address_delta: 0
+                global_cycle_seconds: 1e-09
+          - name: read
+            arguments:
+                data_delta: 1
+                address_delta: 0
+                global_cycle_seconds: 1e-09
+          - name: read
+            arguments:
+                data_delta: 0
+                address_delta: 1
+                global_cycle_seconds: 1e-09
+          - name: read
+            arguments:
+                data_delta: 1
+                address_delta: 1
+                global_cycle_seconds: 1e-09
+          - name: write
+            arguments:
+                data_delta: 0
+                address_delta: 0
+                global_cycle_seconds: 1e-09
+          - name: write
+            arguments:
+                data_delta: 1
+                address_delta: 0
+                global_cycle_seconds: 1e-09
+          - name: write
+            arguments:
+                data_delta: 0
+                address_delta: 1
+                global_cycle_seconds: 1e-09
+          - name: write
+            arguments:
+                data_delta: 1
+                address_delta: 1
+                global_cycle_seconds: 1e-09
+          - name: update
+            arguments:
+                data_delta: 0
+                address_delta: 0
+                global_cycle_seconds: 1e-09
+          - name: update
+            arguments:
+                data_delta: 1
+                address_delta: 0
+                global_cycle_seconds: 1e-09
+          - name: update
+            arguments:
+                data_delta: 0
+                address_delta: 1
+                global_cycle_seconds: 1e-09
+          - name: update
+            arguments:
+                data_delta: 1
+                address_delta: 1
+                global_cycle_seconds: 1e-09
+          - name: idle
+            arguments:
+                global_cycle_seconds: 1e-09
+          - name: leak
+            arguments:
+                global_cycle_seconds: 1e-09
+      - name: systolic_array.PE[0..4095].psum_spad
+        class: regfile
+        actions:
+          - name: read
+            arguments:
+                data_delta: 0
+                address_delta: 0
+                global_cycle_seconds: 1e-09
+          - name: read
+            arguments:
+                data_delta: 1
+                address_delta: 0
+                global_cycle_seconds: 1e-09
+          - name: read
+            arguments:
+                data_delta: 0
+                address_delta: 1
+                global_cycle_seconds: 1e-09
+          - name: read
+            arguments:
+                data_delta: 1
+                address_delta: 1
+                global_cycle_seconds: 1e-09
+          - name: write
+            arguments:
+                data_delta: 0
+                address_delta: 0
+                global_cycle_seconds: 1e-09
+          - name: write
+            arguments:
+                data_delta: 1
+                address_delta: 0
+                global_cycle_seconds: 1e-09
+          - name: write
+            arguments:
+                data_delta: 0
+                address_delta: 1
+                global_cycle_seconds: 1e-09
+          - name: write
+            arguments:
+                data_delta: 1
+                address_delta: 1
+                global_cycle_seconds: 1e-09
+          - name: update
+            arguments:
+                data_delta: 0
+                address_delta: 0
+                global_cycle_seconds: 1e-09
+          - name: update
+            arguments:
+                data_delta: 1
+                address_delta: 0
+                global_cycle_seconds: 1e-09
+          - name: update
+            arguments:
+                data_delta: 0
+                address_delta: 1
+                global_cycle_seconds: 1e-09
+          - name: update
+            arguments:
+                data_delta: 1
+                address_delta: 1
+                global_cycle_seconds: 1e-09
+          - name: idle
+            arguments:
+                global_cycle_seconds: 1e-09
+          - name: leak
+            arguments:
+                global_cycle_seconds: 1e-09
+      - name: systolic_array.weights_dram
+        class: DRAM
+        actions:
+          - name: read
+            arguments:
+                global_cycle_seconds: 1e-09
+          - name: write
+            arguments:
+                global_cycle_seconds: 1e-09
+          - name: idle
+            arguments:
+                global_cycle_seconds: 1e-09
+          - name: leak
+            arguments:
+                global_cycle_seconds: 1e-09
+      - name: systolic_array.ifmap_dram
+        class: DRAM
+        actions:
+          - name: read
+            arguments:
+                global_cycle_seconds: 1e-09
+          - name: write
+            arguments:
+                global_cycle_seconds: 1e-09
+          - name: idle
+            arguments:
+                global_cycle_seconds: 1e-09
+          - name: leak
+            arguments:
+                global_cycle_seconds: 1e-09
+      - name: systolic_array.psum_dram
+        class: DRAM
+        actions:
+          - name: read
+            arguments:
+                global_cycle_seconds: 1e-09
+          - name: write
+            arguments:
+                global_cycle_seconds: 1e-09
+          - name: idle
+            arguments:
+                global_cycle_seconds: 1e-09
+          - name: leak
+            arguments:
+                global_cycle_seconds: 1e-09
