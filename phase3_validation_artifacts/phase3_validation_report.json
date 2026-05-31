@@ -8,7 +8,7 @@
           "value_gemm",
           "writeback"
         ],
-        "total_cycles": 5244,
+        "total_cycles": 5236,
         "total_macs": 131072
       },
       "name": "baseline_rich_result",
@@ -24,16 +24,16 @@
     },
     {
       "details": {
-        "large_total_cycles": 10452,
-        "small_total_cycles": 2640
+        "large_total_cycles": 10444,
+        "small_total_cycles": 2632
       },
       "name": "sequence_scaling",
       "status": "PASS"
     },
     {
       "details": {
-        "large_array_cycles": 4662,
-        "small_array_cycles": 6504
+        "large_array_cycles": 4654,
+        "small_array_cycles": 6496
       },
       "name": "array_scaling",
       "status": "PASS"
@@ -42,14 +42,14 @@
       "details": {
         "mode": "baseline_mqa_decode",
         "stage_count": 4,
-        "total_cycles": 14704
+        "total_cycles": 14696
       },
       "name": "simulator_baseline_route",
       "status": "PASS"
     },
     {
       "details": {
-        "kv_preload_bytes": 16384,
+        "kv_preload_bytes": 32768,
         "stage_names": [
           "kv_preload",
           "query_stream",
@@ -57,7 +57,7 @@
           "final_normalize",
           "writeback"
         ],
-        "total_cycles": 14873
+        "total_cycles": 80763
       },
       "name": "kv_structural_validity",
       "status": "PASS"
@@ -66,7 +66,7 @@
       "details": {
         "stage_cycles": {
           "score_gemm": 230,
-          "softmax_reduce": 2568,
+          "softmax_reduce": 2560,
           "value_gemm": 264,
           "writeback": 14
         },

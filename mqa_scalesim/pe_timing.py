@@ -18,6 +18,13 @@ class PETiming:
     sram_read_cycles_per_tile: int = 1
     sram_write_cycles_per_tile: int = 1
     dram_latency_cycles: int = 1
+    stream_startup_cycles: int = 2
+    wavefront_step_cycles: int = 1
+    state_forward_cycles: int = 1
+    partial_output_forward_cycles: int = 1
+    pipeline_drain_cycles: int = 2
+    head_switch_cycles: int = 1
+    kv_preload_setup_cycles: int = 2
 
     def validate(self) -> None:
         for field_name in (
@@ -34,6 +41,13 @@ class PETiming:
             'sram_read_cycles_per_tile',
             'sram_write_cycles_per_tile',
             'dram_latency_cycles',
+            'stream_startup_cycles',
+            'wavefront_step_cycles',
+            'state_forward_cycles',
+            'partial_output_forward_cycles',
+            'pipeline_drain_cycles',
+            'head_switch_cycles',
+            'kv_preload_setup_cycles',
         ):
             if getattr(self, field_name) <= 0:
                 raise ValueError(f'{field_name} must be positive')
@@ -43,3 +57,9 @@ class PETiming:
 
     def writeback_overhead(self) -> int:
         return self.tile_launch_overhead + self.sram_write_cycles_per_tile
+
+    def stream_step_cost(self) -> int:
+        return self.mac_cycles + self.wavefront_step_cycles + self.state_forward_cycles + self.partial_output_forward_cycles
+
+    def drain_cost(self, depth: int) -> int:
+        return self.pipeline_drain_cycles + max(0, depth - 1) * self.wavefront_step_cycles

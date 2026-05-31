@@ -18,6 +18,15 @@ def result_to_validation_dict(result: MQASimulationResult) -> Dict[str, Any]:
     payload['stage_names'] = [stage['name'] for stage in payload['stages']]
     payload['stage_cycles'] = {stage['name']: stage['cycles'] for stage in payload['stages']}
     payload['stage_macs'] = {stage['name']: stage['macs'] for stage in payload['stages']}
+    payload['stage_occupancies'] = {stage['name']: stage['occupancy'] for stage in payload['stages']}
+    payload['stage_stall_cycles'] = {stage['name']: stage['stall_cycles'] for stage in payload['stages']}
+    payload['stream_metrics'] = {
+        'kv_preload_bytes': payload.get('kv_preload_bytes', 0),
+        'weighted_pe_utilization': payload.get('weighted_pe_utilization', 0.0),
+        'pipeline_depth': payload.get('metadata', {}).get('pipeline_depth'),
+        'stream_groups': payload.get('metadata', {}).get('stream_groups'),
+        'amortized_preload_bytes_per_token': payload.get('metadata', {}).get('amortized_preload_bytes_per_token'),
+    }
     return payload
 
 

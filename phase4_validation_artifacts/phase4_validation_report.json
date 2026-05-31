@@ -1,0 +1,104 @@
+{
+  "results": [
+    {
+      "details": {
+        "stage_names": [
+          "score_gemm",
+          "softmax_reduce",
+          "value_gemm",
+          "writeback"
+        ],
+        "total_cycles": 5236
+      },
+      "name": "baseline_still_structural",
+      "status": "PASS"
+    },
+    {
+      "details": {
+        "stage_names": [
+          "kv_preload",
+          "query_stream",
+          "online_softmax_accum",
+          "final_normalize",
+          "writeback"
+        ]
+      },
+      "name": "kv_stage_names",
+      "status": "PASS"
+    },
+    {
+      "details": {
+        "large_preload": 65536,
+        "large_total_cycles": 160635,
+        "small_preload": 16384,
+        "small_total_cycles": 40827
+      },
+      "name": "sequence_scaling",
+      "status": "PASS"
+    },
+    {
+      "details": {
+        "large_array_cycles": 79959,
+        "small_array_cycles": 82755
+      },
+      "name": "array_scaling",
+      "status": "PASS"
+    },
+    {
+      "details": {
+        "four_amortized_preload": 8192.0,
+        "four_token_total_cycles": 316883,
+        "one_amortized_preload": 32768.0,
+        "one_token_total_cycles": 80763
+      },
+      "name": "decode_token_amortization",
+      "status": "PASS"
+    },
+    {
+      "details": {
+        "kv1_resident_bytes": 16384,
+        "kv4_resident_bytes": 65536
+      },
+      "name": "kv_heads_impact",
+      "status": "PASS"
+    },
+    {
+      "details": {
+        "amortized_preload_bytes_per_token": 16384.0,
+        "kv_preload_bytes": 32768,
+        "pipeline_depth": 20,
+        "stream_groups": 16,
+        "weighted_pe_utilization": 0.9998589049772053
+      },
+      "name": "validation_bridge_stream_metrics",
+      "status": "PASS"
+    },
+    {
+      "details": {
+        "mode": "kv_stationary_mqa_decode",
+        "stage_count": 5,
+        "total_cycles": 165731
+      },
+      "name": "simulator_kv_route",
+      "status": "PASS"
+    },
+    {
+      "details": {
+        "baseline_dram_reads": 28672,
+        "baseline_kv_bytes_per_token": 32768,
+        "baseline_total_kv_bytes": 131072,
+        "kv_amortized_preload_bytes_per_token": 8192.0,
+        "kv_dram_reads": 34816,
+        "kv_preload_bytes": 32768
+      },
+      "name": "directional_vs_baseline",
+      "status": "PASS"
+    }
+  ],
+  "summary": {
+    "artifact_dir": "/Users/dhruv/VS_Code/CSEN318/MQA_Systolic/phase4_validation_artifacts",
+    "failed": 0,
+    "passed": 9,
+    "total": 9
+  }
+}
