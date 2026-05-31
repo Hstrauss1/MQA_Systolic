@@ -1,263 +1,181 @@
-"""Compare baseline GEMM-style MQA against the KV-stationary analytical model.
-
-The baseline models the standard two-GEMM decomposition (Q@K^T, then scores@V)
-on a dense systolic array using a roofline bound: max(compute, memory).
-
-The KV-stationary model uses actual pipeline timing (fill + vertical-K-fill +
-steady + drain) so its cycle count is always >= its own roofline bound.
-
-Speedup is computed roofline-vs-roofline so both architectures are on the same
-footing. The pipeline_efficiency column shows how much the KV-stationary design
-loses to drain overhead versus its own ideal.
-"""
+#!/usr/bin/env python3
+"""Compare Phase 7 baseline and KV-stationary MQA sweep outputs."""
 
 from __future__ import annotations
 
 import argparse
 import csv
-import math
+import json
 from pathlib import Path
 from typing import Dict, List
 
-from baseline_mqa_model import baseline_mqa_metrics
-from kv_stationary_model import kv_stationary_metrics
+try:
+    from tqdm import tqdm
+except ImportError:
+    tqdm = None
 
 
-DEFAULT_SEQUENCE_LENGTHS = [128, 512, 1024, 2048, 4096, 8192]
-DEFAULT_H = 64
-DEFAULT_D = 128
-DEFAULT_ARRAY_ROWS = 64
-DEFAULT_ARRAY_COLS = 64
-DEFAULT_BYTES_PER_ELEMENT = 2
-DEFAULT_MEMORY_BANDWIDTH_BYTES_PER_CYCLE = 512
-DEFAULT_PE_MAC_WIDTH = 128   # fully parallel upper PE — reasonable hardware target
-DEFAULT_LOWER_MAC_COUNT = 1  # interleaved MACs in lower dot-product unit
-DEFAULT_EXP_LATENCY = 4
-DEFAULT_BATCH_SIZE = 1
-DEFAULT_HEAD_PARALLELISM = 1
-DEFAULT_MERGE_EXTENSIONS = 0
-RESULTS_CSV = "results.csv"
-
-
-def bytes_to_mb(num_bytes: int) -> float:
-    return num_bytes / (1024 * 1024)
-
-
-def kv_roofline_cycles(kv: Dict, array_rows: int, array_cols: int,
-                       pe_mac_width: int, memory_bandwidth: int) -> int:
-    """Two-resource roofline bound for the KV-stationary architecture.
-
-    The architecture has two distinct compute units:
-
-    1. Lower MAC array: array_rows × array_cols × lower_mac_count MAC units —
-       each unit handles one Q·K dot product serially (d cycles), so total
-       throughput = array_rows * array_cols * lower_mac_count MACs/cycle.
-    2. Upper Running Attention PE (one per row, pe_mac_width MACs each) —
-       handles Oout = Oin*exp_old + exp_new*V (3*d ops per pair).
-
-    The roofline is the max of the three bottlenecks:
-        max(lower_mac_bound, upper_pe_bound, memory_bound)
-    """
-    lower_mac_count = kv.get("lower_mac_count", 1)
-    lower_mac_bound = math.ceil(kv["dot_product_macs"] / (array_rows * array_cols * lower_mac_count))
-    upper_pe_bound  = math.ceil(kv["value_macs"] / (array_rows * pe_mac_width))
-    memory_bound    = math.ceil(kv["total_dram_bytes"] / memory_bandwidth)
-    return max(lower_mac_bound, upper_pe_bound, memory_bound)
-
-
-def build_result_row(
-    T: int,
-    pe_mac_width: int,
-    lower_mac_count: int,
-    exp_latency: int,
-    batch_size: int,
-    head_parallelism: int,
-    query_tokens: int,
-    merge_extensions: int = 0,
-) -> Dict[str, float]:
-    # KV-stationary array dimensions scale with merge_extensions:
-    #   rows = H * 2^n  (one row per lane in each sub-array level)
-    #   cols = T / 2^n  (each row handles T/2^n tokens — one tile total per section)
-    # This ensures drain = T/2^n - 1 steps instead of array_cols - 1 repeated over many tiles.
-    eff_rows = DEFAULT_H * (2 ** merge_extensions)
-    eff_cols = max(1, T // (2 ** merge_extensions))
-
-    # Baseline always uses the standard dense array (fixed reference hardware).
-    baseline = baseline_mqa_metrics(
-        H=DEFAULT_H,
-        T=T,
-        d=DEFAULT_D,
-        array_rows=DEFAULT_ARRAY_ROWS,
-        array_cols=DEFAULT_ARRAY_COLS,
-        bytes_per_element=DEFAULT_BYTES_PER_ELEMENT,
-        memory_bandwidth_bytes_per_cycle=DEFAULT_MEMORY_BANDWIDTH_BYTES_PER_CYCLE,
-        batch_size=batch_size,
-        query_tokens=query_tokens,
-    )
-    kv = kv_stationary_metrics(
-        H=DEFAULT_H,
-        T=T,
-        d=DEFAULT_D,
-        array_rows=eff_rows,
-        array_cols=eff_cols,
-        bytes_per_element=DEFAULT_BYTES_PER_ELEMENT,
-        memory_bandwidth_bytes_per_cycle=DEFAULT_MEMORY_BANDWIDTH_BYTES_PER_CYCLE,
-        pe_mac_width=pe_mac_width,
-        lower_mac_count=lower_mac_count,
-        exp_latency_cycles=exp_latency,
-        batch_size=batch_size,
-        head_parallelism=head_parallelism,
-        merge_extensions=merge_extensions,
-        query_tokens=query_tokens,
-    )
-
-    baseline_roofline  = baseline["estimated_cycles"]           # already max(compute,mem)
-    kv_roofline        = kv_roofline_cycles(
-        kv, eff_rows, eff_cols,
-        pe_mac_width,
-        DEFAULT_MEMORY_BANDWIDTH_BYTES_PER_CYCLE,
-    )
-    baseline_dram_mb   = bytes_to_mb(baseline["total_dram_bytes"])
-    kv_dram_mb         = bytes_to_mb(kv["total_dram_bytes"])
-
-    # latency_tbot    = pipeline_latency_cycles  (single-sequence TBOT)
-    #                 = (active_rows-1)*row_stagger + active_cols*column_dwell
-    # throughput_tbot = row_stagger              (sustained rate, pipeline full)
-    # pipeline_depth  = active_cols + active_rows - 1  (steps to fill pipeline)
-    throughput_tbot = kv["throughput_cycles_per_token"]
-    latency_tbot    = kv["pipeline_latency_cycles"]
-    pipeline_depth  = kv["pipeline_depth_steps"]
-
-    return {
-        "T": T,
-        # --- cycles: two distinct TBOT metrics ---
-        "baseline_roofline_cycles":    baseline_roofline,
-        "kv_roofline_cycles":          kv_roofline,
-        "kv_latency_tbot":             latency_tbot,    # single-sequence TBOT
-        "kv_throughput_tbot":          throughput_tbot, # batched/continuous TBOT
-        "pipeline_depth":              pipeline_depth,  # steps to fill pipeline
-        # --- speedup (roofline vs roofline) ---
-        "roofline_speedup":            baseline_roofline / kv_roofline,
-        # --- memory ---
-        "baseline_dram_MB":            baseline_dram_mb,
-        "kv_dram_MB":                  kv_dram_mb,
-        "memory_reduction_ratio":      baseline_dram_mb / kv_dram_mb,
-        # --- arithmetic intensity ---
-        "baseline_AI":                 baseline["arithmetic_intensity"],
-        "kv_AI":                       kv["arithmetic_intensity"],
-        # --- hardware params ---
-        "column_dwell_cyc":            kv["column_dwell"],
-        "packet_stagger_cyc":          kv["packet_stagger"],
-        "lower_mac_cyc":               kv["lower_mac_throughput_cycles"],
-        "upper_pe_cyc":                kv["upper_pe_cycles_per_stage"],
-        # --- on-chip K buffer cost ---
-        "k_buf_per_pe_KB":             kv["k_buffer_bytes_per_pe"] / 1024,
-        "total_k_buf_MB":              kv["total_k_buffer_bytes"] / (1024 * 1024),
-        # --- merge extension ---
-        "merge_stage_cyc":             kv["merge_stage_cycles"],
-        "skew_per_level":              kv["skew_per_level"],
-        "sync_buffer_KB":              kv["sync_buffer_bytes"] / 1024,
-    }
-
-
-HEADERS = [
-    "T",
-    "baseline_roofline_cycles",
-    "kv_roofline_cycles",
-    "kv_latency_tbot",       # single-sequence TBOT  = pipeline depth × cps
-    "kv_throughput_tbot",    # batched/continuous TBOT = cycles_per_stage
-    "pipeline_depth",        # steps to fill pipeline = latency_tbot / cps
-    "roofline_speedup",
-    "baseline_dram_MB",
-    "kv_dram_MB",
-    "memory_reduction_ratio",
-    "baseline_AI",
-    "kv_AI",
-    "column_dwell_cyc",
-    "packet_stagger_cyc",
-    "lower_mac_cyc",
-    "upper_pe_cyc",
-    "k_buf_per_pe_KB",
-    "total_k_buf_MB",
-    "merge_stage_cyc",
-    "skew_per_level",
-    "sync_buffer_KB",
+DEFAULT_OUTPUT_ROOT = Path('outputs')
+DEFAULT_SWEEP_CSV = 'sweep_results.csv'
+DEFAULT_CSV = 'comparison.csv'
+DEFAULT_JSON = 'comparison.json'
+JOIN_KEYS = [
+    'experiment_id',
+    'sequence_length',
+    'batch_size',
+    'query_heads',
+    'kv_heads',
+    'head_dim',
+    'array_shape',
+    'decode_tokens',
+    'precision',
 ]
 
 
-def format_value(key: str, val: float) -> str:
-    if key in ("T", "pipeline_depth") or key.endswith("_cycles") or key.endswith("_cyc") or key.endswith("_tbot"):
-        return f"{int(val)}"
-    if key.endswith("_MB"):
-        return f"{val:.2f}"
-    if key.endswith("_KB"):
-        return f"{val:.2f}"
-    return f"{val:.4f}"
+def safe_ratio(numerator: float, denominator: float) -> float:
+    return float(numerator) / float(denominator) if denominator else 0.0
 
 
-def format_table(rows: List[Dict[str, float]]) -> str:
-    formatted = [
-        [format_value(h, row[h]) for h in HEADERS]
-        for row in rows
-    ]
-    widths = [
-        max(len(h), max(len(r[i]) for r in formatted))
-        for i, h in enumerate(HEADERS)
-    ]
-    sep   = "  ".join("-" * w for w in widths)
-    hdr   = "  ".join(h.ljust(widths[i]) for i, h in enumerate(HEADERS))
-    lines = ["  ".join(r[i].ljust(widths[i]) for i in range(len(HEADERS))) for r in formatted]
-    return "\n".join([hdr, sep, *lines])
+def load_rows(path: Path) -> List[Dict[str, object]]:
+    with path.open('r', newline='', encoding='utf-8') as handle:
+        return list(csv.DictReader(handle))
 
 
-def write_results_csv(rows: List[Dict[str, float]], path: Path) -> None:
-    with path.open("w", newline="", encoding="utf-8") as f:
-        writer = csv.DictWriter(f, fieldnames=HEADERS)
+def normalize_numeric(row: Dict[str, object], key: str) -> float:
+    value = row.get(key, 0)
+    if value in ('', None):
+        return 0.0
+    return float(value)
+
+
+def find_latest_run_dir(output_root: Path) -> Path:
+    if not output_root.exists():
+        raise FileNotFoundError(f'Output root does not exist: {output_root}')
+    candidates = sorted(path for path in output_root.iterdir() if path.is_dir())
+    if not candidates:
+        raise FileNotFoundError(f'No run directories found under {output_root}')
+    return candidates[-1]
+
+
+def maybe_progress(iterable, enabled: bool, total: int, desc: str):
+    if enabled and tqdm is not None:
+        return tqdm(iterable, total=total, desc=desc)
+    return iterable
+
+
+def log(message: str, verbose: bool) -> None:
+    if verbose:
+        print(message, flush=True)
+
+
+def compare_rows(baseline: Dict[str, object], kv: Dict[str, object]) -> Dict[str, object]:
+    baseline_total_cycles = normalize_numeric(baseline, 'total_cycles')
+    kv_total_cycles = normalize_numeric(kv, 'total_cycles')
+    baseline_dram_reads = normalize_numeric(baseline, 'dram_reads')
+    kv_dram_reads = normalize_numeric(kv, 'dram_reads')
+    baseline_dram_writes = normalize_numeric(baseline, 'dram_writes')
+    kv_dram_writes = normalize_numeric(kv, 'dram_writes')
+    baseline_sram_total = normalize_numeric(baseline, 'sram_reads') + normalize_numeric(baseline, 'sram_writes')
+    kv_sram_total = normalize_numeric(kv, 'sram_reads') + normalize_numeric(kv, 'sram_writes')
+    baseline_util = normalize_numeric(baseline, 'weighted_pe_utilization')
+    kv_util = normalize_numeric(kv, 'weighted_pe_utilization')
+    baseline_stall = normalize_numeric(baseline, 'memory_stall_cycles')
+    kv_stall = normalize_numeric(kv, 'memory_stall_cycles')
+    kv_preload_bw = normalize_numeric(kv, 'kv_preload_bandwidth_cycles')
+
+    out = {key: baseline[key] for key in JOIN_KEYS}
+    out.update({
+        'baseline_total_cycles': baseline_total_cycles,
+        'kv_total_cycles': kv_total_cycles,
+        'baseline_over_kv_cycle_ratio': safe_ratio(baseline_total_cycles, kv_total_cycles),
+        'kv_over_baseline_cycle_ratio': safe_ratio(kv_total_cycles, baseline_total_cycles),
+        'baseline_dram_reads': baseline_dram_reads,
+        'kv_dram_reads': kv_dram_reads,
+        'dram_read_ratio_baseline_over_kv': safe_ratio(baseline_dram_reads, kv_dram_reads),
+        'baseline_dram_writes': baseline_dram_writes,
+        'kv_dram_writes': kv_dram_writes,
+        'dram_write_ratio_baseline_over_kv': safe_ratio(baseline_dram_writes, kv_dram_writes),
+        'baseline_total_dram': baseline_dram_reads + baseline_dram_writes,
+        'kv_total_dram': kv_dram_reads + kv_dram_writes,
+        'total_dram_ratio_baseline_over_kv': safe_ratio(baseline_dram_reads + baseline_dram_writes, kv_dram_reads + kv_dram_writes),
+        'baseline_total_sram': baseline_sram_total,
+        'kv_total_sram': kv_sram_total,
+        'sram_ratio_baseline_over_kv': safe_ratio(baseline_sram_total, kv_sram_total),
+        'baseline_weighted_pe_utilization': baseline_util,
+        'kv_weighted_pe_utilization': kv_util,
+        'weighted_pe_utilization_delta_kv_minus_baseline': kv_util - baseline_util,
+        'baseline_memory_stall_cycles': baseline_stall,
+        'kv_memory_stall_cycles': kv_stall,
+        'memory_stall_cycles_delta_kv_minus_baseline': kv_stall - baseline_stall,
+        'kv_preload_bandwidth_cycles': kv_preload_bw,
+        'baseline_stage_names': baseline.get('stage_names', ''),
+        'kv_stage_names': kv.get('stage_names', ''),
+    })
+    return out
+
+
+def write_outputs(output_dir: Path, rows: List[Dict[str, object]]) -> Dict[str, str]:
+    output_dir.mkdir(parents=True, exist_ok=True)
+    csv_path = output_dir / DEFAULT_CSV
+    json_path = output_dir / DEFAULT_JSON
+
+    fieldnames = sorted({key for row in rows for key in row.keys()})
+    with csv_path.open('w', newline='', encoding='utf-8') as handle:
+        writer = csv.DictWriter(handle, fieldnames=fieldnames)
         writer.writeheader()
         writer.writerows(rows)
 
+    with json_path.open('w', encoding='utf-8') as handle:
+        json.dump(rows, handle, indent=2, sort_keys=True)
 
-def parse_args() -> argparse.Namespace:
-    p = argparse.ArgumentParser(description="Compare baseline vs KV-stationary MQA.")
-    p.add_argument("--pe-mac-width", type=int, default=DEFAULT_PE_MAC_WIDTH,
-                   help=f"Parallel MACs in upper PE (default {DEFAULT_PE_MAC_WIDTH})")
-    p.add_argument("--exp-latency", type=int, default=DEFAULT_EXP_LATENCY,
-                   help=f"Exp lookup latency in cycles (default {DEFAULT_EXP_LATENCY})")
-    p.add_argument("--batch-size", type=int, default=DEFAULT_BATCH_SIZE,
-                   help=f"Decode batch size (default {DEFAULT_BATCH_SIZE})")
-    p.add_argument("--lower-mac-count", type=int, default=DEFAULT_LOWER_MAC_COUNT,
-                   help=f"Interleaved MACs in lower dot-product unit (default {DEFAULT_LOWER_MAC_COUNT})")
-    p.add_argument("--head-parallelism", type=int, default=DEFAULT_HEAD_PARALLELISM,
-                   help=f"Row lanes per head (default {DEFAULT_HEAD_PARALLELISM})")
-    p.add_argument("--merge-extensions", type=int, default=DEFAULT_MERGE_EXTENSIONS,
-                   help=f"Inline merge-tree levels (default {DEFAULT_MERGE_EXTENSIONS}). "
-                        "Each level doubles array rows and halves array cols. "
-                        "n=3 is optimal for H=64, T=8192.")
-    p.add_argument("--query-tokens", type=int, default=1,
-                   help="Q tokens per head per sequence: 1=decode, T=prefill (default 1)")
-    p.add_argument("--output", type=str, default=RESULTS_CSV,
-                   help=f"Output CSV path (default {RESULTS_CSV})")
-    return p.parse_args()
+    return {'csv': str(csv_path), 'json': str(json_path)}
 
 
-def main() -> None:
-    args = parse_args()
-    rows = [
-        build_result_row(T, args.pe_mac_width, args.lower_mac_count, args.exp_latency,
-                         args.batch_size, args.head_parallelism, args.query_tokens,
-                         args.merge_extensions)
-        for T in DEFAULT_SEQUENCE_LENGTHS
-    ]
-    print(f"pe_mac_width={args.pe_mac_width}  lower_mac_count={args.lower_mac_count}  "
-          f"exp_latency={args.exp_latency}  batch_size={args.batch_size}  "
-          f"head_parallelism={args.head_parallelism}  merge_extensions={args.merge_extensions}  "
-          f"query_tokens={args.query_tokens}")
-    print()
-    print(format_table(rows))
-    path = Path(args.output)
-    write_results_csv(rows, path)
-    print(f"\nSaved to {path}")
+def main() -> int:
+    parser = argparse.ArgumentParser(description='Compare Phase 7 baseline and KV-stationary MQA sweep outputs.')
+    parser.add_argument('--run-dir', type=Path, default=None)
+    parser.add_argument('--output-root', type=Path, default=DEFAULT_OUTPUT_ROOT)
+    parser.add_argument('--input', type=Path, default=None)
+    parser.add_argument('--output-dir', type=Path, default=None)
+    parser.add_argument('--verbose', action='store_true')
+    parser.add_argument('--progress', action='store_true')
+    args = parser.parse_args()
+
+    run_dir = args.run_dir or find_latest_run_dir(args.output_root)
+    input_path = args.input or (run_dir / DEFAULT_SWEEP_CSV)
+    output_dir = args.output_dir or run_dir
+
+    log(f'Using run directory {run_dir}', args.verbose)
+    log(f'Loading sweep results from {input_path}', args.verbose)
+    rows = load_rows(input_path)
+    log(f'Loaded {len(rows)} rows', args.verbose)
+
+    baseline_rows = {tuple(row[k] for k in JOIN_KEYS): row for row in rows if row.get('mode') == 'baseline_mqa_decode'}
+    kv_rows = {tuple(row[k] for k in JOIN_KEYS): row for row in rows if row.get('mode') == 'kv_stationary_mqa_decode'}
+    common_keys = sorted(set(baseline_rows.keys()) & set(kv_rows.keys()))
+    if not common_keys:
+        raise ValueError('No matching baseline/KV rows found in input CSV')
+
+    log(f'Found {len(common_keys)} matched baseline/KV workload pairs', args.verbose)
+    comparison_rows: List[Dict[str, object]] = []
+    iterator = maybe_progress(common_keys, enabled=args.progress, total=len(common_keys), desc='Phase 7 compare')
+    for key in iterator:
+        baseline = baseline_rows[key]
+        kv = kv_rows[key]
+        if args.verbose:
+            log(
+                f"[COMPARE] exp={baseline['experiment_id']} seq={baseline['sequence_length']} tok={baseline['decode_tokens']} array={baseline['array_shape']}",
+                True,
+            )
+        comparison_rows.append(compare_rows(baseline, kv))
+
+    outputs = write_outputs(output_dir, comparison_rows)
+    print(f'Phase 7 comparison complete: {len(comparison_rows)} rows')
+    print(f'RUN_DIR: {run_dir}')
+    print(f"CSV: {outputs['csv']}")
+    print(f"JSON: {outputs['json']}")
+    return 0
 
 
-if __name__ == "__main__":
-    main()
+if __name__ == '__main__':
+    raise SystemExit(main())

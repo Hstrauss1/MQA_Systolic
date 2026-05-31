@@ -1,0 +1,95 @@
+{
+  "results": [
+    {
+      "details": {
+        "csv_path": "/Users/dhruv/VS_Code/CSEN318/MQA_Systolic/phase5_validation_artifacts/sweep/phase5_sweep_results.csv",
+        "csv_rows": 8,
+        "experiment_count": 4,
+        "json_path": "/Users/dhruv/VS_Code/CSEN318/MQA_Systolic/phase5_validation_artifacts/sweep/phase5_sweep_results.json"
+      },
+      "name": "sweep_outputs",
+      "status": "PASS"
+    },
+    {
+      "details": {
+        "field_count": 41,
+        "required_columns_checked": [
+          "amortized_preload_bytes_per_token",
+          "array_shape",
+          "batch_size",
+          "decode_tokens",
+          "dram_reads",
+          "dram_writes",
+          "experiment_id",
+          "head_dim",
+          "kv_heads",
+          "kv_preload_bytes",
+          "mode",
+          "query_heads",
+          "sequence_length",
+          "sram_reads",
+          "sram_writes",
+          "total_cycles",
+          "weighted_pe_utilization"
+        ]
+      },
+      "name": "required_columns",
+      "status": "PASS"
+    },
+    {
+      "details": {
+        "columns_checked": [
+          "baseline_total_cycles",
+          "cycle_speedup_baseline_over_kv",
+          "dram_read_ratio_baseline_over_kv",
+          "kv_total_cycles",
+          "sram_traffic_ratio_baseline_over_kv",
+          "weighted_pe_util_delta_kv_minus_baseline"
+        ],
+        "csv_path": "/Users/dhruv/VS_Code/CSEN318/MQA_Systolic/phase5_validation_artifacts/compare/phase5_compare_results.csv",
+        "json_path": "/Users/dhruv/VS_Code/CSEN318/MQA_Systolic/phase5_validation_artifacts/compare/phase5_compare_results.json"
+      },
+      "name": "compare_outputs",
+      "status": "PASS"
+    },
+    {
+      "details": {
+        "plot_dir": "/Users/dhruv/VS_Code/CSEN318/MQA_Systolic/phase5_validation_artifacts/plots",
+        "plots_checked": [
+          "total_cycles_vs_sequence_length.png",
+          "amortized_preload_vs_decode_tokens.png",
+          "dram_reads_vs_sequence_length.png",
+          "weighted_pe_util_vs_array_shape.png",
+          "baseline_vs_kv_speedup_vs_sequence_length.png"
+        ]
+      },
+      "name": "plot_generation",
+      "status": "PASS"
+    },
+    {
+      "details": {
+        "keys": [
+          "baseline_topology",
+          "note",
+          "workload"
+        ],
+        "output_path": "/Users/dhruv/VS_Code/CSEN318/MQA_Systolic/phase5_validation_artifacts/topology/topology_compat.json"
+      },
+      "name": "topology_wrapper",
+      "status": "PASS"
+    },
+    {
+      "details": {
+        "field_count": 41
+      },
+      "name": "schema_stability",
+      "status": "PASS"
+    }
+  ],
+  "summary": {
+    "artifact_dir": "/Users/dhruv/VS_Code/CSEN318/MQA_Systolic/phase5_validation_artifacts",
+    "failed": 0,
+    "passed": 6,
+    "total": 6
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "baseline_topology": {
+    "score_gemm": {
+      "cols": 256,
+      "reduction_dim": 64,
+      "rows": 16
+    },
+    "value_gemm": {
+      "cols": 64,
+      "reduction_dim": 256,
+      "rows": 16
+    }
+  },
+  "note": "Compatibility helper: topology dimensions are now derived from the shared MQAWorkload spec used by the integrated Phase 5 flow.",
+  "workload": {
+    "array_cols": 16,
+    "array_rows": 16,
+    "batch_size": 1,
+    "decode_step": 4,
+    "decode_tokens": 2,
+    "head_dim": 64,
+    "kv_heads": 2,
+    "mode": "baseline_mqa_decode",
+    "query_heads": 8,
+    "sequence_length": 256
+  }
+}

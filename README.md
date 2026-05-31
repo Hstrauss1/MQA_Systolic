@@ -1,339 +1,252 @@
-# SystoliC AcceLErator Simulator (SCALE-Sim) 
+# MQA SCALE-Sim: Native Decode Modeling for Baseline and KV-Stationary Multi-Query Attention
 
-<!-- [![Documentation Status](https://readthedocs.org/projects/scale-sim-project/badge/?version=latest)](https://scale-sim-project.readthedocs.io/en/latest/?badge=latest) -->
+This repository is a research fork of SCALE-Sim that adds a native workflow for modeling decode-time Multi-Query Attention (MQA) with two comparable execution modes: a conventional baseline mapping and a custom KV-stationary dataflow. The project combines a canonical workload description, decode-specific stage modeling, explicit online-softmax timing, and a shared memory/reporting bridge so that both designs can be evaluated under the same reporting pipeline.
 
-SCALE-Sim is a simulator for systolic array based accelerators supporting Deep Neural Network layers such as Convolution, Fully Connected, and any layer that uses GEMMs (e.g., Attention).
+## Repository purpose
 
-## MQA Fork Overview
+The goal of this fork is to turn MQA decode from an external analytical side-model into a first-class simulation flow that can be run, swept, compared, and validated inside a consistent SCALE-Sim-oriented environment. The active workflow now centers on `mqa_scalesim/`, the modified `scalesim/` integration points, root-level benchmark drivers, and the `validation/` suite, while older exploratory material has been moved into `legacy/` for reference only.
 
-This fork extends SCALE-Sim for a class project on Multi-Query Attention (MQA)
-decode and a custom KV-stationary systolic-array concept. The goal is to
-compare a standard GEMM-style attention mapping against a streaming design that
-keeps `K` and `V` resident while queries move through the fabric.
+## Directory layout
 
-### What This Fork Adds
+The current top-level layout is intentionally organized around active code, validation, and archived material.
 
-- Baseline MQA support through a helper topology generator for
-  `Q @ K.T` and `softmax(QK) @ V`
-- A separate analytical KV-stationary model for performance estimation
-- A numerical correctness check for the online-softmax streaming formulation
-- Sweep and plotting scripts for cycles, DRAM traffic, and arithmetic intensity
+| Path | Role |
+|---|---|
+| `README.md` | Unified project documentation and operational guide. |
+| `PLAN.MD` | Implementation plan and milestone history for the project. |
+| `run_sweep.py` | Main benchmark driver; creates a timestamped run under `outputs/` and writes `sweep_results.csv`, JSON, and summary artifacts. |
+| `compare.py` | Loads sweep results, compares baseline and KV-stationary runs, and writes `comparison.csv` and `comparison.json` into the selected run directory. |
+| `plot_results.py` | Reads sweep and comparison outputs and writes plots into `outputs/<timestamp>/plots/`. |
+| `mqa_scalesim/` | Canonical MQA workload, simulators, memory bridge, result schema, softmax timing, and validation adapters. |
+| `scalesim/` | Modified SCALE-Sim core integration points used by the MQA flow. |
+| `validation/` | Phase validation scripts and their artifacts, updated to run from the new `validation/` layout. |
+| `legacy/` | Archived exploratory models, prior outputs, original configs, documentation assets, and non-active scripts retained for reference. |
 
-### Design Walkthrough
+A practical mental model is: `scalesim/` provides the shared simulation substrate, `mqa_scalesim/` provides the MQA-specific execution layer, the root scripts drive experiments, `validation/` guards correctness and regression behavior, and `legacy/` preserves prior work without cluttering the active repository surface.
 
-#### 1. Running attention inside one PE
+## Why `mqa_scalesim` exists
 
-Each attention PE consumes the running max `Min`, normalization term `Lin`, and
-partial output vector `Oin`. It computes a fresh score `Qi * Ki`, updates the
-online-softmax state, and emits the next `Mout`, `Lout`, and `Oout`.
+SCALE-Sim was originally structured around convolution and GEMM-style workloads, which is not enough to describe decode-time MQA as a staged process with online softmax state, KV reuse semantics, and a KV-stationary streaming schedule. `mqa_scalesim/` was created to provide a canonical workload object, decode-aware simulators, shared result schemas, and a translation layer that lets MQA-specific execution concepts plug into a common memory and reporting backend rather than living in disconnected one-off scripts.
 
-![Running Attention PE](./documentation/resources/mqa-designs/AttentionPE.png "Running Attention PE")
+The package exists for three reasons. First, it provides a single source of truth for MQA experiments through `MQAWorkload`, which captures the mode, sequence length, head structure, array shape, SRAM sizes, decode token count, bandwidth settings, and softmax/pipeline metadata in one validated object. Second, it separates architectural policy from experiment orchestration: the root scripts build workloads and collect outputs, while the actual execution semantics live in the package. Third, it ensures that baseline and KV-stationary modes can be flattened into the same reporting format through `result_schema.py` and `validation_bridge.py`, making side-by-side comparison practical and fair.
 
-#### 2. Single-query systolic traversal
+## `mqa_scalesim` architecture
 
-A single query vector streams left-to-right across the MAC chain. Each column
-contributes one key/value pair, and the intermediate output vector is updated
-as the running softmax state advances through the array.
+The active MQA package is organized as a layered architecture rather than a monolithic script collection.
 
-![K dot V Systolic Operations](./documentation/resources/mqa-designs/SystolicSingle.png "K dot V Systolic Operations")
+### Workload layer
 
-#### 3. Multi-head execution view
+`mqa_scalesim/workload.py` defines `MQAWorkload`, the canonical workload specification for all active MQA experiments. It validates mode selection, head relationships, decode-token settings, bandwidth mode, array sizes, KV grouping constraints, and optional overrides such as KV block sizing, stream grouping, and softmax-state precision.
 
-The same stationary `K/V` structure can be viewed across multiple query heads.
-Heads reuse the shared key/value context while maintaining their own running
-softmax and output accumulation.
+This workload object is the contract between user intent and simulator behavior. Every active execution path in this repository starts by constructing one or more `MQAWorkload` instances and then passing them to the appropriate simulator mode.
 
-![K dot V Multi-Headed MQA](./documentation/resources/mqa-designs/MultiHeaded.png "K dot V Multi-Headed MQA")
+### Baseline decode path
 
-#### 4. Final output vector
+`mqa_scalesim/baseline_decode.py` implements `BaselineMQADecodeSimulator`, which models a conventional decode schedule as the stage sequence `score_gemm`, `softmax_reduce`, `value_gemm`, and `writeback`. It uses explicit online-softmax cost estimation and stage-level accounting to build a structured result, and it supports optional memory-model application via `run_memory_model=True` so the same execution can be evaluated with the shared memory bridge enabled.
 
-After the stream finishes, the accumulated output vector is normalized by the
-final softmax denominator `L` to produce the completed attention output.
+This path is important because it converts what would otherwise be treated as a plain GEMM proxy into a decode-aware baseline with explicit stage semantics. That makes the baseline comparable to the KV-stationary design at the stage, cycle, and traffic levels rather than only at an aggregated total.
 
-![Final Output Vector](./documentation/resources/mqa-designs/FinalOutVector.png "Final Output Vector")
+### KV-stationary decode path
 
-### Modeling Boundary
+`mqa_scalesim/kv_stationary_decode.py` implements `KVStationaryMQADecodeSimulator`, which models the custom streaming dataflow through the stages `kv_preload`, `query_stream`, `online_softmax_accum`, `final_normalize`, and `writeback`. The implementation explicitly accounts for softmax state bytes, KV preload behavior, streaming row costs, and final normalization, again with optional memory-model application through the same simulation result path used by the baseline mode.
 
-- SCALE-Sim is still used for the baseline GEMM-style execution path.
-- The KV-stationary architecture is not natively modeled by SCALE-Sim in this
-  fork.
-- KV-stationary results come from a separate analytical extension and are not
-  claimed to be cycle-accurate.
-- The correctness check validates the online-softmax math against NumPy, not a
-  hardware RTL implementation.
+This is the core architectural contribution of the repository. Instead of treating KV-stationary execution as a separate spreadsheet or post-hoc estimate, the design is represented as a simulator with named stages, derived resource quantities, and a result structure that can be consumed by the same comparison and plotting pipeline as the baseline path.
 
-### MQA Helper Files
+### Shared timing and softmax layer
 
-- `mqa_correctness.py`
-- `baseline_mqa_model.py`
-- `kv_stationary_model.py`
-- `generate_scalesim_topology.py`
-- `compare.py`
-- `plot_results.py`
-- `README_MQA.md`
+`mqa_scalesim/softmax_ops.py` provides explicit estimators for online-softmax cost and streaming-softmax row/step costs, while `mqa_scalesim/pe_timing.py` provides timing helpers shared across execution paths. This layer exists because softmax and reduction timing were a key technical gap in earlier approximations, and the active repository models them explicitly rather than hiding them in opaque totals.
 
-### Quick Start
+### Result, bridge, and reporting layer
+
+`mqa_scalesim/result_schema.py` defines the structured simulation result and tracks whether the memory model has actually been applied, while `mqa_scalesim/validation_bridge.py` converts simulation outputs into flattened dictionaries suitable for CSV rows, validation payloads, and downstream plotting. The bridge records fields such as stage names and `memory_model_applied`, which are critical for regression checks and benchmark reporting.
+
+### Memory integration layer
+
+`mqa_scalesim/memory_bridge.py` provides `MQAMemoryBridge`, the point where MQA stage-level behavior is connected to the shared memory accounting path. This is what makes the project more than a pair of isolated analytical decoders: both baseline and KV-stationary simulations can pass through a common memory-model application path so SRAM, DRAM, stall, and utilization metrics are reported under the same infrastructure.
+
+## How SCALE-Sim was modified
+
+The project does not replace SCALE-Sim; it extends it. The active implementation adds MQA-aware integration points in the existing SCALE-Sim code so decode workloads can be described, routed, and reported without forcing the entire project into an external side tool.
+
+The modifications are visible in the active codebase through new workload-related fields and dispatch points in `scalesim/scale_config.py`, `scalesim/topology_utils.py`, and `scalesim/simulator.py`. The search results show MQA-aware handling for `softmax_variant`, staged topology naming such as `softmax_reduce`, and simulator integration points that route MQA parameters into the active simulation flow.
+
+At a high level, the project changes SCALE-Sim in four ways:
+- It extends configuration and topology plumbing so MQA workloads carry decode-specific parameters rather than only legacy GEMM assumptions.
+- It allows staged decode semantics, including softmax-specific stages, to appear in the workload/reporting pipeline.
+- It integrates MQA simulation outputs with the shared memory path so both decode modes can claim memory-model-backed metrics using the same infrastructure.
+- It keeps the active project anchored to the repository’s SCALE-Sim foundation rather than splitting execution into unrelated scripts and post-processing notebooks.
+
+## Active workflow
+
+The active benchmark flow is straightforward and centered on three root-level drivers.
+
+1. `run_sweep.py` constructs a sweep over sequence lengths, decode token counts, and array sizes, then emits a new timestamped run directory under `outputs/` for every invocation.
+2. `compare.py` reads `sweep_results.csv` from a selected or auto-detected run directory, matches baseline and KV rows by their join keys, and writes comparison artifacts into the same run directory. 
+3. `plot_results.py` reads both `sweep_results.csv` and `comparison.csv` and writes summary figures under `outputs/<timestamp>/plots/`.
+
+Both `compare.py` and `plot_results.py` auto-detect the latest timestamped run directory under `outputs/` when no `--run-dir` is provided, which makes the default sweep-to-plot workflow convenient for repeated benchmarking on new machines or clean clones.
+
+## Step-by-step setup in an arbitrary environment
+
+The repository is designed to run in a standard Python environment without machine-specific assumptions beyond normal package installation and a working interpreter. The current documentation and scripts assume a plain repository checkout with Python dependencies installed from `requirements.txt`.
+
+### 1. Clone the repository
 
 ```bash
-pip3 install -r requirements.txt
-python3 mqa_correctness.py
-python3 generate_scalesim_topology.py
-python3 compare.py
+git clone <your-repository-url>
+cd MQA_Systolic
+```
+
+### 2. Create and activate a Python environment
+
+A virtual environment is the safest default in arbitrary environments because it avoids dependency collisions and makes the run instructions reproducible.
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+```
+
+On Windows PowerShell, activate with:
+
+```powershell
+.venv\Scripts\Activate.ps1
+```
+
+### 3. Install dependencies
+
+The repository keeps runtime dependencies in `requirements.txt`, and the active root-level scripts depend on that environment being installed before use.
+
+```bash
+python3 -m pip install --upgrade pip
+python3 -m pip install -r requirements.txt
+```
+
+### 4. Optional: run validation
+
+The validation suite now lives under `validation/` and has been patched so its artifact paths work from the new location.
+
+```bash
+python3 validation/phase6_validation.py --verbose
+```
+
+### 5. Run a sweep
+
+The sweep driver creates a fresh timestamped directory under `outputs/` on every run and writes `sweep_results.csv` together with JSON and summary artifacts there.
+
+```bash
+python3 run_sweep.py --verbose --progress
+```
+
+If `tqdm` is available, `--progress` enables progress bars; otherwise the script still works, and `--verbose` gives per-workload logging.
+
+### 6. Compare the two execution modes
+
+The comparison script defaults to the latest run directory under `outputs/`, reads `sweep_results.csv`, and writes `comparison.csv` plus `comparison.json` into that same run directory.
+
+```bash
+python3 compare.py --verbose --progress
+```
+
+To target a specific prior run instead of the latest one:
+
+```bash
+python3 compare.py --run-dir outputs/<timestamp> --verbose --progress
+```
+
+### 7. Generate plots
+
+The plotting script also defaults to the latest run directory and writes figures into `outputs/<timestamp>/plots/`.
+
+```bash
 python3 plot_results.py
 ```
 
-For more detail on the MQA workflow, see `README_MQA.md`.
+To target a specific run explicitly:
 
-
-## Features of SCALE-sim Releases
-
-### Features of v2
-
-SCALE-Sim v2 includes following features:
-
-1. Simulation of GEMM and convolution (as im2col) operations
-2. Analytical compute cycles validated by RTL simulation
-3. Separate double-buffered memory modeling for Input, Filter and Output matrices
-4. Multi-Fidelity: Bandwidth calculation mode (CALC) and Stall cycle calculation/Use user bandwidth mode (USER)
-5. Save cycle-accurate SRAM and DRAM traces for separately for Input, Filter and Output
-
-![scalesim overview](https://github.com/scalesim-project/scale-sim-v2/blob/doc/anand/readme/documentation/resources/scalesim-overview.png "scalesim overview")
-
-Note: **SCALE-sim v1** (developed with ARM) is a legacy version that can be found [here](https://github.com/ARM-software/SCALE-Sim) and is no longer maintained.
-
-### Features of v3
-
-SCALE-Sim v3 includes several advanced features over v2:
-
-1. **Sparsity Support**: Layer-wise and row-wise sparsity support for efficient neural network execution
-2. **Ramulator Integration**: Detailed memory model integration for evaluating DRAM performance
-3. **Accelergy Integration**: Energy and power estimation capabilities
-4. **Layout Support**: Advanced memory layout configurations
-5. **Multi-core Support**: Support for multi-core simulations
-
-![scalesim v3 features](https://github.com/scalesim-project/SCALE-Sim/blob/main/documentation/resources/v3_overview.png "scalesim v3 features")
-
-<!-- The previous version of the simulator can be found [here](https://github.com/scalesim-project/scale-sim-v2). -->
-
-
-
-## Getting started in 30 seconds
-
-### *Installing the package*
-
-Getting started is simple! SCALE-Sim is completely written in python and could be installed from source.
-
-You can install SCALE-Sim in your environment using the following command
-
-```$ pip3 install <path-to-scalesim-v3-folder>```
-
-If you are a developer that will modify scale-sim during your usage, please install it with `-e` flag, which will create a symbolic link instead of replicating scalesim in your environment, thus modification of scale-sim code can be syncronized simultaneously
-
-```$ pip3 install -e <path-to-scalesim-v3-folder>```
-
-### *Launching a run*
-
-After installing SCALE-Sim, it can be run by using the ```scalesim.scale``` and providing the paths to the architecture configuration, and the topology descriptor csv file.
-
-```$ python3 -m scalesim.scale -c <path_to_config_file> -t <path_to_topology_file> -p <path_to_output_log_dir>```
-
-### *Running from source*
-
-The above method uses the installed package for running the simulator.
-In cases where you would like to run directly from the source, the following command should be used instead.
-
-```$ PYTHONPATH=$PYTHONPATH:<scale_sim_repo_root> python3 <scale_sim_repo_root>/scalesim/scale.py -c <path_to_config_file> -t <path_to_topology_file>```
-
-If you are running from sources for the first time and do not have all the dependencies installed, please install them first  using the following command.
-
-```$ pip3 install -r <scale_sim_repo_root>/requirements.txt```
-
-## Tool inputs
-
-SCALE-Sim uses two input files to run, a configuration file and a topology file.
-
-### Configuration file
-
-The configuration file is used to specify the architecture and run parameters for the simulations.
-The following shows a sample config file:
-
-![sample config](./documentation/resources/config-file-example-new.png "sample config")
-
-The config file has three sections. The "*general*" section specifies the run name, which is user specific. The "*architecture_presets*" section describes the parameter of the systolic array hardware to simulate.
-The "*run_preset*" section specifies if the simulator should run with user specified bandwidth, or should it calculate the optimal bandwidth for stall free execution. It also allows specifying a `TimeLinearModel` parameter (e.g., `TPUv4`, `TPUv5e`, or `TPUv6e`) to convert compute cycles into time estimations using hardware-specific linear models.
-
-The detailed documentation for the config file could be found **here (TBD)**
-
-### Topology file
-
-The topology file is a *CSV* file which decribes the layers of the workload topology. The layers are typically described as convolution layer parameters as shown in the example below.
-
-![sample topo](https://github.com/scalesim-project/scale-sim-v2/blob/main/documentation/resources/topo-file-example.png "sample topo")
-
-For other layer types, SCALE-Sim also accepts the workload desciption in M, N, K format of the equivalent GEMM operation as shown in the example below.
-
-![sample mnk topo](https://github.com/scalesim-project/scale-sim-v2/blob/doc/anand/readme/documentation/resources/topo-mnk-file-example.png "sample mnk topo")
-
-The tool however expects the inputs to be in the convolution format by default. When using the mnk format for input, please specify using the  ```-i gemm``` switch, as shown in the example below.
-
-```$ python3 <scale sim repo root>/scalesim/scale.py -c <path_to_config_file> -t <path_to_mnk_topology_file> -i gemm```
-
-### Output
-
-Here is an example output dumped to stdout when running Yolo Tiny (whose configuration is in yolo_tiny.csv):
-![screen_out](https://github.com/scalesim-project/scale-sim-v2/blob/doc/anand/readme/documentation/resources/output.png "std_out")
-
-Also, the simulator generates read write traces and summary logs at ```<run_dir>/../scalesim_outputs/```. The user can also provide a custom location using ```-p <custom_output_directory>``` when using `scalesim.py` file.
-There are four summary logs:
-
-* COMPUTE_REPORT.csv: Layer wise logs for compute cycles, stalls, utilization percentages etc.
-* BANDWIDTH_REPORT.csv: Layer wise information about average and maximum bandwidths for each operand when accessing SRAM and DRAM
-* DETAILED_ACCESS_REPORT.csv: Layer wise information about number of accesses and access cycles for each operand for SRAM and DRAM.
-* TIME_REPORT.csv: Layer wise time estimations in microseconds, calculated using the configured linear model (TPUv4, TPUv5e, or TPUv6e) based on compute cycles and spatiotemporal dimensions.
-
-In addition cycle accurate SRAM/DRAM access logs are also dumped and could be accesses at ```<outputs_dir>/<run_name>/``` eg `<run_dir>/../scalesim_outputs/<run_name>`
-
-## Advanced Features
-
-### *Using Multi-core feature*
-
-SCALE-Sim v3 introduces **multi-core simulation capabilities** to address the limitations of its predecessor, SCALE-Sim v2, which could only model single-core systolic arrays. This feature allows comprehensive modeling of modern AI accelerators equipped with multiple tensor cores, enabling researchers to simulate advanced workloads and optimize performance. For detailed setup and usage instructions, refer to the ```multi-core/README.md``` file.
-
-### *Using Sparsity feature*
-
-SCALE-Sim v3 introduces advanced support for layer-wise and row-wise sparsity. For detailed information about sparsity features and usage, refer to the ```README_Sparsity.md``` file.
-
-Key features include:
-- Layer-wise sparsity with customizable configurations
-- Row-wise sparsity with N:M ratio support
-- Support for different sparse representations (CSR, CSC, Blocked ELLPACK)
-- Detailed sparsity reports and metrics
-
-### *Using Ramulator feature*
-
-SCALE-sim v3 integrates a detailed memory model with the systolic array computation. Users can evaluate:
-- Stall cycles due to data load from memory
-- Bank conflicts
-- Different memory types (DDR3, DDR4, etc.)
-- Various memory configurations (channels, rows, etc.)
-
-For detailed setup and usage instructions, refer to the ```README_ramulator.md``` file.
-
-### *Using Accelergy feature*
-
-SCALE-Sim v3 integrates with Accelergy for energy and power estimation. This feature allows:
-- Energy estimation of systolic array architectures
-- Power analysis
-- Integration with CACTI and Aladdin plugins for accurate estimation
-
-For setup and usage instructions, refer to the ```README_accelergy.md``` file.
-
-### *Using Layout feature*
-
-SCALE-Sim v3 supports advanced memory layout configurations for on-chip buffers. The layout feature enables:
-
-- **Custom Data Organization**: Specify different data layouts for ifmap, filter, and ofmap tensors
-- **Bank Conflict Evaluation**: Model realistic memory access patterns and bank conflicts
-- **Multi-bank Support**: Configure number of memory banks and ports per bank
-- **Layout Specification**: Define layouts through three key parameters:
-  - `intraline_factor`: Specifies elements per line for each dimension
-  - `intraline_order`: Controls dimension ordering within a line
-  - `interline_order`: Controls dimension ordering across lines
-
-Layout configurations can be specified in the architecture configuration file using parameters like:
-- `OnChipMemoryBanks`: Total number of on-chip memory banks
-- `OnChipMemoryBankPorts`: Number of ports per bank
-- `IfmapCustomLayout`/`FilterCustomLayout`: Enable custom layouts for tensors
-
-For detailed information about layout features and usage, refer to the documentation in the ```README_layout.md``` file.
-
-## Detailed Documentation
-
-Detailed documentation about the tool can be found **here (TBD)**. You can refer to the SCALE-Sim v3 paper (to be published at ISPASS'25):
-
-Raj, R., Banerjee, S., Chandra, N., Wan, Z., Tong, J., Samajdhar, A., & Krishna, T.; **"SCALE-Sim v3: A modular cycle-accurate systolic accelerator simulator for end-to-end system analysis."** arXiv preprint arXiv:2504.15377 (2025) [\[pdf\]](https://ieeexplore.ieee.org/document/11096402)
-
-We also recommend referring to the following papers for previous versions of SCALE-Sim.
-
-[1] Samajdar, A., Joseph, J. M., Zhu, Y., Whatmough, P., Mattina, M., & Krishna, T.; **"A systematic methodology for characterizing scalability of DNN accelerators using SCALE-sim"**. In 2020 IEEE International Symposium on Performance Analysis of Systems and Software (ISPASS). [\[pdf\]](https://ieeexplore.ieee.org/document/9238602)
-
-[2] Samajdar, A., Zhu, Y., Whatmough, P., Mattina, M., & Krishna, T.;  **"Scale-sim: Systolic cnn accelerator simulator."** arXiv preprint arXiv:1811.02883 (2018). [\[pdf\]](https://arxiv.org/abs/1811.02883)
-
-
-
-## Citing this work
-
-If you found this tool useful, please use the following bibtex to cite us
-
-```
-@inproceedings{raj2025scale,
-  title={SCALE-Sim v3: A modular cycle-accurate systolic accelerator simulator for end-to-end system analysis},
-  author={Raj, Ritik and Banerjee, Sarbartha and Chandra, Nikhil and Wan, Zishen and Tong, Jianming and Samajdhar, Ananda and Krishna, Tushar},
-  booktitle={2025 IEEE International Symposium on Performance Analysis of Systems and Software (ISPASS)},
-  pages={186--200},
-  year={2025},
-  organization={IEEE}
-}
-
-@inproceedings{samajdar2020systematic,
-  title={A systematic methodology for characterizing scalability of DNN accelerators using SCALE-sim},
-  author={Samajdar, Ananda and Joseph, Jan Moritz and Zhu, Yuhao and Whatmough, Paul and Mattina, Matthew and Krishna, Tushar},
-  booktitle={2020 IEEE International Symposium on Performance Analysis of Systems and Software (ISPASS)},
-  pages={58--68},
-  year={2020},
-  organization={IEEE}
-}
-
-@article{samajdar2018scale,
-  title={SCALE-Sim: Systolic CNN Accelerator Simulator},
-  author={Samajdar, Ananda and Zhu, Yuhao and Whatmough, Paul and Mattina, Matthew and Krishna, Tushar},
-  journal={arXiv preprint arXiv:1811.02883},
-  year={2018}
-}
-
+```bash
+python3 plot_results.py --run-dir outputs/<timestamp>
 ```
 
-## Contributing to the project
+## Changing sweep parameters
 
-We are happy for your contributions and would love to merge new features into our stable codebase. To ensure continuity within the project, please consider the following workflow.
+The sweep is intentionally parameterized at the command line so new machines and new experiments do not require code edits for ordinary changes. The active script exposes sequence lengths, decode-token counts, array sizes, batch size, head structure, precision, stress inclusion, output root, verbosity, and progress-bar behavior through CLI flags.
 
-When contributing to this repository, please first discuss the change you wish to make via issue,
-email, or any other method with the owners of this repository before making a change.
+The most common parameter changes are handled directly in the command line.
 
-### Pull Request Process
+### Example: change sequence lengths
 
-1. Ensure any install or build dependencies are removed before the end of the layer when doing a
-   build. Please do not commit temporary files to the repo.
-2. Update the documentation in the documentation/-folder with details of changes to the interface, this includes new environment
-   variables, exposed ports, useful file locations and container parameters.
-3. Add a tutorial how to use your new feature in form of a jupyter notebook to the documentation, as well. This makes sure that others can use your code!
-4. Add test cases to our unit test system for your contribution.
-5. Increase the version numbers in any example's files and the README.md to the new version that this
-   Pull Request would represent. The versioning scheme we use is [SemVer](http://semver.org/). Add your changes to the CHANGELOG.md. Address the issue numbers that you are solving.
-6. You may merge the Pull Request in once you have the sign-off of two other developers, or if you
-   do not have permission to do that, you may request the second reviewer to merge it for you.
+```bash
+python3 run_sweep.py --sequence-lengths 64,128,256,512 --verbose --progress
+```
 
+### Example: change decode-token counts
 
-## Developers
+```bash
+python3 run_sweep.py --decode-tokens 1,2,4,8 --verbose --progress
+```
 
-Dev/Maintainer:
-* Ritik Raj (@ritikraj7)
+### Example: change array sizes
 
+```bash
+python3 run_sweep.py --array-sizes 8x8,16x16,32x32 --verbose --progress
+```
 
-Advisors
-* Ananda Samajdar (@AnandS09)
-* Tushar Krishna
+### Example: change architectural parameters
 
-v3 Contributers/Collaborators
-* Sarbartha Banerjee - Ramulator feature (@iamsarbartha)
-* Nikhil Chandra - Sparsity feature (@NikhilChandraNcbs)
-* Zishen Wan - Accelergy feature (@zishenwan)
-* Jianming Tong - SRAM Layout feature (@JianmingTONG)
+```bash
+python3 run_sweep.py \
+  --batch-size 1 \
+  --query-heads 8 \
+  --kv-heads 2 \
+  --head-dim 64 \
+  --precision int8 \
+  --verbose --progress
+```
 
+### Example: include the stress preset
 
-v2 Contributers/Collaborators
-* Jan Moritz Joseph (@jmjos)
-* Yuhao Zhu
-* Paul Whatmough
-* Vineet Nadella
-* Sachit Kuhar
+```bash
+python3 run_sweep.py --include-stress --verbose --progress
+```
+
+These flags are all translated into `MQAWorkload` objects before execution, which means the command line is not bypassing the architecture layer; it is configuring it through the canonical workload interface.
+
+## Changing the default sweep in code
+
+For recurring benchmark campaigns, the default sweep can also be changed directly in `run_sweep.py`. The script defines defaults for sequence lengths, decode tokens, array sizes, query heads, KV heads, head dimension, batch size, and precision near the top of the file, then uses those defaults to build the workload list before execution.
+
+That design supports two styles of use:
+- For one-off experiments, pass parameters on the command line.
+- For team-wide benchmark baselines, update the default constants in `run_sweep.py` so a plain `python3 run_sweep.py` produces the desired standard campaign.
+
+## Validation layout
+
+The validation suite has been separated from the root benchmark flow to make the repository easier to navigate. The active validation entry points live in `validation/`, and their artifact directories now live alongside them under `validation/phase*_validation_artifacts/` rather than at repo root.
+
+This layout makes validation runs easier to audit because each phase’s script and artifacts are colocated. It also keeps the root of the repository focused on the active operational path: sweep, compare, plot, and the implementation code that backs those commands.
+
+## Legacy material
+
+`legacy/` is a deliberate archive, not a trash directory. It contains earlier analytical models, prior outputs, reference assets, original configs, archived tests, and historical documentation that remain useful for provenance, debugging, or reconstructing earlier milestones, but they are no longer part of the active benchmark path described in this README.
+
+This split is important for publishable quality. Active users can understand the repository quickly from the root-level files and the `mqa_scalesim/` and `validation/` directories, while researchers who need prior context still have access to the archived material without having it interfere with normal use.
+
+## Recommended usage pattern
+
+For a clean end-to-end run on a fresh machine, the recommended sequence is:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+python3 -m pip install -r requirements.txt
+python3 validation/phase6_validation.py --verbose
+python3 run_sweep.py --verbose --progress
+python3 compare.py --verbose --progress
+python3 plot_results.py
+```
+
+This sequence validates the current implementation, generates a timestamped run directory, produces a normalized comparison artifact, and then renders figures for inspection or inclusion in reports.
+
+## Summary of the active design
+
+This repository is best understood as a layered MQA extension of SCALE-Sim rather than as a collection of scripts. `scalesim/` provides the shared simulation substrate, `mqa_scalesim/` provides the decode-specific architecture and canonical workload layer, the root drivers execute reproducible benchmark campaigns into timestamped `outputs/` directories, `validation/` protects milestone correctness, and `legacy/` preserves the historical and exploratory record of the project.

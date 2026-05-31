@@ -78,6 +78,11 @@ class double_buffered_scratchpad:
         self.using_ifmap_custom_layout = False
         self.using_filter_custom_layout = False
 
+        # Phase 6: MQA-mode tracking
+        self.mqa_mode = False
+        self.kv_preload_cycles = 0
+        self.kv_residency_bytes = 0
+
     #
     def set_params(self,
                    layer_id=0,
@@ -89,7 +94,10 @@ class double_buffered_scratchpad:
                    ifmap_backing_buf_bw=1, filter_backing_buf_bw=1, ofmap_backing_buf_bw=1,
                    ifmap_sram_bank_num=1, ifmap_sram_bank_port=2, filter_sram_bank_num=1, filter_sram_bank_port=2,
                    using_ifmap_custom_layout=False, using_filter_custom_layout=False,
-                   config=cfg(), topo=topo()
+                   config=cfg(), topo=topo(),
+                   mqa_mode=False,
+                   kv_preload_bytes=0,
+                   kv_residency_bytes=0,
                    ):
 
         """
@@ -167,7 +175,19 @@ class double_buffered_scratchpad:
         self.verbose = verbose
 
         self.using_ifmap_custom_layout = using_ifmap_custom_layout  
-        self.using_filter_custom_layout = using_filter_custom_layout  
+        self.using_filter_custom_layout = using_filter_custom_layout
+
+        # Phase 6: MQA preload tracking
+        self.mqa_mode = mqa_mode
+        self.kv_residency_bytes = kv_residency_bytes
+        if mqa_mode and kv_preload_bytes > 0:
+            word_size_local = word_size if word_size > 0 else 1
+            bw = max(1, ifmap_backing_buf_bw)
+            preload_words = max(1, -(-kv_preload_bytes // word_size_local))  # ceiling div
+            self.kv_preload_cycles = max(1, -(-preload_words // bw))
+        else:
+            self.kv_preload_cycles = 0
+
         self.params_valid_flag = True
 
 
@@ -276,7 +296,7 @@ class double_buffered_scratchpad:
             ofmap_serviced_cycles += [ofmap_cycle_out[0]]
             ofmap_stalls = ofmap_cycle_out[0] - cycle_arr[0]
 
-            self.stall_cycles += int(max(ifmap_stalls[0], filter_stalls[0], ofmap_stalls[0]))
+            self.stall_cycles += int(np.max([ifmap_stalls[0], filter_stalls[0], ofmap_stalls[0]]))
             #self.stall_cycles += ifmap_stalls[0] + filter_stalls[0] + ofmap_stalls[0]
 
         if self.estimate_bandwidth_mode:
@@ -302,10 +322,9 @@ class double_buffered_scratchpad:
             np.asarray(ofmap_serviced_cycles).reshape((len(ofmap_serviced_cycles), 1))
         self.ofmap_trace_matrix = np.concatenate((ofmap_services_cycles_np, ofmap_demand_mat),
                                                  axis=1)
-        # `ofmap_serviced_cycles` is a list of NumPy scalars / 1-element arrays, so
-        # Python's built-in `max()` can return a non-scalar object here. Use the
-        # finalized trace matrix instead and take the last serviced cycle.
-        self.total_cycles = int(self.ofmap_trace_matrix[-1][0])
+        #self.total_cycles = int(ofmap_serviced_cycles[-1][0])
+        ## Probable fault in sanity check
+        self.total_cycles = int(np.max(ofmap_serviced_cycles))
 
         # END of serving demands from memory
         self.traces_valid = True
@@ -483,6 +502,22 @@ class double_buffered_scratchpad:
         """
         assert self.traces_valid, 'Traces not generated yet'
         return int(self.stall_cycles)
+
+    #
+    def get_kv_preload_cycles(self):
+        """Return cycles spent on one-time KV DRAM->SRAM fill (MQA mode only)."""
+        return int(self.kv_preload_cycles)
+
+    #
+    def get_mqa_stall_breakdown(self):
+        """Return dict with MQA-specific stall breakdown."""
+        assert self.traces_valid, 'Traces not generated yet'
+        return {
+            'compute_stall_cycles': int(self.stall_cycles),
+            'kv_preload_cycles': int(self.kv_preload_cycles),
+            'total_mqa_overhead_cycles': int(self.stall_cycles) + int(self.kv_preload_cycles),
+            'kv_residency_bytes': int(self.kv_residency_bytes),
+        }
 
     #
     def get_ifmap_sram_start_stop_cycles(self):

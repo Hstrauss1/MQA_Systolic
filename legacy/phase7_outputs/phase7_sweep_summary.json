@@ -1,0 +1,27 @@
+{
+  "array_shapes": [
+    "16x16",
+    "32x32",
+    "8x8"
+  ],
+  "decode_tokens": [
+    1,
+    4,
+    8
+  ],
+  "experiment_count": 36,
+  "memory_model_applied_values": [
+    true
+  ],
+  "modes": [
+    "baseline_mqa_decode",
+    "kv_stationary_mqa_decode"
+  ],
+  "row_count": 72,
+  "sequence_lengths": [
+    64,
+    128,
+    512,
+    1024
+  ]
+}

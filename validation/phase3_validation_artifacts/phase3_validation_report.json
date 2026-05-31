@@ -1,0 +1,90 @@
+{
+  "results": [
+    {
+      "details": {
+        "stage_names": [
+          "score_gemm",
+          "softmax_reduce",
+          "value_gemm",
+          "writeback"
+        ],
+        "total_cycles": 5236,
+        "total_macs": 131072
+      },
+      "name": "baseline_rich_result",
+      "status": "PASS"
+    },
+    {
+      "details": {
+        "score_macs": 36864,
+        "value_macs": 36864
+      },
+      "name": "baseline_stage_macs",
+      "status": "PASS"
+    },
+    {
+      "details": {
+        "large_total_cycles": 10444,
+        "small_total_cycles": 2632
+      },
+      "name": "sequence_scaling",
+      "status": "PASS"
+    },
+    {
+      "details": {
+        "large_array_cycles": 4654,
+        "small_array_cycles": 6496
+      },
+      "name": "array_scaling",
+      "status": "PASS"
+    },
+    {
+      "details": {
+        "mode": "baseline_mqa_decode",
+        "stage_count": 4,
+        "total_cycles": 14696
+      },
+      "name": "simulator_baseline_route",
+      "status": "PASS"
+    },
+    {
+      "details": {
+        "kv_preload_bytes": 32768,
+        "stage_names": [
+          "kv_preload",
+          "query_stream",
+          "online_softmax_accum",
+          "final_normalize",
+          "writeback"
+        ],
+        "total_cycles": 80763
+      },
+      "name": "kv_structural_validity",
+      "status": "PASS"
+    },
+    {
+      "details": {
+        "stage_cycles": {
+          "score_gemm": 230,
+          "softmax_reduce": 2560,
+          "value_gemm": 264,
+          "writeback": 14
+        },
+        "stage_names": [
+          "score_gemm",
+          "softmax_reduce",
+          "value_gemm",
+          "writeback"
+        ]
+      },
+      "name": "validation_bridge",
+      "status": "PASS"
+    }
+  ],
+  "summary": {
+    "artifact_dir": "/Users/dhruv/VS_Code/CSEN318/MQA_Systolic/phase3_validation_artifacts",
+    "failed": 0,
+    "passed": 7,
+    "total": 7
+  }
+}
