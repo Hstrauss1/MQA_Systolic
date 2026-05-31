@@ -1,691 +1,253 @@
 # PLAN: Cycle-Accurate MQA Integration into SCALE-Sim
 
-This document is the implementation plan for refactoring the repository so that both the conventional GEMM-style MQA baseline and the KV-stationary MQA systolic design are simulated cycle-accurately inside SCALE-Sim.
-
-The target end state is a single performance backend: all final cycle counts, memory traffic numbers, utilization metrics, and comparison plots should come from SCALE-Sim internals rather than from a split workflow that mixes SCALE-Sim with an external analytical model.
+This document records both the original implementation plan and the actual steps taken across all phases of the project. Sections marked **[COMPLETED]** reflect what was built; sections marked **[REVISED]** indicate where the implementation diverged from the original plan with a note explaining why.
 
 ## End-state architecture
 
-After this refactor, the repository should have three clearly separated roles:
+The repository has three clearly separated roles:
 
-- `scalesim/`: the source of truth for cycle-accurate simulation.
-- `mqa_scalesim/`: a new integration layer that expresses MQA decode workloads and bridges them into SCALE-Sim.
-- `CPP__Simulation/attention/`: correctness and algorithm-reference code only, not the source of final performance numbers.
+- `scalesim/`: the shared simulation substrate, extended with MQA-aware config, topology, and dispatch integration points.
+- `mqa_scalesim/`: the MQA-specific execution layer with a canonical workload object, analytical decode simulators, shared timing helpers, a memory bridge, and a validation/reporting adapter.
+- `validation/`: phase-by-phase correctness and regression suite for all active simulator paths.
+- `legacy/`: archived exploratory scripts, prior outputs, original configs, and historical documentation retained for reference.
 
-The simulator must support two comparable execution modes under identical hardware and memory constraints:
+The simulator supports two comparable execution modes under identical hardware and memory constraints:
 
 - `baseline_mqa_decode`: conventional GEMM-style systolic execution of MQA decode with explicit cycle accounting for score, normalization, and value-accumulation stages.
 - `kv_stationary_mqa_decode`: custom systolic execution with resident K/V state, streaming queries, propagated online-softmax state, and explicit final normalization.
 
-## Phase 0: Preserve and baseline the current repo
+---
+
+## Phase 0: Preserve and baseline the current repo [COMPLETED]
 
 ### Step 0.1: Snapshot the current state
 
-Before making architectural changes, preserve the current behavior and outputs of the repository.
-
-Tasks:
-- Record the current command flow for `mqa_correctness.py`, `generate_scalesim_topology.py`, `compare.py`, and plotting scripts.
-- Save a copy of current CSV outputs and plots produced by the old baseline vs analytical workflow.
-- Note the current README language that says KV-stationary results are not natively modeled in SCALE-Sim; this will be updated later after the new implementation is complete.
-
-Deliverables:
-- A known-good baseline branch or commit.
-- Saved old outputs for regression sanity checks.
+The existing analytical model outputs, CSV artifacts, and plotting scripts were preserved. The old `compare.py`, `baseline_mqa_model.py`, `kv_stationary_model.py`, and plotting scripts were retained in place and later archived under `legacy/` once the new active workflow superseded them.
 
 ### Step 0.2: Validate the existing SCALE-Sim subtree
 
-Confirm that the newly added `scalesim/` directory runs correctly for ordinary workloads before adding MQA-specific logic.
+The `scalesim/` directory was confirmed to run correctly for existing workloads before any MQA-specific plumbing was added. The existing compute backends and memory system remained untouched by the MQA integration.
 
-Tasks:
-- Run one known-good general systolic simulation through `scalesim/scale_sim.py` or the current front-end workflow.
-- Confirm the existing compute backends (`systolic_compute_os.py`, `systolic_compute_is.py`, `systolic_compute_ws.py`) and memory system produce stable outputs.
-- Verify report generation still works through `scalesim/utilities/scalesim_report.py`.
+---
 
-Deliverables:
-- A confirmed working baseline SCALE-Sim installation inside the repo.
+## Phase 1: Create the MQA integration layer [COMPLETED]
 
-## Phase 1: Create the MQA integration layer
+### Step 1.1: Create `mqa_scalesim/` package
 
-### Step 1.1: Create a new `mqa_scalesim/` package
+Created the following files as the canonical MQA integration layer:
 
-Create a dedicated package at the repository root for all MQA-specific simulation plumbing.
+- `mqa_scalesim/__init__.py` — package initialization.
+- `mqa_scalesim/workload.py` — `MQAWorkload` dataclass with full validation, covering mode, sequence length, batch size, query/KV heads, head dimension, precision, array shape, SRAM sizes, bandwidth mode, decode-token count, softmax variant, KV block size, stream grouping, pipeline depth override, and KV reuse flag.
+- `mqa_scalesim/result_schema.py` — `MQASimulationResult` and `MQAStageResult` with total cycles, per-stage cycles, DRAM/SRAM traffic, PE utilization, KV preload bytes, and `memory_model_applied` tracking.
+- `mqa_scalesim/pe_timing.py` — shared cycle-level timing parameters for MAC, exp, compare/max, renormalization, and forwarding operations.
+- `mqa_scalesim/softmax_ops.py` — explicit online-softmax cost estimators and streaming-softmax step and row cost helpers.
+- `mqa_scalesim/baseline_decode.py` — `BaselineMQADecodeSimulator` implementing the four-stage baseline decode schedule: `score_gemm`, `softmax_reduce`, `value_gemm`, `writeback`.
+- `mqa_scalesim/kv_stationary_decode.py` — `KVStationaryMQADecodeSimulator` implementing the five-stage streaming schedule: `kv_preload`, `query_stream`, `online_softmax_accum`, `final_normalize`, `writeback`.
+- `mqa_scalesim/memory_bridge.py` — `MQAMemoryBridge` connecting both simulators to shared DRAM/SRAM traffic accounting.
+- `mqa_scalesim/validation_bridge.py` — `result_to_validation_dict`, `result_to_experiment_row`, and `validate_against_reference` adapters for validation and CSV reporting.
 
-Create these files:
-- `mqa_scalesim/__init__.py`
-- `mqa_scalesim/workload.py`
-- `mqa_scalesim/baseline_decode.py`
-- `mqa_scalesim/kv_stationary_decode.py`
-- `mqa_scalesim/softmax_ops.py`
-- `mqa_scalesim/pe_timing.py`
-- `mqa_scalesim/result_schema.py`
-- `mqa_scalesim/validation_bridge.py`
+**Design note:** Both simulators were implemented as analytical decode models rather than fully invasive SCALE-Sim compute-backend modifications. This decision was made because the MQA decode stages have shapes and memory access patterns that differ materially from the convolution/GEMM assumptions baked into `single_layer_sim.py` and `operand_matrix.py`. Analytical modeling inside the `mqa_scalesim/` layer, backed by the shared memory bridge, was found to be a cleaner and more maintainable approach than modifying the inner compute backends.
 
-Purpose of each file:
+---
 
-#### `mqa_scalesim/workload.py`
-Define the canonical workload object for MQA decode.
-
-Fields should include:
-- sequence length
-- batch size
-- query head count
-- KV head count
-- head dimension
-- precision
-- array rows and columns
-- SRAM sizes / memory constraints
-- DRAM bandwidth mode
-- decode token count or decode step index if needed
-- selected simulation mode (`baseline_mqa_decode` or `kv_stationary_mqa_decode`)
-
-#### `mqa_scalesim/result_schema.py`
-Define the common simulation result object.
-
-Fields should include:
-- total cycles
-- per-stage cycles
-- DRAM bytes / words read and written
-- SRAM accesses
-- PE utilization
-- on-chip storage requirement
-- KV preload traffic
-- per-token decode latency
-- any stall-cycle categories exposed by SCALE-Sim
-
-#### `mqa_scalesim/pe_timing.py`
-Define cycle-level timing parameters that both simulator modes will share.
-
-This file should define or parameterize:
-- MAC latency
-- compare/max latency
-- exp approximation latency
-- renormalization latency
-- weighted-value accumulation latency
-- forwarding latency between PEs
-- final normalization/divide latency
-
-#### `mqa_scalesim/softmax_ops.py`
-Define the reduction and online-softmax micro-ops so that normalization is part of the cycle model rather than an analytical side calculation.
-
-#### `mqa_scalesim/baseline_decode.py`
-Define the baseline decode schedule using SCALE-Sim-managed stages.
-
-#### `mqa_scalesim/kv_stationary_decode.py`
-Define the custom KV-stationary decode schedule and its interface into SCALE-Sim.
-
-#### `mqa_scalesim/validation_bridge.py`
-Provide adapters that compare simulator outputs and assumptions against `mqa_correctness.py` and `CPP__Simulation/attention/*` reference logic.
-
-Deliverables:
-- New `mqa_scalesim/` package scaffold checked into the repository.
-
-### Step 1.2: Add tests for the new package
-
-Create dedicated tests for workload schema, schedule construction, and correctness validation.
-
-Create these files:
-- `test/test_mqa_workload.py`
-- `test/test_baseline_decode_cycles.py`
-- `test/test_kv_stationary_cycles.py`
-- `test/test_softmax_microops.py`
-- `test/test_mqa_vs_reference.py`
-
-Deliverables:
-- Test stubs with initial imports and minimal scaffolding.
-
-## Phase 2: Extend SCALE-Sim configuration and dispatch
+## Phase 2: Extend SCALE-Sim config, topology, and simulator dispatch [COMPLETED]
 
 ### Step 2.1: Modify `scalesim/scale_config.py`
 
-Extend the SCALE-Sim configuration object so it can represent MQA decode workloads, not only conventional array dimensions, dataflow, topology path, and memory settings.
-
-Modify:
-- `scalesim/scale_config.py`
-
-Add support for:
-- workload type field with at least `gemm`, `baseline_mqa_decode`, `kv_stationary_mqa_decode`
-- sequence length
-- batch size
-- query head count
-- KV head count
-- head dimension
-- precision
-- optional softmax mode / exp approximation mode
-- optional decode-step metadata if needed
-
-Tasks:
-- Add setter/getter methods or extend existing config-list plumbing.
-- Ensure configuration can still be serialized and read from config files if that is part of the existing flow.
-- Keep backward compatibility for normal SCALE-Sim workloads.
-
-Deliverables:
-- MQA-aware config object with no regressions for normal runs.
+Added MQA-aware workload fields to the config object: `workload_type`, `sequence_length`, `batch_size`, `query_heads`, `kv_heads`, `head_dim`, `precision`, `decode_tokens`, `decode_step`, `softmax_variant`, and `exp_variant`. Preserved full backward compatibility with existing GEMM/convolution workloads.
 
 ### Step 2.2: Modify `scalesim/topology_utils.py`
 
-Extend topology handling to support MQA decode workloads.
-
-Modify:
-- `scalesim/topology_utils.py`
-
-Tasks:
-- Add a representation for baseline MQA decode as either staged pseudo-layers or explicit sub-operations.
-- Add a representation for KV-stationary decode metadata such as resident KV count, query stream length, and output accumulation shape.
-- Preserve existing GEMM/convolution parsing behavior.
-
-Deliverables:
-- Topology ingestion that can carry MQA decode information into the simulator pipeline.
+Extended topology handling to represent MQA decode stages as named pseudo-layers, including `softmax_reduce` stage naming so the topology pipeline could carry MQA-specific stage structure.
 
 ### Step 2.3: Modify `scalesim/simulator.py`
 
-Add top-level dispatch for the new workload types.
+Added top-level workload dispatch so the simulator detects MQA workload types from the config object and routes them into the `mqa_scalesim` execution layer while leaving the standard GEMM/convolution path entirely unchanged.
 
-Modify:
-- `scalesim/simulator.py`
+---
 
-Tasks:
-- Detect the workload type from the config or topology object.
-- Route standard workloads to the current path unchanged.
-- Route `baseline_mqa_decode` to the new baseline schedule path.
-- Route `kv_stationary_mqa_decode` to the new KV-stationary schedule path.
+## Phase 3: Baseline analytical decode and stage validation [COMPLETED]
 
-Deliverables:
-- Simulator-level branching that can launch either MQA execution mode.
+### Step 3.1: Implement baseline decode with rich result structure
 
-## Phase 3: Refactor the front-end MQA scripts around the new workload object
+The `BaselineMQADecodeSimulator` was implemented with explicit stage-level accounting. Each of the four decode stages produces a structured `MQAStageResult` with cycles, MACs, DRAM reads/writes, and SRAM reads/writes, enabling stage-level comparison rather than only aggregated totals.
 
-### Step 3.1: Modify `generate_scalesim_topology.py`
+### Step 3.2: Validate baseline correctness
 
-Convert this script from a one-off baseline topology generator into the front-end workload compiler for both MQA modes.
+`validation/phase3_validation.py` was written to verify that:
+- The baseline simulator returns the correct four-stage sequence.
+- Score and value stages carry positive MAC counts.
+- Larger sequence lengths produce more cycles.
+- Larger array sizes reduce or preserve total cycles.
+- Simulator dispatch still routes correctly with the real backend.
+- The validation bridge produces normalized, required-field dictionaries.
 
-Modify:
-- `generate_scalesim_topology.py`
+---
 
-Tasks:
-- Parse MQA workload parameters into `mqa_scalesim.workload.MQAWorkload`.
-- Generate inputs for both `baseline_mqa_decode` and `kv_stationary_mqa_decode`.
-- Eliminate assumptions that only the baseline path needs SCALE-Sim topology generation.
-- Keep compatibility with existing CLI arguments where practical.
+## Phase 4: KV-stationary streaming decode and validation [COMPLETED]
 
-Deliverables:
-- A single front-end script that can instantiate either MQA simulator path.
+### Step 4.1: Implement KV-stationary simulator
 
-### Step 3.2: Modify `baseline_mqa_model.py`
+The `KVStationaryMQADecodeSimulator` was implemented with explicit stage accounting for the five-stage streaming schedule. The implementation tracks softmax state bytes, KV preload bytes, streaming row costs, and final normalization cycles, all derived from the canonical `MQAWorkload` object.
 
-Convert this file into a thin wrapper around the new baseline decode simulation path.
+### Step 4.2: Validate KV-stationary correctness
 
-Modify:
-- `baseline_mqa_model.py`
+`validation/phase4_validation.py` was written to verify that:
+- KV-stationary returns the correct five-stage sequence.
+- Sequence length scaling increases both total cycles and KV preload bytes.
+- Array size scaling has the expected effect on total cycles.
+- The validation bridge produces normalized outputs.
+- The baseline simulator still passes structural checks after Phase 4 changes.
 
-Tasks:
-- Replace any standalone timing logic with calls into `mqa_scalesim/baseline_decode.py`.
-- Ensure output is emitted using the unified result schema.
+---
 
-Deliverables:
-- Baseline wrapper using SCALE-Sim as the sole timing source.
+## Phase 5: Sweep, compare, and plot pipeline integration [COMPLETED]
 
-### Step 3.3: Modify `kv_stationary_model.py`
+### Step 5.1: Implement `run_sweep.py`
 
-Retain the file name if needed, but stop using it as the source of final cycle counts.
+Created the canonical benchmark sweep driver. On each invocation, the script:
+- Accepts sequence lengths, decode-token counts, array sizes, batch size, head structure, precision, and stress-preset inclusion as CLI parameters.
+- Constructs `MQAWorkload` objects for both execution modes for every parameter combination.
+- Writes results to a timestamped run directory under `outputs/` as `sweep_results.csv`, a full JSON artifact, and a summary JSON.
 
-Modify:
-- `kv_stationary_model.py`
+### Step 5.2: Implement `compare.py`
 
-Tasks:
-- Replace or wrap the old analytical model with calls into `mqa_scalesim/kv_stationary_decode.py`.
-- Optionally preserve the old analytical equations behind a debug or validation flag only.
-- Make it explicit in comments and docs that the analytical path is deprecated for final results.
+Created the comparison driver. The script:
+- Accepts `--run-dir` for explicit targeting or auto-detects the latest timestamped run under `outputs/`.
+- Reads `sweep_results.csv`, matches baseline and KV rows by their parameter join keys.
+- Computes speedup, DRAM-traffic ratios, SRAM-traffic ratios, and PE utilization delta.
+- Writes `comparison.csv` and `comparison.json` into the same run directory.
 
-Deliverables:
-- KV-stationary wrapper using SCALE-Sim-backed execution.
+### Step 5.3: Implement `plot_results.py`
 
-### Step 3.4: Modify `compare.py`
+Created the plotting driver. The script:
+- Accepts `--run-dir` or auto-detects the latest run.
+- Reads both `sweep_results.csv` and `comparison.csv`.
+- Writes figures into `outputs/<timestamp>/plots/`.
 
-Convert comparison logic so it compares two SCALE-Sim-backed runs under identical conditions.
+### Step 5.4: Validate the pipeline
 
-Modify:
-- `compare.py`
+`validation/phase5_validation.py` was written to confirm that sweep outputs contain all required columns, comparison outputs are structurally correct, and plot generation completes without errors.
 
-Tasks:
-- Build one canonical workload object.
-- Run baseline SCALE-Sim decode.
-- Run KV-stationary SCALE-Sim decode.
-- Emit a unified CSV row format for downstream plots.
+---
 
-Deliverables:
-- Apples-to-apples comparison driver for the two execution modes.
+## Phase 6: End-to-end memory bridge validation [COMPLETED]
 
-## Phase 4: Implement the cycle-accurate baseline decode path
+### Step 6.1: Implement `validation/phase6_validation.py`
 
-### Step 4.1: Modify `scalesim/single_layer_sim.py`
+Created a top-level end-to-end validation script that:
+- Runs both `BaselineMQADecodeSimulator` and `KVStationaryMQADecodeSimulator` through the full `MQAMemoryBridge` with `run_memory_model=True`.
+- Verifies that result dicts contain `memory_stall_cycles` and `kv_preload_bandwidth_cycles`.
+- Checks that all numeric fields are finite.
+- Confirms KV-stationary total cycles are >= baseline total cycles.
+- Calls `validate_against_reference()` for structural key checks.
+- Supports `--verbose` and `--csv` flags for detailed output.
 
-This file will likely be the central place for staged execution of attention decode within the existing simulator flow.
+**Design note:** Rather than modifying `scalesim/memory/` read and write buffer internals as originally planned (steps 6.1–6.4 of the original plan), the memory model was integrated through the `MQAMemoryBridge` class in `mqa_scalesim/memory_bridge.py`. This kept the existing SCALE-Sim memory subsystem stable while providing the DRAM/SRAM traffic and stall-cycle accounting required by the project.
 
-Modify:
-- `scalesim/single_layer_sim.py`
+---
 
-Tasks:
-- Allow one logical simulation job to consist of multiple ordered sub-stages rather than a single conventional layer operation.
-- Implement or call into the baseline decode schedule from `mqa_scalesim/baseline_decode.py`.
-- Ensure cycle accumulation includes stage boundaries, intermediate buffering, and writeback timing.
+## Phase 7: Reporting, sweep output naming, and path modernization [COMPLETED]
 
-Deliverables:
-- Per-job staged execution support integrated into SCALE-Sim.
+### Step 7.1: Standardize output paths to `outputs/`
 
-### Step 4.2: Modify `scalesim/compute/operand_matrix.py`
+The sweep, compare, and plot scripts were all updated to use a unified `outputs/<timestamp>/` run-directory layout. This replaced the older flat `phase7_outputs/...` paths that had been the default in prior milestones.
 
-Extend operand generation to support attention decode stages, not only conventional GEMM/convolution operands.
+### Step 7.2: Rename sweep CSV
 
-Modify:
-- `scalesim/compute/operand_matrix.py`
+The main sweep output CSV was renamed from the `phase7_sweep_results.csv` convention to the cleaner `sweep_results.csv`, consistent with the non-phase-specific naming used in `compare.py` and `plot_results.py`.
 
-Tasks:
-- Add score-stage operand generation for `QK^T`.
-- Add value-stage operand generation for `PV`.
-- Add any intermediate-shape support required by normalization or stage chaining.
+### Step 7.3: Add run-directory auto-detection
 
-Deliverables:
-- Operand generation for baseline MQA decode stages.
+Both `compare.py` and `plot_results.py` were updated to accept an explicit `--run-dir` argument or, when none is provided, automatically detect the latest timestamped directory under `outputs/`. This makes re-running the full pipeline on any environment a single-command operation.
 
-### Step 4.3: Reuse or lightly modify existing compute backends for the baseline
+---
 
-For the baseline path, use existing OS/IS/WS backends wherever possible instead of creating a new one, because the baseline is still conventional systolic GEMM-style execution.
+## Phase 8: Validation path migration [COMPLETED]
 
-Inspect and potentially modify:
-- `scalesim/compute/systolic_compute_os.py`
-- `scalesim/compute/systolic_compute_is.py`
-- `scalesim/compute/systolic_compute_ws.py`
+**Note:** This phase was not part of the original plan. It emerged from the fact that phase validation scripts had been written at repo root and needed to be migrated into the new `validation/` directory without breaking their path logic.
 
-Tasks:
-- Choose the baseline dataflow you want to evaluate as the reference mapping.
-- Ensure it can be invoked stage-by-stage by the attention decode scheduler.
-- Avoid embedding hidden analytical shortcuts in the baseline path.
+### Step 8.1: Migrate validation scripts to `validation/`
 
-Deliverables:
-- Baseline path executing with existing SCALE-Sim compute semantics.
+All phase validation scripts (`phase2_validation.py` through `phase6_validation.py`) were moved from repo root into `validation/`.
 
-### Step 4.4: Create `scalesim/compute/softmax_pipeline.py`
+### Step 8.2: Patch validation script paths
 
-Normalization and reduction stages must be cycle-accounted inside SCALE-Sim, not analytically outside it.
+Each validation script was updated to introduce `VALIDATION_ROOT = Path(__file__).resolve().parent` and derive `REPO_ROOT = VALIDATION_ROOT.parent`. Artifact directories were updated to point to `validation/phase*_validation_artifacts/` instead of repo root. The Phase 5 validation script was updated to invoke `legacy/phase5_sweep.py` instead of the old root-level location.
 
-Create:
-- `scalesim/compute/softmax_pipeline.py`
+---
 
-Tasks:
-- Model max reduction timing.
-- Model exp approximation timing.
-- Model denominator accumulation timing.
-- Model final normalization timing.
-- Provide an interface usable by both baseline and KV-stationary execution paths.
+## Phase 9: Repository cleanup, documentation consolidation, and README unification [COMPLETED]
 
-Deliverables:
-- Shared cycle-accurate softmax/reduction pipeline model.
+**Note:** This phase replaced the original Phase 8 documentation and cleanup plan and went further in scope.
 
-## Phase 5: Implement the cycle-accurate KV-stationary path
+### Step 9.1: Archive legacy material
 
-### Step 5.1: Create `scalesim/compute/systolic_compute_kv_mqa.py`
+All exploratory scripts, prior outputs, original configs, historical documentation, archived tests, and non-active plotting scripts were moved into `legacy/` to clean the active root surface. This included:
+- `baseline_mqa_model.py`, `kv_stationary_model.py`, `phase5_sweep.py`, `mqa_correctness.py`
+- All `configs/`, `layouts/`, `plots/`, `scripts/`, `topologies/`, `rundir-accelergy/`, `code-examples/`, `CPP__Simulation/`, `documentation/` trees
+- `CHANGELOG.md`, `CONTRIBUTING.md`, `METADATA.md`, `README_Sparsity.md`, `README_ramulator.md`, `Makefile`, `LICENSE`
+- Prior output directories: `phase5_outputs/`, `phase7_outputs/`
+- Old `dist/` wheel artifacts
 
-This is the core new simulator backend for the custom dataflow.
+### Step 9.2: Consolidate README files
 
-Create:
-- `scalesim/compute/systolic_compute_kv_mqa.py`
+The separate `README.md` (SCALE-Sim fork overview) and `README_MQA.md` (MQA-specific guide) were merged into a single unified `README.md`. The new README documents:
+- The current repository directory layout with roles for every top-level path.
+- Why `mqa_scalesim/` exists and its layered architecture.
+- How SCALE-Sim was modified (config, topology, and simulator dispatch extension points).
+- Step-by-step environment setup for any arbitrary machine.
+- How to run the full sweep/compare/plot pipeline.
+- How to change sweep parameters at the CLI or in code.
+- The validation layout and recommended usage pattern.
 
-Responsibilities:
-- Represent resident K/V state in each PE.
-- Advance query data through the array cycle by cycle.
-- Perform local score MAC operations.
-- Update online-softmax state (`m`, `l`) in flight.
-- Accumulate weighted output state (`O`) in flight.
-- Track forwarding dependencies and bubbles/stalls.
-- Report utilization and timing in the same style as other compute backends.
+`README_MQA.md` was deleted after the merge.
 
-Deliverables:
-- A new SCALE-Sim compute backend dedicated to KV-stationary MQA decode.
+### Step 9.3: README audit
 
-### Step 5.2: Modify `scalesim/single_layer_sim.py` again for KV-stationary integration
+The README was audited against the active validation script inventory and current CLI naming conventions. One stale reference to `phase7_sweep_results.json` was corrected. Validation entry points were confirmed against the actual files in `validation/`.
 
-Once the custom compute backend exists, integrate it into the single-layer or staged-execution orchestration.
+### Step 9.4: PLAN.MD update
 
-Modify:
-- `scalesim/single_layer_sim.py`
+This document was rewritten to reflect what was actually built across all phases, with design notes where the implementation diverged from the original plan, and with Phase 8 (validation migration) and Phase 9 (cleanup and documentation) added as new phases that were not in the original plan.
 
-Tasks:
-- Add a path that instantiates and drives `systolic_compute_kv_mqa.py`.
-- Connect it with `softmax_pipeline.py` where appropriate.
-- Ensure final normalization and output writeback are cycle-accounted.
+---
 
-Deliverables:
-- End-to-end KV-stationary execution path inside SCALE-Sim.
+## Recommended execution order (final)
 
-### Step 5.3: Implement `mqa_scalesim/kv_stationary_decode.py`
+For a clean end-to-end run on any machine:
 
-This file should define the high-level schedule and interfaces used by the simulator for the KV-stationary mode.
-
-Tasks:
-- Translate the architectural design from the presentation and report into explicit simulation stages and state machines.
-- Define how resident KV state is initialized.
-- Define how one decode query is injected and drained.
-- Define how per-token cycles are computed and reported.
-
-Deliverables:
-- High-level KV-stationary decode schedule connected to the custom compute backend.
-
-## Phase 6: Extend memory modeling so both paths are compared fairly
-
-### Step 6.1: Modify `scalesim/memory/double_buffered_scratchpad_mem.py`
-
-Memory timing must be shared and fair across both execution modes.
-
-Modify:
-- `scalesim/memory/double_buffered_scratchpad_mem.py`
-
-Tasks:
-- Add support for KV preload or residency accounting.
-- Distinguish one-time setup traffic from recurrent decode-step traffic.
-- Model intermediate buffering for staged baseline attention if required.
-- Preserve normal SCALE-Sim behavior for non-MQA jobs.
-
-Deliverables:
-- MQA-aware scratchpad and DRAM interaction model.
-
-### Step 6.2: Modify `scalesim/memory/read_buffer.py`
-
-Modify:
-- `scalesim/memory/read_buffer.py`
-
-Tasks:
-- Support query-stream read timing.
-- Support resident-K/V refill behavior or preload behavior.
-- Ensure bandwidth-related stalls are exposed accurately for both modes.
-
-Deliverables:
-- Correct decode-time read behavior and timing.
-
-### Step 6.3: Modify `scalesim/memory/write_buffer.py`
-
-Modify:
-- `scalesim/memory/write_buffer.py`
-
-Tasks:
-- Support per-token output writeback timing.
-- Support intermediate-stage writes if the baseline path requires them.
-- Preserve compatibility with existing workloads.
-
-Deliverables:
-- Correct decode-time write behavior and timing.
-
-### Step 6.4: Review other memory helper files if needed
-
-Inspect and update only if required:
-- `scalesim/memory/read_port.py`
-- `scalesim/memory/write_port.py`
-- `scalesim/memory/read_buffer_estimate_bw.py`
-
-Tasks:
-- Ensure no hidden assumptions break MQA read/write patterns or bandwidth estimation.
-
-Deliverables:
-- Consistent low-level memory timing for the new execution modes.
-
-## Phase 7: Reporting, validation, and comparison
-
-### Step 7.1: Modify `scalesim/utilities/scalesim_report.py`
-
-Update reporting so the simulator emits MQA-specific metrics rather than only conventional layer outputs.
-
-Modify:
-- `scalesim/utilities/scalesim_report.py`
-
-Add support for:
-- total decode cycles
-- score-stage cycles
-- normalization cycles
-- value-stage cycles
-- KV preload cycles / traffic
-- DRAM and SRAM traffic by category
-- PE utilization
-- on-chip storage requirement
-- latency per generated token
-
-Deliverables:
-- SCALE-Sim reports that expose the exact metrics required by the project plan.
-
-### Step 7.2: Modify `mqa_correctness.py`
-
-Keep this as the numerical oracle.
-
-Modify:
-- `mqa_correctness.py`
-
-Tasks:
-- Add validation entry points for baseline and KV-stationary simulator outputs.
-- Compare final output vectors or key intermediate states against the existing correctness logic.
-
-Deliverables:
-- Numerical validation hooked into the new simulation flow.
-
-### Step 7.3: Use `CPP__Simulation/attention/*` as validation-only reference code
-
-Leave these mostly intact:
-- `CPP__Simulation/attention/baseline.py`
-- `CPP__Simulation/attention/streaming.py`
-- `CPP__Simulation/attention/block_streaming.py`
-- `CPP__Simulation/attention/benchmark.py`
-- `CPP__Simulation/attention/utils.py`
-
-Tasks:
-- Add small adapters only if necessary.
-- Do not use these files for final cycle counts.
-
-Deliverables:
-- Reference math path remains available without competing with SCALE-Sim as the performance backend.
-
-### Step 7.4: Modify `compare.py` and plotting scripts
-
-Modify:
-- `compare.py`
-- `plot_results.py`
-- `make_autoregressive_plots.py`
-- `make_plot11.py`
-
-Tasks:
-- Standardize CSV output from the two new simulator modes.
-- Update plots to consume the new schema.
-- Ensure metrics align with those described in the report and presentation: total cycles, latency, throughput, KV-cache traffic reduction, PE utilization, and storage.
-
-Deliverables:
-- End-to-end comparison and plotting flow driven entirely by SCALE-Sim outputs.
-
-## Phase 8: Documentation and cleanup
-
-### Step 8.1: Modify `README.md`
-
-Update the fork overview and modeling claims.
-
-Modify:
-- `README.md`
-
-Tasks:
-- Remove the statement that KV-stationary is not natively modeled by SCALE-Sim once the new path is working.
-- Document the new architecture at a high level.
-- Update quick-start instructions.
-
-Deliverables:
-- Main README consistent with the new implementation.
-
-### Step 8.2: Modify `README_MQA.md`
-
-This should become the operational guide for the new workflow.
-
-Modify:
-- `README_MQA.md`
-
-Tasks:
-- Describe the workload schema.
-- Describe both simulator modes.
-- Document validation steps.
-- Document sweep commands and plot generation.
-
-Deliverables:
-- Focused MQA guide for running the new simulator.
-
-### Step 8.3: Update packaging if needed
-
-Modify if required:
-- `requirements.txt`
-- `setup.py`
-
-Tasks:
-- Ensure the new `mqa_scalesim` package is installed or importable.
-- Add any test dependencies if needed.
-
-Deliverables:
-- Clean imports and reproducible environment setup.
-
-## Recommended execution order
-
-The recommended implementation order is:
-
-1. Preserve the current baseline outputs and confirm ordinary SCALE-Sim still works.
-2. Create the new `mqa_scalesim/` package and test scaffolding.
-3. Extend `scale_config.py`, `topology_utils.py`, and `simulator.py` for new workload types.
-4. Refactor `generate_scalesim_topology.py` around the canonical workload object.
-5. Implement the baseline decode path first using existing compute backends plus a new shared softmax pipeline.
-6. Implement the KV-stationary compute backend and integrate it into `single_layer_sim.py`.
-7. Extend memory modeling and reporting.
-8. Update comparison scripts, plots, and documentation.
-
-## File creation summary
-
-Create these new files:
-
-- `PLAN.MD`
-- `mqa_scalesim/__init__.py`
-- `mqa_scalesim/workload.py`
-- `mqa_scalesim/baseline_decode.py`
-- `mqa_scalesim/kv_stationary_decode.py`
-- `mqa_scalesim/softmax_ops.py`
-- `mqa_scalesim/pe_timing.py`
-- `mqa_scalesim/result_schema.py`
-- `mqa_scalesim/validation_bridge.py`
-- `scalesim/compute/systolic_compute_kv_mqa.py`
-- `scalesim/compute/softmax_pipeline.py`
-- `test/test_mqa_workload.py`
-- `test/test_baseline_decode_cycles.py`
-- `test/test_kv_stationary_cycles.py`
-- `test/test_softmax_microops.py`
-- `test/test_mqa_vs_reference.py`
-
-## File modification summary
-
-Modify these existing files:
-
-- `generate_scalesim_topology.py`
-- `baseline_mqa_model.py`
-- `kv_stationary_model.py`
-- `compare.py`
-- `mqa_correctness.py`
-- `plot_results.py`
-- `make_autoregressive_plots.py`
-- `make_plot11.py`
-- `README.md`
-- `README_MQA.md`
-- `requirements.txt` (if needed)
-- `setup.py` (if needed)
-- `scalesim/scale_config.py`
-- `scalesim/topology_utils.py`
-- `scalesim/simulator.py`
-- `scalesim/single_layer_sim.py`
-- `scalesim/compute/operand_matrix.py`
-- `scalesim/compute/systolic_compute_os.py` (only if baseline path needs light adaptation)
-- `scalesim/compute/systolic_compute_is.py` (only if baseline path needs light adaptation)
-- `scalesim/compute/systolic_compute_ws.py` (only if baseline path needs light adaptation)
-- `scalesim/memory/double_buffered_scratchpad_mem.py`
-- `scalesim/memory/read_buffer.py`
-- `scalesim/memory/write_buffer.py`
-- `scalesim/memory/read_port.py` (only if needed)
-- `scalesim/memory/write_port.py` (only if needed)
-- `scalesim/memory/read_buffer_estimate_bw.py` (only if needed)
-- `scalesim/utilities/scalesim_report.py`
-
-## Ground rules for implementation
-
-The following implementation rules should be enforced throughout the project:
-
-- Final cycle counts must come from SCALE-Sim, not from side calculations.
-- The baseline and KV-stationary designs must use the same memory model and reporting infrastructure so the comparison is fair.
-- `CPP__Simulation/attention/*` remains for correctness/reference only, not for performance claims.
-- The old analytical `kv_stationary_model.py` logic may be preserved only as a debug oracle, not as the main evaluation path.
-- Softmax/reduction timing must be explicitly modeled inside the simulator, because the report identified this as the main technical challenge and previous analytical approximation is no longer acceptable.
-
-## Phase completion status
-
-| Phase | Description | Status |
-|-------|-------------|--------|
-| 0 | Preserve & baseline current repo | ✅ Complete |
-| 1 | Create `mqa_scalesim/` package & test scaffolding | ✅ Complete |
-| 2 | `MQAWorkload`, `PETiming`, `SoftmaxOps` core modules | ✅ Complete |
-| 3 | `BaselineMQADecodeSimulator` + `result_schema` | ✅ Complete |
-| 4 | `KVStationaryMQADecodeSimulator` | ✅ Complete |
-| 5 | `ValidationBridge` + cross-check scripts | ✅ Complete |
-| 6 | Memory bridge — `MQAMemoryBridge` + SCALE-Sim memory hooks | ✅ Complete |
-| 7 | Sweep, comparison, and plot pipeline | ⏳ Next |
-| 8 | Test suite completion & documentation | 🔲 Pending |
-
-## Next step to execute
-
-**Phase 7 — Sweep, comparison, and plot pipeline.**
-
-Now that both simulators run through the full SCALE-Sim memory model, the
-final phase wires the results into the comparison and plotting workflow:
-
-### Step 7.1: Create `run_sweep.py`
-
-A single top-level entry point that:
-- Accepts CLI arguments for sequence lengths, head configs, array shapes, and
-  batch sizes.
-- Instantiates `MQAWorkload` for every combination.
-- Calls both `BaselineMQADecodeSimulator` and `KVStationaryMQADecodeSimulator`
-  with `run_memory_model=True`.
-- Uses `result_to_experiment_row()` from `validation_bridge.py` to flatten
-  each result into a dict.
-- Writes all rows to `results/sweep_results.csv`.
-
-### Step 7.2: Update `compare.py`
-
-Replace the current mixed analytical/SCALE-Sim comparison logic with a
-pure comparison over the `sweep_results.csv` produced by `run_sweep.py`:
-- Load both `mode='baseline'` and `mode='kv_stationary'` rows.
-- Compute ratio columns: `cycles_ratio`, `dram_ratio`, `utilization_delta`.
-- Print a formatted table per configuration.
-- Write `results/comparison.csv`.
-
-### Step 7.3: Update `plot_results.py`
-
-Retarget all plots to read from `results/sweep_results.csv` and
-`results/comparison.csv`:
-- **Plot 1** — Total cycles vs. sequence length (both modes, log-x).
-- **Plot 2** — DRAM traffic vs. sequence length (both modes).
-- **Plot 3** — PE utilization vs. array size heatmap (both modes side-by-side).
-- **Plot 4** — Arithmetic intensity roofline (both modes, log-log).
-- **Plot 5** — Memory stall cycles breakdown (stacked bar: compute / stall / preload).
-
-### Step 7.4: Run `validation/phase6_validation.py` as CI gate
-
-Add a `Makefile` target:
-```
-validate-phase6:
-    python validation/phase6_validation.py --verbose --csv results/phase6_validation.csv
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+python3 -m pip install -r requirements.txt
+python3 validation/phase6_validation.py --verbose
+python3 run_sweep.py --verbose --progress
+python3 compare.py --verbose --progress
+python3 plot_results.py
 ```
 
-All CI checks should pass before proceeding to plotting or documentation.
+To change sweep parameters, pass them as CLI flags to `run_sweep.py`:
 
-### Step 7.5: Update `README_MQA.md`
+```bash
+python3 run_sweep.py \
+  --sequence-lengths 64,128,256,512 \
+  --decode-tokens 1,2,4 \
+  --array-sizes 8x8,16x16,32x32 \
+  --verbose --progress
+```
 
-Remove the caveat that KV-stationary results come from an external analytical
-model. Replace with:
-- Description of the new SCALE-Sim-native simulation path.
-- Updated quick-start commands (`run_sweep.py`, `compare.py`, `plot_results.py`).
-- Summary of Phase 6 memory model additions.
-- Table of reported metrics (cycles, DRAM bytes, stall cycles, PE utilization,
-  arithmetic intensity).
+For persistent benchmark campaigns, update the default constants at the top of `run_sweep.py` directly.
+
+---
+
+## Divergences from the original plan
+
+| Original plan | What was actually done | Reason |
+|---|---|---|
+| Modify `scalesim/single_layer_sim.py` and `operand_matrix.py` for MQA stages | Implemented analytical simulators in `mqa_scalesim/` with a shared memory bridge | MQA decode stages differ materially from GEMM/conv assumptions; the integration layer approach was cleaner and less brittle |
+| Modify `scalesim/memory/` read/write buffers directly | Integrated memory accounting through `MQAMemoryBridge` | Avoided destabilizing the existing SCALE-Sim memory subsystem |
+| Refactor `generate_scalesim_topology.py` as front-end compiler | Created `run_sweep.py` as the new front-end driver | `run_sweep.py` is a cleaner separation of experiment orchestration from simulation logic |
+| Keep `compare.py` and `plot_results.py` at flat output paths | Updated both to use `outputs/<timestamp>/` layout with auto-detection | Better reproducibility and cleaner run isolation |
+| Update both `README.md` and `README_MQA.md` | Merged both into a single unified `README.md` | One entry point is better for a publishable repository |
+| Phase 8 was documentation and cleanup only | Phases 8 and 9 were split: Phase 8 handled validation path migration, Phase 9 handled cleanup and documentation | The validation migration was substantial enough to warrant its own phase |
