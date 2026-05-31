@@ -18,12 +18,12 @@ OUTPUT_PNG = Path("results.png")
 def load_results(path: Path) -> Dict[str, List[float]]:
     data: Dict[str, List[float]] = {
         "T": [],
-        "baseline_cycles": [],
-        "kv_stationary_cycles": [],
+        "baseline_roofline_cycles": [],
+        "kv_roofline_cycles": [],
         "baseline_dram_MB": [],
-        "kv_stationary_dram_MB": [],
+        "kv_dram_MB": [],
         "baseline_AI": [],
-        "kv_stationary_AI": [],
+        "kv_AI": [],
     }
 
     with path.open("r", newline="", encoding="utf-8") as csvfile:
@@ -39,8 +39,8 @@ def plot_results(data: Dict[str, List[float]], output_path: Path) -> None:
     seq = data["T"]
     fig, axes = plt.subplots(1, 3, figsize=(16, 4.5))
 
-    axes[0].plot(seq, data["baseline_cycles"], marker="o", label="Baseline GEMM")
-    axes[0].plot(seq, data["kv_stationary_cycles"], marker="s", label="KV-stationary")
+    axes[0].plot(seq, data["baseline_roofline_cycles"], marker="o", label="Baseline GEMM")
+    axes[0].plot(seq, data["kv_roofline_cycles"], marker="s", label="KV-stationary")
     axes[0].set_title("Cycles vs Sequence Length")
     axes[0].set_xlabel("Sequence Length (T)")
     axes[0].set_ylabel("Estimated Cycles")
@@ -49,7 +49,7 @@ def plot_results(data: Dict[str, List[float]], output_path: Path) -> None:
     axes[0].legend()
 
     axes[1].plot(seq, data["baseline_dram_MB"], marker="o", label="Baseline GEMM")
-    axes[1].plot(seq, data["kv_stationary_dram_MB"], marker="s", label="KV-stationary")
+    axes[1].plot(seq, data["kv_dram_MB"], marker="s", label="KV-stationary")
     axes[1].set_title("DRAM Traffic vs Sequence Length")
     axes[1].set_xlabel("Sequence Length (T)")
     axes[1].set_ylabel("DRAM Traffic (MB)")
@@ -58,7 +58,7 @@ def plot_results(data: Dict[str, List[float]], output_path: Path) -> None:
     axes[1].legend()
 
     axes[2].plot(seq, data["baseline_AI"], marker="o", label="Baseline GEMM")
-    axes[2].plot(seq, data["kv_stationary_AI"], marker="s", label="KV-stationary")
+    axes[2].plot(seq, data["kv_AI"], marker="s", label="KV-stationary")
     axes[2].set_title("Arithmetic Intensity vs Sequence Length")
     axes[2].set_xlabel("Sequence Length (T)")
     axes[2].set_ylabel("Arithmetic Intensity (MACs/byte)")

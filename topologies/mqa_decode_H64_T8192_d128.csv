@@ -1,3 +1,0 @@
-Layer, M, N, K,
-QK_decode, 64, 8192, 128,
-AV_decode, 64, 128, 8192,

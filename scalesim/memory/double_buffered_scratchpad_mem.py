@@ -276,7 +276,7 @@ class double_buffered_scratchpad:
             ofmap_serviced_cycles += [ofmap_cycle_out[0]]
             ofmap_stalls = ofmap_cycle_out[0] - cycle_arr[0]
 
-            self.stall_cycles += int(max(ifmap_stalls[0], filter_stalls[0], ofmap_stalls[0]))
+            self.stall_cycles += int(np.max([ifmap_stalls[0], filter_stalls[0], ofmap_stalls[0]]))
             #self.stall_cycles += ifmap_stalls[0] + filter_stalls[0] + ofmap_stalls[0]
 
         if self.estimate_bandwidth_mode:
@@ -302,10 +302,9 @@ class double_buffered_scratchpad:
             np.asarray(ofmap_serviced_cycles).reshape((len(ofmap_serviced_cycles), 1))
         self.ofmap_trace_matrix = np.concatenate((ofmap_services_cycles_np, ofmap_demand_mat),
                                                  axis=1)
-        # `ofmap_serviced_cycles` is a list of NumPy scalars / 1-element arrays, so
-        # Python's built-in `max()` can return a non-scalar object here. Use the
-        # finalized trace matrix instead and take the last serviced cycle.
-        self.total_cycles = int(self.ofmap_trace_matrix[-1][0])
+        #self.total_cycles = int(ofmap_serviced_cycles[-1][0])
+        ## Probable fault in sanity check
+        self.total_cycles = int(np.max(ofmap_serviced_cycles))
 
         # END of serving demands from memory
         self.traces_valid = True

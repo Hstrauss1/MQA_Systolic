@@ -102,7 +102,9 @@ class scalesim:
 
         # Parse the topology
         self.topo.load_arrays(topofile=self.topology_file, mnk_inputs=self.read_gemm_inputs)
-        self.layout.load_arrays(layoutfile=self.layout_file, mnk_inputs=self.read_gemm_inputs)
+
+        if self.layout_file != '':
+            self.layout.load_arrays(layoutfile=self.layout_file, mnk_inputs=self.read_gemm_inputs)
 
         #num_layers = self.topo.get_num_layers()
         #self.config.scale_memory_maps(num_layers=num_layers)
@@ -149,7 +151,7 @@ class scalesim:
         self.runner.run()
         self.run_done_flag = True
 
-        #self.runner.generate_all_logs()
+        # self.runner.generate_all_logs()
         self.logs_generated_flag = True
 
         if self.verbose_flag:
