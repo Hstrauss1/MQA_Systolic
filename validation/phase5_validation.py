@@ -11,8 +11,9 @@ import sys
 import traceback
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parent
-ARTIFACT_DIR = REPO_ROOT / 'phase5_validation_artifacts'
+VALIDATION_ROOT = Path(__file__).resolve().parent
+REPO_ROOT = VALIDATION_ROOT.parent
+ARTIFACT_DIR = VALIDATION_ROOT / 'phase5_validation_artifacts'
 PYTHON = sys.executable
 
 
@@ -77,7 +78,7 @@ def check_sweep_outputs():
     output_dir = ARTIFACT_DIR / 'sweep'
     run_command([
         PYTHON,
-        'phase5_sweep.py',
+        'legacy/phase5_sweep.py',
         '--sequence-lengths', '128,256',
         '--decode-tokens', '1,2',
         '--array-sizes', '16x16',
@@ -200,7 +201,7 @@ def check_schema_stability():
     rerun_dir = ARTIFACT_DIR / 'sweep_rerun'
     run_command([
         PYTHON,
-        'phase5_sweep.py',
+        'legacy/phase5_sweep.py',
         '--sequence-lengths', '128,256',
         '--decode-tokens', '1,2',
         '--array-sizes', '16x16',

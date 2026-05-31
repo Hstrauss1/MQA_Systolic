@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Compare integrated baseline and KV-stationary MQA results from the shared Phase 5 backend."""
+"""Compare Phase 7 baseline and KV-stationary MQA sweep outputs."""
 
 from __future__ import annotations
 
@@ -9,92 +9,109 @@ import json
 from pathlib import Path
 from typing import Dict, List
 
-from mqa_scalesim.baseline_decode import BaselineMQADecodeSimulator
-from mqa_scalesim.kv_stationary_decode import KVStationaryMQADecodeSimulator
-from mqa_scalesim.validation_bridge import result_to_experiment_row
-from mqa_scalesim.workload import MQAWorkload
+try:
+    from tqdm import tqdm
+except ImportError:
+    tqdm = None
 
 
-DEFAULT_OUTPUT_DIR = Path('phase5_outputs')
-DEFAULT_CSV = 'phase5_compare_results.csv'
-DEFAULT_JSON = 'phase5_compare_results.json'
-
-
-def build_workload(sequence_length: int,
-                   batch_size: int,
-                   query_heads: int,
-                   kv_heads: int,
-                   head_dim: int,
-                   array_rows: int,
-                   array_cols: int,
-                   decode_tokens: int,
-                   mode: str) -> MQAWorkload:
-    return MQAWorkload(
-        mode=mode,
-        sequence_length=sequence_length,
-        batch_size=batch_size,
-        query_heads=query_heads,
-        kv_heads=kv_heads,
-        head_dim=head_dim,
-        precision='int8',
-        array_rows=array_rows,
-        array_cols=array_cols,
-        ifmap_sram_kb=64,
-        filter_sram_kb=64,
-        ofmap_sram_kb=64,
-        bandwidth_mode='calc',
-        dram_bandwidth=None,
-        decode_tokens=decode_tokens,
-        decode_step=4,
-        softmax_variant='online',
-        exp_variant='lookup',
-        reuse_kv_across_tokens=True,
-        metadata={'array_shape': f'{array_rows}x{array_cols}'},
-    )
-
-
-def run_mode(workload: MQAWorkload) -> Dict[str, object]:
-    if workload.mode == 'baseline_mqa_decode':
-        result = BaselineMQADecodeSimulator(workload).simulate()
-    elif workload.mode == 'kv_stationary_mqa_decode':
-        result = KVStationaryMQADecodeSimulator(workload).simulate()
-    else:
-        raise ValueError(f'Unsupported mode: {workload.mode}')
-    return result_to_experiment_row(workload, result)
+DEFAULT_OUTPUT_ROOT = Path('outputs')
+DEFAULT_SWEEP_CSV = 'sweep_results.csv'
+DEFAULT_CSV = 'comparison.csv'
+DEFAULT_JSON = 'comparison.json'
+JOIN_KEYS = [
+    'experiment_id',
+    'sequence_length',
+    'batch_size',
+    'query_heads',
+    'kv_heads',
+    'head_dim',
+    'array_shape',
+    'decode_tokens',
+    'precision',
+]
 
 
 def safe_ratio(numerator: float, denominator: float) -> float:
     return float(numerator) / float(denominator) if denominator else 0.0
 
 
+def load_rows(path: Path) -> List[Dict[str, object]]:
+    with path.open('r', newline='', encoding='utf-8') as handle:
+        return list(csv.DictReader(handle))
+
+
+def normalize_numeric(row: Dict[str, object], key: str) -> float:
+    value = row.get(key, 0)
+    if value in ('', None):
+        return 0.0
+    return float(value)
+
+
+def find_latest_run_dir(output_root: Path) -> Path:
+    if not output_root.exists():
+        raise FileNotFoundError(f'Output root does not exist: {output_root}')
+    candidates = sorted(path for path in output_root.iterdir() if path.is_dir())
+    if not candidates:
+        raise FileNotFoundError(f'No run directories found under {output_root}')
+    return candidates[-1]
+
+
+def maybe_progress(iterable, enabled: bool, total: int, desc: str):
+    if enabled and tqdm is not None:
+        return tqdm(iterable, total=total, desc=desc)
+    return iterable
+
+
+def log(message: str, verbose: bool) -> None:
+    if verbose:
+        print(message, flush=True)
+
+
 def compare_rows(baseline: Dict[str, object], kv: Dict[str, object]) -> Dict[str, object]:
-    return {
-        'sequence_length': baseline['sequence_length'],
-        'batch_size': baseline['batch_size'],
-        'query_heads': baseline['query_heads'],
-        'kv_heads': baseline['kv_heads'],
-        'head_dim': baseline['head_dim'],
-        'array_shape': baseline['array_shape'],
-        'decode_tokens': baseline['decode_tokens'],
-        'baseline_total_cycles': baseline['total_cycles'],
-        'kv_total_cycles': kv['total_cycles'],
-        'cycle_speedup_baseline_over_kv': safe_ratio(baseline['total_cycles'], kv['total_cycles']),
-        'dram_read_ratio_baseline_over_kv': safe_ratio(baseline['dram_reads'], kv['dram_reads']),
-        'dram_write_ratio_baseline_over_kv': safe_ratio(baseline['dram_writes'], kv['dram_writes']),
-        'sram_traffic_ratio_baseline_over_kv': safe_ratio(
-            baseline['sram_reads'] + baseline['sram_writes'],
-            kv['sram_reads'] + kv['sram_writes'],
-        ),
-        'weighted_pe_util_delta_kv_minus_baseline': kv['weighted_pe_utilization'] - baseline['weighted_pe_utilization'],
-        'baseline_amortized_preload_bytes_per_token': baseline['amortized_preload_bytes_per_token'],
-        'kv_amortized_preload_bytes_per_token': kv['amortized_preload_bytes_per_token'],
-        'amortized_preload_ratio_baseline_over_kv': safe_ratio(
-            baseline['amortized_preload_bytes_per_token'],
-            kv['amortized_preload_bytes_per_token'],
-        ),
-        'baseline_stage_names': baseline['stage_names'],
-        'kv_stage_names': kv['stage_names'],
-    }
+    baseline_total_cycles = normalize_numeric(baseline, 'total_cycles')
+    kv_total_cycles = normalize_numeric(kv, 'total_cycles')
+    baseline_dram_reads = normalize_numeric(baseline, 'dram_reads')
+    kv_dram_reads = normalize_numeric(kv, 'dram_reads')
+    baseline_dram_writes = normalize_numeric(baseline, 'dram_writes')
+    kv_dram_writes = normalize_numeric(kv, 'dram_writes')
+    baseline_sram_total = normalize_numeric(baseline, 'sram_reads') + normalize_numeric(baseline, 'sram_writes')
+    kv_sram_total = normalize_numeric(kv, 'sram_reads') + normalize_numeric(kv, 'sram_writes')
+    baseline_util = normalize_numeric(baseline, 'weighted_pe_utilization')
+    kv_util = normalize_numeric(kv, 'weighted_pe_utilization')
+    baseline_stall = normalize_numeric(baseline, 'memory_stall_cycles')
+    kv_stall = normalize_numeric(kv, 'memory_stall_cycles')
+    kv_preload_bw = normalize_numeric(kv, 'kv_preload_bandwidth_cycles')
+
+    out = {key: baseline[key] for key in JOIN_KEYS}
+    out.update({
+        'baseline_total_cycles': baseline_total_cycles,
+        'kv_total_cycles': kv_total_cycles,
+        'baseline_over_kv_cycle_ratio': safe_ratio(baseline_total_cycles, kv_total_cycles),
+        'kv_over_baseline_cycle_ratio': safe_ratio(kv_total_cycles, baseline_total_cycles),
+        'baseline_dram_reads': baseline_dram_reads,
+        'kv_dram_reads': kv_dram_reads,
+        'dram_read_ratio_baseline_over_kv': safe_ratio(baseline_dram_reads, kv_dram_reads),
+        'baseline_dram_writes': baseline_dram_writes,
+        'kv_dram_writes': kv_dram_writes,
+        'dram_write_ratio_baseline_over_kv': safe_ratio(baseline_dram_writes, kv_dram_writes),
+        'baseline_total_dram': baseline_dram_reads + baseline_dram_writes,
+        'kv_total_dram': kv_dram_reads + kv_dram_writes,
+        'total_dram_ratio_baseline_over_kv': safe_ratio(baseline_dram_reads + baseline_dram_writes, kv_dram_reads + kv_dram_writes),
+        'baseline_total_sram': baseline_sram_total,
+        'kv_total_sram': kv_sram_total,
+        'sram_ratio_baseline_over_kv': safe_ratio(baseline_sram_total, kv_sram_total),
+        'baseline_weighted_pe_utilization': baseline_util,
+        'kv_weighted_pe_utilization': kv_util,
+        'weighted_pe_utilization_delta_kv_minus_baseline': kv_util - baseline_util,
+        'baseline_memory_stall_cycles': baseline_stall,
+        'kv_memory_stall_cycles': kv_stall,
+        'memory_stall_cycles_delta_kv_minus_baseline': kv_stall - baseline_stall,
+        'kv_preload_bandwidth_cycles': kv_preload_bw,
+        'baseline_stage_names': baseline.get('stage_names', ''),
+        'kv_stage_names': kv.get('stage_names', ''),
+    })
+    return out
 
 
 def write_outputs(output_dir: Path, rows: List[Dict[str, object]]) -> Dict[str, str]:
@@ -115,44 +132,48 @@ def write_outputs(output_dir: Path, rows: List[Dict[str, object]]) -> Dict[str, 
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description='Compare integrated baseline and KV-stationary MQA paths.')
-    parser.add_argument('--sequence-length', type=int, default=1024)
-    parser.add_argument('--batch-size', type=int, default=1)
-    parser.add_argument('--query-heads', type=int, default=8)
-    parser.add_argument('--kv-heads', type=int, default=2)
-    parser.add_argument('--head-dim', type=int, default=64)
-    parser.add_argument('--array-rows', type=int, default=16)
-    parser.add_argument('--array-cols', type=int, default=16)
-    parser.add_argument('--decode-tokens', type=int, default=4)
-    parser.add_argument('--output-dir', type=Path, default=DEFAULT_OUTPUT_DIR)
+    parser = argparse.ArgumentParser(description='Compare Phase 7 baseline and KV-stationary MQA sweep outputs.')
+    parser.add_argument('--run-dir', type=Path, default=None)
+    parser.add_argument('--output-root', type=Path, default=DEFAULT_OUTPUT_ROOT)
+    parser.add_argument('--input', type=Path, default=None)
+    parser.add_argument('--output-dir', type=Path, default=None)
+    parser.add_argument('--verbose', action='store_true')
+    parser.add_argument('--progress', action='store_true')
     args = parser.parse_args()
 
-    baseline_row = run_mode(build_workload(
-        sequence_length=args.sequence_length,
-        batch_size=args.batch_size,
-        query_heads=args.query_heads,
-        kv_heads=args.kv_heads,
-        head_dim=args.head_dim,
-        array_rows=args.array_rows,
-        array_cols=args.array_cols,
-        decode_tokens=args.decode_tokens,
-        mode='baseline_mqa_decode',
-    ))
-    kv_row = run_mode(build_workload(
-        sequence_length=args.sequence_length,
-        batch_size=args.batch_size,
-        query_heads=args.query_heads,
-        kv_heads=args.kv_heads,
-        head_dim=args.head_dim,
-        array_rows=args.array_rows,
-        array_cols=args.array_cols,
-        decode_tokens=args.decode_tokens,
-        mode='kv_stationary_mqa_decode',
-    ))
+    run_dir = args.run_dir or find_latest_run_dir(args.output_root)
+    input_path = args.input or (run_dir / DEFAULT_SWEEP_CSV)
+    output_dir = args.output_dir or run_dir
 
-    comparison = compare_rows(baseline_row, kv_row)
-    outputs = write_outputs(args.output_dir, [comparison])
-    print(json.dumps({'outputs': outputs, 'comparison': comparison}, indent=2, sort_keys=True))
+    log(f'Using run directory {run_dir}', args.verbose)
+    log(f'Loading sweep results from {input_path}', args.verbose)
+    rows = load_rows(input_path)
+    log(f'Loaded {len(rows)} rows', args.verbose)
+
+    baseline_rows = {tuple(row[k] for k in JOIN_KEYS): row for row in rows if row.get('mode') == 'baseline_mqa_decode'}
+    kv_rows = {tuple(row[k] for k in JOIN_KEYS): row for row in rows if row.get('mode') == 'kv_stationary_mqa_decode'}
+    common_keys = sorted(set(baseline_rows.keys()) & set(kv_rows.keys()))
+    if not common_keys:
+        raise ValueError('No matching baseline/KV rows found in input CSV')
+
+    log(f'Found {len(common_keys)} matched baseline/KV workload pairs', args.verbose)
+    comparison_rows: List[Dict[str, object]] = []
+    iterator = maybe_progress(common_keys, enabled=args.progress, total=len(common_keys), desc='Phase 7 compare')
+    for key in iterator:
+        baseline = baseline_rows[key]
+        kv = kv_rows[key]
+        if args.verbose:
+            log(
+                f"[COMPARE] exp={baseline['experiment_id']} seq={baseline['sequence_length']} tok={baseline['decode_tokens']} array={baseline['array_shape']}",
+                True,
+            )
+        comparison_rows.append(compare_rows(baseline, kv))
+
+    outputs = write_outputs(output_dir, comparison_rows)
+    print(f'Phase 7 comparison complete: {len(comparison_rows)} rows')
+    print(f'RUN_DIR: {run_dir}')
+    print(f"CSV: {outputs['csv']}")
+    print(f"JSON: {outputs['json']}")
     return 0
 
 

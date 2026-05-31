@@ -21,7 +21,8 @@ import sys
 import traceback
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parent
+VALIDATION_ROOT = Path(__file__).resolve().parent
+REPO_ROOT = VALIDATION_ROOT.parent
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
@@ -53,7 +54,7 @@ from scalesim.simulator import simulator
 import scalesim.simulator as sim_mod
 
 
-ARTIFACT_DIR = REPO_ROOT / "phase2_validation_artifacts"
+ARTIFACT_DIR = VALIDATION_ROOT / "phase2_validation_artifacts"
 
 
 def clean_artifacts():

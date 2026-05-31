@@ -670,12 +670,12 @@ Retarget all plots to read from `results/sweep_results.csv` and
 - **Plot 4** — Arithmetic intensity roofline (both modes, log-log).
 - **Plot 5** — Memory stall cycles breakdown (stacked bar: compute / stall / preload).
 
-### Step 7.4: Run `phase6_validation.py` as CI gate
+### Step 7.4: Run `validation/phase6_validation.py` as CI gate
 
 Add a `Makefile` target:
 ```
 validate-phase6:
-    python phase6_validation.py --verbose --csv results/phase6_validation.csv
+    python validation/phase6_validation.py --verbose --csv results/phase6_validation.csv
 ```
 
 All CI checks should pass before proceeding to plotting or documentation.

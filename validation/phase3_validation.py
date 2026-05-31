@@ -20,7 +20,8 @@ import sys
 import traceback
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parent
+VALIDATION_ROOT = Path(__file__).resolve().parent
+REPO_ROOT = VALIDATION_ROOT.parent
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
@@ -33,7 +34,7 @@ from scalesim.simulator import simulator
 from scalesim.topology_utils import topologies
 
 
-ARTIFACT_DIR = REPO_ROOT / "phase3_validation_artifacts"
+ARTIFACT_DIR = VALIDATION_ROOT / "phase3_validation_artifacts"
 
 
 class ResultCollector:

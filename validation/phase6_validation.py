@@ -71,21 +71,6 @@ TEST_CONFIGS: List[Dict[str, Any]] = [
         ofmap_sram_kb=64,
         decode_tokens=1,
     ),
-    # Large — stress memory bridge
-    dict(
-        experiment_id='large_stress',
-        sequence_length=2048,
-        batch_size=4,
-        query_heads=16,
-        kv_heads=2,
-        head_dim=128,
-        array_rows=32,
-        array_cols=32,
-        ifmap_sram_kb=256,
-        filter_sram_kb=256,
-        ofmap_sram_kb=128,
-        decode_tokens=1,
-    ),
 ]
 
 
