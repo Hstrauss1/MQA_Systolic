@@ -66,6 +66,10 @@ class MQASimulationResult:
     sram_writes: int = 0
     stages: List[MQAStageResult] = field(default_factory=list)
     metadata: Dict[str, object] = field(default_factory=dict)
+    # Phase 6: populated by MQAMemoryBridge after the memory model runs
+    memory_stall_cycles: int = 0
+    kv_preload_bandwidth_cycles: int = 0
+    memory_model_applied: bool = False
 
     def add_stage(self, stage: MQAStageResult) -> None:
         self.stages.append(stage)
@@ -93,6 +97,15 @@ class MQASimulationResult:
     def finalize(self) -> None:
         self._recompute_utilization()
 
+    def apply_memory_result(self, mem_result: object) -> None:
+        """Merge MQAMemoryResult output into this simulation result (Phase 6)."""
+        self.memory_stall_cycles = mem_result.stall_cycles
+        self.kv_preload_bandwidth_cycles = mem_result.kv_preload_cycles
+        self.total_stall_cycles += mem_result.stall_cycles
+        self.total_cycles += mem_result.stall_cycles
+        self.memory_model_applied = True
+        self.metadata['memory_model'] = mem_result.to_dict()
+
     def to_dict(self) -> Dict[str, object]:
         return {
             'mode': self.mode,
@@ -109,4 +122,7 @@ class MQASimulationResult:
             'sram_writes': self.sram_writes,
             'stages': [stage.to_dict() for stage in self.stages],
             'metadata': dict(self.metadata),
+            'memory_stall_cycles': self.memory_stall_cycles,
+            'kv_preload_bandwidth_cycles': self.kv_preload_bandwidth_cycles,
+            'memory_model_applied': self.memory_model_applied,
         }

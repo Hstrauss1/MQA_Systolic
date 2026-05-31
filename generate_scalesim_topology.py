@@ -31,7 +31,7 @@ def build_workload(args: argparse.Namespace) -> MQAWorkload:
         softmax_variant='online',
         exp_variant='lookup',
         reuse_kv_across_tokens=True,
-        meta={'source': 'generate_scalesim_topology.py'},
+        metadata={'source': 'generate_scalesim_topology.py'},
     )
 
 

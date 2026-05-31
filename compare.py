@@ -49,7 +49,7 @@ def build_workload(sequence_length: int,
         softmax_variant='online',
         exp_variant='lookup',
         reuse_kv_across_tokens=True,
-        meta={'array_shape': f'{array_rows}x{array_cols}'},
+        metadata={'array_shape': f'{array_rows}x{array_cols}'},
     )
 
 

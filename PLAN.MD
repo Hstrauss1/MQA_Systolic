@@ -618,6 +618,74 @@ The following implementation rules should be enforced throughout the project:
 - The old analytical `kv_stationary_model.py` logic may be preserved only as a debug oracle, not as the main evaluation path.
 - Softmax/reduction timing must be explicitly modeled inside the simulator, because the report identified this as the main technical challenge and previous analytical approximation is no longer acceptable.
 
-## First step to execute next
+## Phase completion status
 
-The first implementation step should be to scaffold the new `mqa_scalesim/` package and the associated test files, because those provide the shared workload schema and result format that all later SCALE-Sim modifications will depend on.
+| Phase | Description | Status |
+|-------|-------------|--------|
+| 0 | Preserve & baseline current repo | ✅ Complete |
+| 1 | Create `mqa_scalesim/` package & test scaffolding | ✅ Complete |
+| 2 | `MQAWorkload`, `PETiming`, `SoftmaxOps` core modules | ✅ Complete |
+| 3 | `BaselineMQADecodeSimulator` + `result_schema` | ✅ Complete |
+| 4 | `KVStationaryMQADecodeSimulator` | ✅ Complete |
+| 5 | `ValidationBridge` + cross-check scripts | ✅ Complete |
+| 6 | Memory bridge — `MQAMemoryBridge` + SCALE-Sim memory hooks | ✅ Complete |
+| 7 | Sweep, comparison, and plot pipeline | ⏳ Next |
+| 8 | Test suite completion & documentation | 🔲 Pending |
+
+## Next step to execute
+
+**Phase 7 — Sweep, comparison, and plot pipeline.**
+
+Now that both simulators run through the full SCALE-Sim memory model, the
+final phase wires the results into the comparison and plotting workflow:
+
+### Step 7.1: Create `run_sweep.py`
+
+A single top-level entry point that:
+- Accepts CLI arguments for sequence lengths, head configs, array shapes, and
+  batch sizes.
+- Instantiates `MQAWorkload` for every combination.
+- Calls both `BaselineMQADecodeSimulator` and `KVStationaryMQADecodeSimulator`
+  with `run_memory_model=True`.
+- Uses `result_to_experiment_row()` from `validation_bridge.py` to flatten
+  each result into a dict.
+- Writes all rows to `results/sweep_results.csv`.
+
+### Step 7.2: Update `compare.py`
+
+Replace the current mixed analytical/SCALE-Sim comparison logic with a
+pure comparison over the `sweep_results.csv` produced by `run_sweep.py`:
+- Load both `mode='baseline'` and `mode='kv_stationary'` rows.
+- Compute ratio columns: `cycles_ratio`, `dram_ratio`, `utilization_delta`.
+- Print a formatted table per configuration.
+- Write `results/comparison.csv`.
+
+### Step 7.3: Update `plot_results.py`
+
+Retarget all plots to read from `results/sweep_results.csv` and
+`results/comparison.csv`:
+- **Plot 1** — Total cycles vs. sequence length (both modes, log-x).
+- **Plot 2** — DRAM traffic vs. sequence length (both modes).
+- **Plot 3** — PE utilization vs. array size heatmap (both modes side-by-side).
+- **Plot 4** — Arithmetic intensity roofline (both modes, log-log).
+- **Plot 5** — Memory stall cycles breakdown (stacked bar: compute / stall / preload).
+
+### Step 7.4: Run `phase6_validation.py` as CI gate
+
+Add a `Makefile` target:
+```
+validate-phase6:
+    python phase6_validation.py --verbose --csv results/phase6_validation.csv
+```
+
+All CI checks should pass before proceeding to plotting or documentation.
+
+### Step 7.5: Update `README_MQA.md`
+
+Remove the caveat that KV-stationary results come from an external analytical
+model. Replace with:
+- Description of the new SCALE-Sim-native simulation path.
+- Updated quick-start commands (`run_sweep.py`, `compare.py`, `plot_results.py`).
+- Summary of Phase 6 memory model additions.
+- Table of reported metrics (cycles, DRAM bytes, stall cycles, PE utilization,
+  arithmetic intensity).

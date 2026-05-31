@@ -11,7 +11,7 @@ from .workload import MQAWorkload
 class ValidationSummary:
     passed: bool
     message: str
-    meta: Dict[str, Any]
+    metadata: Dict[str, Any]
 
 
 def result_to_validation_dict(result: MQASimulationResult) -> Dict[str, Any]:
@@ -27,6 +27,8 @@ def result_to_validation_dict(result: MQASimulationResult) -> Dict[str, Any]:
         'pipeline_depth': payload.get('metadata', {}).get('pipeline_depth'),
         'stream_groups': payload.get('metadata', {}).get('stream_groups'),
         'amortized_preload_bytes_per_token': payload.get('metadata', {}).get('amortized_preload_bytes_per_token'),
+        'memory_stall_cycles': payload.get('memory_stall_cycles', 0),
+        'kv_preload_bandwidth_cycles': payload.get('kv_preload_bandwidth_cycles', 0),
     }
     return payload
 
@@ -36,7 +38,7 @@ def result_to_experiment_row(workload: MQAWorkload, result: MQASimulationResult)
     stage_cycles = {stage['name']: stage['cycles'] for stage in payload['stages']}
     metadata = payload.get('metadata', {})
     row: Dict[str, Any] = {
-        'experiment_id': workload.meta.get('experiment_id'),
+        'experiment_id': workload.metadata.get('experiment_id'),
         'mode': workload.mode,
         'sequence_length': workload.sequence_length,
         'batch_size': workload.batch_size,
@@ -46,7 +48,7 @@ def result_to_experiment_row(workload: MQAWorkload, result: MQASimulationResult)
         'precision': workload.precision,
         'array_rows': workload.array_rows,
         'array_cols': workload.array_cols,
-        'array_shape': workload.meta.get('array_shape', f'{workload.array_rows}x{workload.array_cols}'),
+        'array_shape': workload.metadata.get('array_shape', f'{workload.array_rows}x{workload.array_cols}'),
         'decode_tokens': workload.decode_tokens,
         'decode_step': workload.decode_step,
         'softmax_variant': workload.softmax_variant,
@@ -69,6 +71,9 @@ def result_to_experiment_row(workload: MQAWorkload, result: MQASimulationResult)
         'pipeline_depth': metadata.get('pipeline_depth', 0),
         'stream_groups': metadata.get('stream_groups', 0),
         'kv_resident_bytes': metadata.get('kv_resident_bytes', 0),
+        'memory_stall_cycles': payload.get('memory_stall_cycles', 0),
+        'kv_preload_bandwidth_cycles': payload.get('kv_preload_bandwidth_cycles', 0),
+        'memory_model_applied': payload.get('memory_model_applied', False),
     }
     for stage_name, cycles in stage_cycles.items():
         row[f'stage_{stage_name}_cycles'] = cycles

@@ -575,6 +575,33 @@ class read_buffer:
         return start_cycle, end_cycle
 
     #
+    def preload_resident_data(self, total_bytes: int, start_cycle: int) -> int:
+        """Simulate a one-time burst DRAM->SRAM fill for KV residency (Phase 6).
+
+        Computes how many cycles the fill takes given req_gen_bandwidth
+        (words per cycle), marks the internal cycle counter, and returns
+        the cycle at which the fill completes.
+
+        Parameters
+        ----------
+        total_bytes : int
+            Total number of bytes to transfer from DRAM to SRAM.
+        start_cycle : int
+            The cycle at which the preload begins.
+
+        Returns
+        -------
+        int
+            The cycle at which the preload completes (start_cycle + fill_cycles).
+        """
+        import math
+        word_size = getattr(self, 'word_size', 1)
+        bw = max(1, self.req_gen_bandwidth)
+        total_words = max(1, math.ceil(total_bytes / max(1, word_size)))
+        fill_cycles = math.ceil(total_words / bw)
+        return start_cycle + fill_cycles
+
+    #
     def print_trace(self, filename):
         """
         Method to write the read buffer trace matrix to a file.

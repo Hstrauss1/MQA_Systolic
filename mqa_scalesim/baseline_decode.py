@@ -164,7 +164,7 @@ class BaselineMQADecodeSimulator:
             },
         )
 
-    def simulate(self) -> MQASimulationResult:
+    def simulate(self, run_memory_model: bool = True) -> MQASimulationResult:
         rows = self.workload.batch_size * self.workload.query_heads * self.workload.decode_tokens
         sequence_length = self.workload.sequence_length
         head_dim = self.workload.head_dim
@@ -209,4 +209,17 @@ class BaselineMQADecodeSimulator:
             result.add_stage(stage)
 
         result.finalize()
+        if run_memory_model:
+            try:
+                from .memory_bridge import MQAMemoryBridge
+                bridge = MQAMemoryBridge(
+                    workload=self.workload,
+                    sim_result=result,
+                    kv_preload_bytes=0,
+                    verbose=False,
+                )
+                mem_result = bridge.run()
+                result.apply_memory_result(mem_result)
+            except ImportError:
+                pass  # SCALE-Sim not installed; skip memory model silently
         return result

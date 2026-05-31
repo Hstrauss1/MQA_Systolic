@@ -283,7 +283,7 @@ class KVStationaryMQADecodeSimulator:
         result.finalize()
         return result
 
-    def simulate(self) -> MQASimulationResult:
+    def simulate(self, run_memory_model: bool = True) -> MQASimulationResult:
         d = self._derive_problem_shape()
         stages = [
             self._simulate_kv_preload(d),
@@ -292,4 +292,18 @@ class KVStationaryMQADecodeSimulator:
             self._simulate_final_normalize(d),
             self._simulate_writeback(d),
         ]
-        return self._finalize_result(d, stages)
+        result = self._finalize_result(d, stages)
+        if run_memory_model:
+            try:
+                from .memory_bridge import MQAMemoryBridge
+                bridge = MQAMemoryBridge(
+                    workload=self.workload,
+                    sim_result=result,
+                    kv_preload_bytes=d.kv_preload_bytes,
+                    verbose=False,
+                )
+                mem_result = bridge.run()
+                result.apply_memory_result(mem_result)
+            except ImportError:
+                pass  # SCALE-Sim not installed; skip memory model silently
+        return result

@@ -63,3 +63,27 @@ class PETiming:
 
     def drain_cost(self, depth: int) -> int:
         return self.pipeline_drain_cycles + max(0, depth - 1) * self.wavefront_step_cycles
+
+    @staticmethod
+    def bandwidth_bytes_to_words(bandwidth_bytes_per_cycle: float, word_size: int) -> int:
+        """Convert a DRAM bandwidth in bytes/cycle to words/cycle (Phase 6).
+
+        Used by MQAMemoryBridge to translate workload.dram_bandwidth into the
+        ifmap_backing_buf_bw word-count form expected by
+        double_buffered_scratchpad.set_params().
+
+        Parameters
+        ----------
+        bandwidth_bytes_per_cycle : float
+            Raw DRAM bandwidth in bytes per cycle.
+        word_size : int
+            Size of one word in bytes (e.g. 2 for fp16, 4 for fp32).
+
+        Returns
+        -------
+        int
+            Words per cycle, floored, with a minimum of 1.
+        """
+        if word_size <= 0:
+            return 1
+        return max(1, int(bandwidth_bytes_per_cycle / word_size))

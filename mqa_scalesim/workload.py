@@ -35,7 +35,7 @@ class MQAWorkload:
     pipeline_depth_override: Optional[int] = None
     reuse_kv_across_tokens: bool = True
     softmax_state_precision: Optional[Precision] = None
-    meta: Dict[str, object] = field(default_factory=dict)
+    metadata: Dict[str, object] = field(default_factory=dict)
 
     def validate(self) -> None:
         if self.mode not in ('baseline_mqa_decode', 'kv_stationary_mqa_decode'):
@@ -67,3 +67,17 @@ class MQAWorkload:
     @property
     def effective_softmax_state_precision(self) -> Precision:
         return self.softmax_state_precision or self.precision
+
+    def precision_bytes(self) -> int:
+        return {
+            'int8': 1,
+            'fp16': 2,
+            'fp32': 4,
+        }[self.precision]
+
+    def softmax_state_precision_bytes(self) -> int:
+        return {
+            'int8': 1,
+            'fp16': 2,
+            'fp32': 4,
+        }[self.effective_softmax_state_precision]

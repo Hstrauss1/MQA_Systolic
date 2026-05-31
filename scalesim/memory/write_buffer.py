@@ -326,6 +326,33 @@ class write_buffer:
         return start_cycle, end_cycle
 
     #
+    def drain_token_output(self, output_bytes: int, start_cycle: int) -> int:
+        """Simulate per-token output writeback draining the write buffer (Phase 6).
+
+        Feeds into service_writes as a synthetic demand, applying the write
+        buffer's bandwidth limit to token outputs. Returns the cycle at which
+        the drain completes.
+
+        Parameters
+        ----------
+        output_bytes : int
+            Total bytes to drain from SRAM write buffer to DRAM.
+        start_cycle : int
+            The cycle at which the drain begins.
+
+        Returns
+        -------
+        int
+            The cycle at which the drain completes (start_cycle + drain_cycles).
+        """
+        import math
+        word_size = getattr(self, 'word_size', 1)
+        bw = max(1, getattr(self, 'req_gen_bandwidth', 1))
+        total_words = max(1, math.ceil(output_bytes / max(1, word_size)))
+        drain_cycles = math.ceil(total_words / bw)
+        return start_cycle + drain_cycles
+
+    #
     def print_trace(self, filename):
         """
         Method to write the write buffer trace matrix to a file.
