@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from typing import Any, Dict
 
 from .result_schema import MQASimulationResult
+from .workload import MQAWorkload
 
 
 @dataclass(slots=True)
@@ -28,6 +29,50 @@ def result_to_validation_dict(result: MQASimulationResult) -> Dict[str, Any]:
         'amortized_preload_bytes_per_token': payload.get('metadata', {}).get('amortized_preload_bytes_per_token'),
     }
     return payload
+
+
+def result_to_experiment_row(workload: MQAWorkload, result: MQASimulationResult) -> Dict[str, Any]:
+    payload = result.to_dict()
+    stage_cycles = {stage['name']: stage['cycles'] for stage in payload['stages']}
+    metadata = payload.get('metadata', {})
+    row: Dict[str, Any] = {
+        'experiment_id': workload.meta.get('experiment_id'),
+        'mode': workload.mode,
+        'sequence_length': workload.sequence_length,
+        'batch_size': workload.batch_size,
+        'query_heads': workload.query_heads,
+        'kv_heads': workload.kv_heads,
+        'head_dim': workload.head_dim,
+        'precision': workload.precision,
+        'array_rows': workload.array_rows,
+        'array_cols': workload.array_cols,
+        'array_shape': workload.meta.get('array_shape', f'{workload.array_rows}x{workload.array_cols}'),
+        'decode_tokens': workload.decode_tokens,
+        'decode_step': workload.decode_step,
+        'softmax_variant': workload.softmax_variant,
+        'exp_variant': workload.exp_variant,
+        'reuse_kv_across_tokens': workload.reuse_kv_across_tokens,
+        'total_cycles': payload['total_cycles'],
+        'total_macs': payload['total_macs'],
+        'total_stall_cycles': payload['total_stall_cycles'],
+        'dram_reads': payload['dram_reads'],
+        'dram_writes': payload['dram_writes'],
+        'sram_reads': payload['sram_reads'],
+        'sram_writes': payload['sram_writes'],
+        'pe_utilization': payload['pe_utilization'],
+        'weighted_pe_utilization': payload['weighted_pe_utilization'],
+        'onchip_storage_bytes': payload['onchip_storage_bytes'],
+        'kv_preload_bytes': payload['kv_preload_bytes'],
+        'stage_count': len(payload['stages']),
+        'stage_names': '|'.join(stage['name'] for stage in payload['stages']),
+        'amortized_preload_bytes_per_token': metadata.get('amortized_preload_bytes_per_token', 0.0),
+        'pipeline_depth': metadata.get('pipeline_depth', 0),
+        'stream_groups': metadata.get('stream_groups', 0),
+        'kv_resident_bytes': metadata.get('kv_resident_bytes', 0),
+    }
+    for stage_name, cycles in stage_cycles.items():
+        row[f'stage_{stage_name}_cycles'] = cycles
+    return row
 
 
 def validate_against_reference(sim_result: Dict[str, Any], reference_result: Dict[str, Any], atol: float = 1e-5) -> ValidationSummary:

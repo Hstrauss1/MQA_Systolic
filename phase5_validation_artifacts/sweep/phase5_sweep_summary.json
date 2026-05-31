@@ -1,0 +1,19 @@
+{
+  "array_shapes": [
+    "16x16"
+  ],
+  "decode_tokens": [
+    1,
+    2
+  ],
+  "experiment_count": 4,
+  "modes": [
+    "baseline_mqa_decode",
+    "kv_stationary_mqa_decode"
+  ],
+  "row_count": 8,
+  "sequence_lengths": [
+    128,
+    256
+  ]
+}

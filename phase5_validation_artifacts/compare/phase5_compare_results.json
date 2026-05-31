@@ -1,0 +1,23 @@
+[
+  {
+    "amortized_preload_ratio_baseline_over_kv": 0.0,
+    "array_shape": "16x16",
+    "baseline_amortized_preload_bytes_per_token": 0.0,
+    "baseline_stage_names": "score_gemm|softmax_reduce|value_gemm|writeback",
+    "baseline_total_cycles": 18644,
+    "batch_size": 1,
+    "cycle_speedup_baseline_over_kv": 0.058783653830995417,
+    "decode_tokens": 2,
+    "dram_read_ratio_baseline_over_kv": 0.6461538461538462,
+    "dram_write_ratio_baseline_over_kv": 9.0,
+    "head_dim": 64,
+    "kv_amortized_preload_bytes_per_token": 32768.0,
+    "kv_heads": 2,
+    "kv_stage_names": "kv_preload|query_stream|online_softmax_accum|final_normalize|writeback",
+    "kv_total_cycles": 317163,
+    "query_heads": 8,
+    "sequence_length": 256,
+    "sram_traffic_ratio_baseline_over_kv": 0.07715582450832073,
+    "weighted_pe_util_delta_kv_minus_baseline": 0.8237865998599444
+  }
+]
