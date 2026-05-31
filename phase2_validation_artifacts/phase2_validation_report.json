@@ -1,0 +1,100 @@
+{
+  "results": [
+    {
+      "details": {
+        "conf_list_length": 25,
+        "is_mqa": false,
+        "workload_type": "gemm"
+      },
+      "name": "legacy_config_roundtrip",
+      "status": "PASS"
+    },
+    {
+      "details": {
+        "layer_name": "fc1",
+        "num_layers": 1,
+        "topology_file": "/Users/dhruv/VS_Code/CSEN318/MQA_Systolic/phase2_validation_artifacts/legacy_topology.csv"
+      },
+      "name": "legacy_topology_path",
+      "status": "PASS"
+    },
+    {
+      "details": {
+        "mqa_metadata": {
+          "batch_size": 2,
+          "decode_step": 5,
+          "decode_tokens": 1,
+          "exp_variant": "lookup",
+          "head_dim": 64,
+          "kv_heads": 2,
+          "precision": "int8",
+          "query_heads": 8,
+          "sequence_length": 128,
+          "softmax_variant": "online",
+          "workload_type": "baseline_mqa_decode"
+        },
+        "stages": [
+          "score_stage",
+          "softmax_reduce",
+          "value_stage",
+          "writeback"
+        ],
+        "workload_type": "baseline_mqa_decode"
+      },
+      "name": "mqa_baseline_topology_staging",
+      "status": "PASS"
+    },
+    {
+      "details": {
+        "stage_count": 4,
+        "stage_names": [
+          "score_stage",
+          "softmax_reduce",
+          "value_stage",
+          "writeback"
+        ],
+        "workload_type": "kv_stationary_mqa_decode"
+      },
+      "name": "mqa_kv_topology_staging",
+      "status": "PASS"
+    },
+    {
+      "details": {
+        "num_layers": 1,
+        "top_path": "/Users/dhruv/VS_Code/CSEN318/MQA_Systolic/phase2_validation_artifacts/reports"
+      },
+      "name": "legacy_simulator_binding",
+      "status": "PASS"
+    },
+    {
+      "details": {
+        "baseline_mqa_decode": {
+          "mode": "baseline_mqa_decode",
+          "route": "baseline",
+          "validated": true
+        },
+        "kv_stationary_mqa_decode": {
+          "mode": "kv_stationary_mqa_decode",
+          "route": "kv_stationary",
+          "validated": true
+        }
+      },
+      "name": "mqa_route_dispatch",
+      "status": "PASS"
+    },
+    {
+      "details": {
+        "caught": true,
+        "message": "MQA workload requires 'sequence_length' to be strictly greater than zero"
+      },
+      "name": "invalid_mqa_validation",
+      "status": "PASS"
+    }
+  ],
+  "summary": {
+    "artifact_dir": "/Users/dhruv/VS_Code/CSEN318/MQA_Systolic/phase2_validation_artifacts",
+    "failed": 0,
+    "passed": 7,
+    "total": 7
+  }
+}
