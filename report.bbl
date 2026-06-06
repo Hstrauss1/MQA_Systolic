@@ -1,0 +1,165 @@
+% $ biblatex auxiliary file $
+% $ biblatex bbl format version 3.3 $
+% Do not modify the above lines!
+%
+% This is an auxiliary file used by the 'biblatex' package.
+% This file may safely be deleted. It will be recreated by
+% biber as required.
+%
+\begingroup
+\makeatletter
+\@ifundefined{ver@biblatex.sty}
+  {\@latex@error
+     {Missing 'biblatex' package}
+     {The bibliography requires the 'biblatex' package.}
+      \aftergroup\endinput}
+  {}
+\endgroup
+
+
+\refsection{0}
+  \datalist[entry]{apa/apasortcite//global/global/global}
+    \entry{ainslie2023gqa}{article}{}{}
+      \name{author}{6}{}{%
+        {{un=0,uniquepart=base,hash=c9e841fff6d89d0371c79b8b1eabe203}{%
+           family={Ainslie},
+           familyi={A\bibinitperiod},
+           given={Joshua},
+           giveni={J\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=9e32dc1e151f8ace06bd5dc3dfbedbc9}{%
+           family={Lee-Thorp},
+           familyi={L\bibinithyphendelim T\bibinitperiod},
+           given={James},
+           giveni={J\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=5a1f0ccec451b37fb72708c32163223f}{%
+           family={Jong},
+           familyi={J\bibinitperiod},
+           given={Michiel},
+           giveni={M\bibinitperiod},
+           givenun=0,
+           prefix={de},
+           prefixi={d\bibinitperiod}}}%
+        {{un=0,uniquepart=base,hash=da39fc85c541d52862a83c70fbd9083f}{%
+           family={Zemlyanskiy},
+           familyi={Z\bibinitperiod},
+           given={Yury},
+           giveni={Y\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=c3f0ee71e863e6ee9e0ccbfddf9c3dd3}{%
+           family={Lebrón},
+           familyi={L\bibinitperiod},
+           given={Federico},
+           giveni={F\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=59cda518d9a4ec0ecad7ee2e2df72b91}{%
+           family={Sanghai},
+           familyi={S\bibinitperiod},
+           given={Sumit},
+           giveni={S\bibinitperiod},
+           givenun=0}}%
+      }
+      \list{publisher}{1}{%
+        {Association for Computational Linguistics}%
+      }
+      \strng{namehash}{3cd79115a61b5d67c242c6b1f4c1aa0a}
+      \strng{fullhash}{49ede003a7c782cf662c48fe352880df}
+      \strng{fullhashraw}{49ede003a7c782cf662c48fe352880df}
+      \strng{bibnamehash}{49ede003a7c782cf662c48fe352880df}
+      \strng{authorbibnamehash}{49ede003a7c782cf662c48fe352880df}
+      \strng{authornamehash}{3cd79115a61b5d67c242c6b1f4c1aa0a}
+      \strng{authorfullhash}{49ede003a7c782cf662c48fe352880df}
+      \strng{authorfullhashraw}{49ede003a7c782cf662c48fe352880df}
+      \field{sortinit}{A}
+      \field{sortinithash}{2f401846e2029bad6b3ecc16d50031e2}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \true{uniqueprimaryauthor}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Proceedings of the 2023 Conference on Empirical Methods in Natural Language Processing}
+      \field{title}{GQA: Training Generalized Multi-Query Transformer Models from Multi-Head Checkpoints}
+      \field{year}{2023}
+      \verb{urlraw}
+      \verb https://aclanthology.org/2023.emnlp-main.298/
+      \endverb
+      \verb{url}
+      \verb https://aclanthology.org/2023.emnlp-main.298/
+      \endverb
+    \endentry
+  \enddatalist
+  \datalist[entry]{apa/global//global/global/global}
+    \entry{ainslie2023gqa}{article}{}{}
+      \name{author}{6}{}{%
+        {{un=0,uniquepart=base,hash=c9e841fff6d89d0371c79b8b1eabe203}{%
+           family={Ainslie},
+           familyi={A\bibinitperiod},
+           given={Joshua},
+           giveni={J\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=9e32dc1e151f8ace06bd5dc3dfbedbc9}{%
+           family={Lee-Thorp},
+           familyi={L\bibinithyphendelim T\bibinitperiod},
+           given={James},
+           giveni={J\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=5a1f0ccec451b37fb72708c32163223f}{%
+           family={Jong},
+           familyi={J\bibinitperiod},
+           given={Michiel},
+           giveni={M\bibinitperiod},
+           givenun=0,
+           prefix={de},
+           prefixi={d\bibinitperiod}}}%
+        {{un=0,uniquepart=base,hash=da39fc85c541d52862a83c70fbd9083f}{%
+           family={Zemlyanskiy},
+           familyi={Z\bibinitperiod},
+           given={Yury},
+           giveni={Y\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=c3f0ee71e863e6ee9e0ccbfddf9c3dd3}{%
+           family={Lebrón},
+           familyi={L\bibinitperiod},
+           given={Federico},
+           giveni={F\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=59cda518d9a4ec0ecad7ee2e2df72b91}{%
+           family={Sanghai},
+           familyi={S\bibinitperiod},
+           given={Sumit},
+           giveni={S\bibinitperiod},
+           givenun=0}}%
+      }
+      \list{publisher}{1}{%
+        {Association for Computational Linguistics}%
+      }
+      \strng{namehash}{3cd79115a61b5d67c242c6b1f4c1aa0a}
+      \strng{fullhash}{49ede003a7c782cf662c48fe352880df}
+      \strng{fullhashraw}{49ede003a7c782cf662c48fe352880df}
+      \strng{bibnamehash}{49ede003a7c782cf662c48fe352880df}
+      \strng{authorbibnamehash}{49ede003a7c782cf662c48fe352880df}
+      \strng{authornamehash}{3cd79115a61b5d67c242c6b1f4c1aa0a}
+      \strng{authorfullhash}{49ede003a7c782cf662c48fe352880df}
+      \strng{authorfullhashraw}{49ede003a7c782cf662c48fe352880df}
+      \field{sortinit}{A}
+      \field{sortinithash}{2f401846e2029bad6b3ecc16d50031e2}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \true{uniqueprimaryauthor}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Proceedings of the 2023 Conference on Empirical Methods in Natural Language Processing}
+      \field{title}{GQA: Training Generalized Multi-Query Transformer Models from Multi-Head Checkpoints}
+      \field{year}{2023}
+      \verb{urlraw}
+      \verb https://aclanthology.org/2023.emnlp-main.298/
+      \endverb
+      \verb{url}
+      \verb https://aclanthology.org/2023.emnlp-main.298/
+      \endverb
+    \endentry
+  \enddatalist
+\endrefsection
+\endinput
+
