@@ -98,6 +98,12 @@ tile_cycles = (R + C - 1) * column_dwell + (P - 1) * effective_stagger
 
 `effective_stagger = max(packet_stagger, upper_pe_cycles)` — see §3.6 below.
 
+> **⚠️ SUPERSEDED — read §20.** The `(R+C-1)*column_dwell` fill term above (135 cyc/column)
+> is the **A / "dwell"** model. SCALE-Sim measures the real Q·K fill at **~2.5 cyc/column**,
+> ruling out A by ~50×. The model now defaults to the **B / "wavefront"** fill
+> (`wavefront_fill=True`): `d + (R+C-1)*effective_stagger`. Pass `wavefront_fill=False` to
+> recover the A numbers in this section. Under B almost all prefill is DRAM-bound — see §20.
+
 ### 3.4 Merge Extensions (n levels)
 
 Motivation: at T=8192 with no partitioning, drain = 8191 steps * 135 cycles
@@ -576,9 +582,14 @@ pdflatex report.tex && biber report && pdflatex report.tex && pdflatex report.te
 
 ## 15. Key Findings Summary
 
-1. **lmc=16 is the single most important parameter.** Raises upper PE utilization from 5% to 87.5% with no extra rows. Transforms a design that loses to FlashAttention per unit area into one that beats it by 65-79%.
+> **⚠️ Findings #1 and #2 below are A-regime (compute-bound) and are OVERTURNED by §20.**
+> Under the SCALE-Sim-validated wavefront fill (B), prefill is DRAM-bound: lmc must be sized
+> to bandwidth (`lmc≈BW/128`; lmc≤4 at 512 B/cyc, lmc=16 only with HBM), and merge extensions
+> help only in the compute-bound regime. Read §20 before citing #1/#2.
 
-2. **Merge extensions hurt area efficiency.** n=3 adds 8× rows for ~2-3× speed. n=0 lmc=16 is Pareto-optimal.
+1. **lmc=16 is the single most important parameter.** Raises upper PE utilization from 5% to 87.5% with no extra rows. Transforms a design that loses to FlashAttention per unit area into one that beats it by 65-79%. *(A-regime — see §20: under B, lmc=16 is 75% idle at 512 B/cyc.)*
+
+2. **Merge extensions hurt area efficiency.** n=3 adds 8× rows for ~2-3× speed. n=0 lmc=16 is Pareto-optimal. *(A-regime — see §20: under B, n=0 and n=3 collapse to the same DRAM floor.)*
 
 3. **The 511× speedup is a MAC-count artifact.** 64×64 baseline is 7.8× compute-bound. MAC-normalized: 65×. Fused: ~1×.
 
@@ -599,6 +610,8 @@ pdflatex report.tex && biber report && pdflatex report.tex && pdflatex report.te
 ## 16. Open Work / TODO
 
 - [ ] SCALE-Sim validation of n=0 lmc=16 at T=4096 and T=8192 (currently blocked by 500MB operand matrix limit)
+- [x] **Pipeline fill model: A (dwell) vs B (wavefront) — RESOLVED & SCALE-Sim validated. B is correct (~2.5 cyc/col measured, A wrong by ~50×). Model defaults to B. See §20.**
+- [x] BW × config × P full sweep under B — COMPLETE. `reuse_full_sweep.csv` (750 rows). See §20.4.
 - [x] Implement `kv_reuse_model.py` — multi-pass silicon re-use model — COMPLETE. See §18.
 - [x] Sweep P=[1,2,4,8,16] at T=[512,1024,2048,4096,8192], plot latency vs P and area-norm throughput vs P — COMPLETE. See §18.
 - [ ] Validate single decode step in SCALE-Sim (currently divergent — needs pipeline traversal model not MAC-only)
@@ -881,3 +894,88 @@ pass. This:
 - Amortises output DRAM across all P passes (C×H×d×bpe per pass vs T×H×d×bpe at end)
 - Enables consumer overlap (next-stage processing can start on early tokens)
 - Is already modelled correctly in `total_cycles_causal` (output added per-pass)
+
+---
+
+## 20. Wavefront Pipeline Fill (Model B) — SCALE-Sim Validated (2026-06-06)
+
+**This section supersedes the compute-bound framing of §3.3, §6, §7, and §15.**
+
+### 20.1 The fill-model bug (A) and the fix (B)
+
+The original pipeline-depth term assumed a single query packet **dwells** the full
+`column_dwell = 135` cycles at each column before advancing (Q completes its whole
+d-cycle dot product at column i, *then* hops to column i+1):
+
+```
+A (dwell, legacy):  tile_compute = (R + C - 1) * column_dwell      + (P-1)*eff_stagger
+B (wavefront, now): tile_compute = d + (R + C - 1) * eff_stagger   + (P-1)*eff_stagger
+```
+
+But every column owns a **dedicated lower MAC + stationary K**, so for one packet the
+C dot products `s_0..s_{C-1}` are **independent** and compute in a pipelined wavefront as
+Q ripples right (1-cycle register hop). The `d=128` reduction latency is paid **once** as
+fill; thereafter the binding path is the online-softmax state chain at `effective_stagger`
+(=8 with lmc=16), **not 135/column**.
+
+### 20.2 SCALE-Sim validation (the contested fill term)
+
+SCALE-Sim runs the Q·K stage on a cycle-accurate systolic array and directly measures the
+per-column fill. Results (prefill, lmc=16; drain = `ss_mac_cycles − analytical_mac`):
+
+| case | eff_cols | measured drain | **cyc/col** | A predicts (×135) | B predicts (×8) |
+|------|----------|----------------|-------------|-------------------|-----------------|
+| T=512  n=0 | 512  | 1,275 | **2.49** | 69,120  | 4,224 |
+| T=1024 n=0 | 1024 | 2,299 | **2.25** | 138,240 | 8,320 |
+| T=2048 n=3 | 256  |   763 | **2.98** | 34,560  | 2,176 |
+
+**Verdict:** real fill ≈ **2.2–3.0 cyc/column**. A (135/col) is wrong by **~50×** and is
+ruled out. B (8/col) is the right regime and is **conservative** (SCALE-Sim is even faster).
+This *reinterprets* the `delta_pct` column of `validate_lower_mac_sweep.csv`: it was never
+"analytical-vs-SS error that converges" — it **is** the measured wavefront fill, confirming
+d-once pipelining.
+
+**Scope:** validates the lower-MAC dot-product fill only (the term A and B disagreed on).
+The upper-PE state-chain rate is still analytical (B uses eff_stagger=8 ≥ the ~2.5 measured,
+so conservative). DRAM-bound behavior below is roofline-analytical (SCALE-Sim runs infinite BW).
+
+### 20.3 Consequence — prefill is DRAM-bound, and the design rules invert
+
+Under B, compute drops far below the DRAM floor (273 MB Q+O at T=8192 → ~525K cyc @512 B/cyc):
+
+| n=0 T=8192 P=1 | A compute | B compute | DRAM floor | bound under B |
+|----------------|-----------|-----------|------------|---------------|
+| lmc=16 | 1,179,953 | 131,696 | 532,480 | **memory** (array 75% idle) |
+
+- **n=0 and n=3 collapse** for lmc=16 (both pinned to the DRAM floor → merge extensions
+  buy nothing when memory-bound). §3.4/§15 "merge helps / n=3 validated 1.29×" was an
+  A-regime (compute-bound) artifact.
+- **lmc must be sized to bandwidth:** compute ∝ 1/lmc, DRAM floor ∝ 1/BW, so the balance is
+  **`lmc_balance ≈ BW/128`** (lmc=4 @512 B/cyc, 8 @1024, 16 @2048). Below balance, extra lmc
+  is idle silicon — per physical MAC, efficiency **halves per lmc doubling**. At/above
+  balance, per-MAC efficiency is **lmc-invariant**; lmc only buys lower wall-clock latency.
+- This **overturns §15 finding #1** ("lmc=16 is the single most important parameter"): that
+  was implicitly compute-bound. At commodity 512 B/cyc use **lmc≤4**; lmc=16 is only correct
+  with ~2 TB/s HBM (4× BW), where it then runs 4× faster (525K→132K).
+- **Merge extensions return** only in the compute-bound regime (high BW / low lmc), where
+  they cut the drain; useless against the DRAM wall.
+
+### 20.4 New / changed files
+
+| File | Change |
+|------|--------|
+| `kv_stationary_model.py` | `simulate_2d_kv_stationary_array(..., wavefront_fill=True)` — default B; `False` = legacy A (exact old numbers, verified n=0 T=8192 → 1,179,953) |
+| `kv_reuse_model.py` | threads `wavefront_fill`; merge-aware multi-pass geometry (sub_cols = (T/P)/2^n, pe_count = H·T/P merge-invariant); exposes `causal_compute_total`/`causal_memory_total`/`bound` |
+| `reuse_full_sweep.py` → `reuse_full_sweep.csv` | 750-row sweep: BW{512,1024,2048} × n{0,3} × lmc{1,2,4,8,16} × T{512..8192} × P{1..16}, causal prefill, B model, with per-MAC speedup + compute/memory bound flag |
+
+### 20.5 Validated per-MAC speedup @ T=8192 (B model, causal prefill)
+
+`speedup_per_mac = (flash_cycles/kv_cycles) / (kv_phys_macs/flash_phys_macs)`,
+`kv_phys_macs = pe_count×lmc`, `flash = 64×64`. `c`=compute-bound, `m`=mem-bound.
+
+| BW | lmc=4 P=8 | lmc=16 P=8 | note |
+|----|-----------|------------|------|
+| 512  | 3.01 c | 0.76 m | lmc=16 75% idle → wasteful |
+| 2048 | 3.01 c | 3.00 c | lmc=16 now fed → matches lmc=4 |
+
+Ceiling across the grid ≈ **3.48×** (lmc≤balance, P=16) — reached with the *fewest* MACs.

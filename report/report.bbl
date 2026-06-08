@@ -1,0 +1,661 @@
+% $ biblatex auxiliary file $
+% $ biblatex bbl format version 3.3 $
+% Do not modify the above lines!
+%
+% This is an auxiliary file used by the 'biblatex' package.
+% This file may safely be deleted. It will be recreated by
+% biber as required.
+%
+\begingroup
+\makeatletter
+\@ifundefined{ver@biblatex.sty}
+  {\@latex@error
+     {Missing 'biblatex' package}
+     {The bibliography requires the 'biblatex' package.}
+      \aftergroup\endinput}
+  {}
+\endgroup
+
+
+\refsection{0}
+  \datalist[entry]{apa/apasortcite//global/global/global}
+    \entry{ainslie2023gqa}{article}{}{}
+      \name{author}{6}{}{%
+        {{un=0,uniquepart=base,hash=c9e841fff6d89d0371c79b8b1eabe203}{%
+           family={Ainslie},
+           familyi={A\bibinitperiod},
+           given={Joshua},
+           giveni={J\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=9e32dc1e151f8ace06bd5dc3dfbedbc9}{%
+           family={Lee-Thorp},
+           familyi={L\bibinithyphendelim T\bibinitperiod},
+           given={James},
+           giveni={J\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=5a1f0ccec451b37fb72708c32163223f}{%
+           family={Jong},
+           familyi={J\bibinitperiod},
+           given={Michiel},
+           giveni={M\bibinitperiod},
+           givenun=0,
+           prefix={de},
+           prefixi={d\bibinitperiod}}}%
+        {{un=0,uniquepart=base,hash=da39fc85c541d52862a83c70fbd9083f}{%
+           family={Zemlyanskiy},
+           familyi={Z\bibinitperiod},
+           given={Yury},
+           giveni={Y\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=c3f0ee71e863e6ee9e0ccbfddf9c3dd3}{%
+           family={Lebrón},
+           familyi={L\bibinitperiod},
+           given={Federico},
+           giveni={F\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=59cda518d9a4ec0ecad7ee2e2df72b91}{%
+           family={Sanghai},
+           familyi={S\bibinitperiod},
+           given={Sumit},
+           giveni={S\bibinitperiod},
+           givenun=0}}%
+      }
+      \list{publisher}{1}{%
+        {Association for Computational Linguistics}%
+      }
+      \strng{namehash}{3cd79115a61b5d67c242c6b1f4c1aa0a}
+      \strng{fullhash}{49ede003a7c782cf662c48fe352880df}
+      \strng{fullhashraw}{49ede003a7c782cf662c48fe352880df}
+      \strng{bibnamehash}{49ede003a7c782cf662c48fe352880df}
+      \strng{authorbibnamehash}{49ede003a7c782cf662c48fe352880df}
+      \strng{authornamehash}{3cd79115a61b5d67c242c6b1f4c1aa0a}
+      \strng{authorfullhash}{49ede003a7c782cf662c48fe352880df}
+      \strng{authorfullhashraw}{49ede003a7c782cf662c48fe352880df}
+      \field{sortinit}{A}
+      \field{sortinithash}{2f401846e2029bad6b3ecc16d50031e2}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \true{uniqueprimaryauthor}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Proceedings of the 2023 Conference on Empirical Methods in Natural Language Processing}
+      \field{title}{{GQA}: Training Generalized Multi-Query Transformer Models from Multi-Head Checkpoints}
+      \field{year}{2023}
+      \field{pages}{4895\bibrangedash 4901}
+      \range{pages}{7}
+      \verb{urlraw}
+      \verb https://aclanthology.org/2023.emnlp-main.298/
+      \endverb
+      \verb{url}
+      \verb https://aclanthology.org/2023.emnlp-main.298/
+      \endverb
+    \endentry
+    \entry{dao2022flashattention}{article}{}{}
+      \name{author}{5}{}{%
+        {{un=0,uniquepart=base,hash=ede2395a7f566a456448fcb5f8222c99}{%
+           family={Dao},
+           familyi={D\bibinitperiod},
+           given={Tri},
+           giveni={T\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=6716abb21ba9752a68430160afff93ec}{%
+           family={Fu},
+           familyi={F\bibinitperiod},
+           given={Daniel\bibnamedelima Y.},
+           giveni={D\bibinitperiod\bibinitdelim Y\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=160929a7e6ceecdf3f7c9a13abd5ea35}{%
+           family={Ermon},
+           familyi={E\bibinitperiod},
+           given={Stefano},
+           giveni={S\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=c02d96ae7fa9b72bff94f3a0c401e570}{%
+           family={Rudra},
+           familyi={R\bibinitperiod},
+           given={Atri},
+           giveni={A\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=eb1f5a2ba08ea12db36c871fe601f5f1}{%
+           family={Ré},
+           familyi={R\bibinitperiod},
+           given={Christopher},
+           giveni={C\bibinitperiod},
+           givenun=0}}%
+      }
+      \strng{namehash}{c6e8806a86a2e83c272c16e8d7d4b3c0}
+      \strng{fullhash}{8e56cf5ff4528ca1d5e266e247465be8}
+      \strng{fullhashraw}{8e56cf5ff4528ca1d5e266e247465be8}
+      \strng{bibnamehash}{8e56cf5ff4528ca1d5e266e247465be8}
+      \strng{authorbibnamehash}{8e56cf5ff4528ca1d5e266e247465be8}
+      \strng{authornamehash}{c6e8806a86a2e83c272c16e8d7d4b3c0}
+      \strng{authorfullhash}{8e56cf5ff4528ca1d5e266e247465be8}
+      \strng{authorfullhashraw}{8e56cf5ff4528ca1d5e266e247465be8}
+      \field{sortinit}{D}
+      \field{sortinithash}{6f385f66841fb5e82009dc833c761848}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \true{uniqueprimaryauthor}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Advances in Neural Information Processing Systems}
+      \field{title}{{FlashAttention}: Fast and Memory-Efficient Exact Attention with {IO}-Awareness}
+      \field{volume}{35}
+      \field{year}{2022}
+    \endentry
+    \entry{ham2020a3}{article}{}{}
+      \true{moreauthor}
+      \true{morelabelname}
+      \name{author}{10}{}{%
+        {{un=0,uniquepart=base,hash=548accfedaf6124c906f7ed657a4c7cf}{%
+           family={Ham},
+           familyi={H\bibinitperiod},
+           given={Tae\bibnamedelima Jun},
+           giveni={T\bibinitperiod\bibinitdelim J\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=074ad20ec592fa8b09b4d0a051606d5b}{%
+           family={Jung},
+           familyi={J\bibinitperiod},
+           given={Sung\bibnamedelima Jun},
+           giveni={S\bibinitperiod\bibinitdelim J\bibinitperiod},
+           givenun=0}}%
+        {{un=1,uniquepart=given,hash=0ac93f49c5b4be6c2726f911fd49165f}{%
+           family={Kim},
+           familyi={K\bibinitperiod},
+           given={Seonghak},
+           giveni={S\bibinitperiod},
+           givenun=1}}%
+        {{un=0,uniquepart=base,hash=6abf6f803fd9db5a802229f4c377e39c}{%
+           family={Oh},
+           familyi={O\bibinitperiod},
+           given={Young\bibnamedelima H.},
+           giveni={Y\bibinitperiod\bibinitdelim H\bibinitperiod},
+           givenun=0}}%
+        {{un=1,uniquepart=given,hash=b20460f2f6bc6e94890359b81929033a}{%
+           family={Park},
+           familyi={P\bibinitperiod},
+           given={Yrongsoo},
+           giveni={Y\bibinitperiod},
+           givenun=1}}%
+        {{un=0,uniquepart=base,hash=f6f97de25467850d183495389b3367fd}{%
+           family={Song},
+           familyi={S\bibinitperiod},
+           given={Youngmin},
+           giveni={Y\bibinitperiod},
+           givenun=0}}%
+        {{un=1,uniquepart=given,hash=b0cbc574fb40433563df9bd7c0af38ef}{%
+           family={Park},
+           familyi={P\bibinitperiod},
+           given={Jung-Hun},
+           giveni={J\bibinithyphendelim H\bibinitperiod},
+           givenun=1}}%
+        {{un=0,uniquepart=base,hash=775d214c02e22871cac2c9eac59f681c}{%
+           family={Lee},
+           familyi={L\bibinitperiod},
+           given={Jaehyung},
+           giveni={J\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=bf1ea194e32bfe999590b6bd27fc35ec}{%
+           family={Deaton},
+           familyi={D\bibinitperiod},
+           given={Daniel},
+           giveni={D\bibinitperiod},
+           givenun=0}}%
+        {{un=1,uniquepart=given,hash=5a1973076033e8823f69cd42eeb15bc9}{%
+           family={Kim},
+           familyi={K\bibinitperiod},
+           given={Tae\bibnamedelima Hoon},
+           giveni={T\bibinitperiod\bibinitdelim H\bibinitperiod},
+           givenun=1}}%
+      }
+      \list{organization}{1}{%
+        {IEEE}%
+      }
+      \strng{namehash}{08d17ecc7d7f018e5f3ed9897c407ac1}
+      \strng{fullhash}{b2065f8113c4fb324ccc076fd89a40fc}
+      \strng{fullhashraw}{b2065f8113c4fb324ccc076fd89a40fc}
+      \strng{bibnamehash}{b2065f8113c4fb324ccc076fd89a40fc}
+      \strng{authorbibnamehash}{b2065f8113c4fb324ccc076fd89a40fc}
+      \strng{authornamehash}{08d17ecc7d7f018e5f3ed9897c407ac1}
+      \strng{authorfullhash}{b2065f8113c4fb324ccc076fd89a40fc}
+      \strng{authorfullhashraw}{b2065f8113c4fb324ccc076fd89a40fc}
+      \field{sortinit}{H}
+      \field{sortinithash}{23a3aa7c24e56cfa16945d55545109b5}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \true{uniqueprimaryauthor}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{2020 IEEE International Symposium on High Performance Computer Architecture (HPCA)}
+      \field{title}{{A\textsuperscript{3}}: Accelerating Attention Mechanisms in Neural Networks with Approximation}
+      \field{year}{2020}
+    \endentry
+    \entry{samajdar2020systematic}{article}{}{}
+      \name{author}{6}{}{%
+        {{un=0,uniquepart=base,hash=356974c3ce43b5d9ad4fdc400d6bb934}{%
+           family={Samajdar},
+           familyi={S\bibinitperiod},
+           given={Ananda},
+           giveni={A\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=6b79931f0cedd80334a05c769b2490c7}{%
+           family={Joseph},
+           familyi={J\bibinitperiod},
+           given={Jan\bibnamedelima Moritz},
+           giveni={J\bibinitperiod\bibinitdelim M\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=8530cd69a6368e147338784103c5c6d8}{%
+           family={Zhu},
+           familyi={Z\bibinitperiod},
+           given={Yuhao},
+           giveni={Y\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=506604a889bf401f9b6dd7ad41d7f68f}{%
+           family={Whatmough},
+           familyi={W\bibinitperiod},
+           given={Paul},
+           giveni={P\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=a2cfc4b2cbd9e4785545c0a1d9dda094}{%
+           family={Mattina},
+           familyi={M\bibinitperiod},
+           given={Matthew},
+           giveni={M\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=e1ce26b15a886cbd409e6a8c2254dd49}{%
+           family={Krishna},
+           familyi={K\bibinitperiod},
+           given={Tushar},
+           giveni={T\bibinitperiod},
+           givenun=0}}%
+      }
+      \list{organization}{1}{%
+        {IEEE}%
+      }
+      \strng{namehash}{da8d17a3796ed312bd61a060cb36128e}
+      \strng{fullhash}{d5af3139197767e98b8bc013ea520e66}
+      \strng{fullhashraw}{d5af3139197767e98b8bc013ea520e66}
+      \strng{bibnamehash}{d5af3139197767e98b8bc013ea520e66}
+      \strng{authorbibnamehash}{d5af3139197767e98b8bc013ea520e66}
+      \strng{authornamehash}{da8d17a3796ed312bd61a060cb36128e}
+      \strng{authorfullhash}{d5af3139197767e98b8bc013ea520e66}
+      \strng{authorfullhashraw}{d5af3139197767e98b8bc013ea520e66}
+      \field{sortinit}{S}
+      \field{sortinithash}{b164b07b29984b41daf1e85279fbc5ab}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \true{uniqueprimaryauthor}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{2020 IEEE International Symposium on Performance Analysis of Systems and Software (ISPASS)}
+      \field{title}{A systematic methodology for characterizing scalability of {DNN} accelerators using {SCALE-Sim}}
+      \field{year}{2020}
+      \field{pages}{58\bibrangedash 68}
+      \range{pages}{11}
+    \endentry
+    \entry{wang2021spatten}{article}{}{}
+      \name{author}{3}{}{%
+        {{un=0,uniquepart=base,hash=2f433fe6a0bc850a3ffbcce2ce293ac4}{%
+           family={Wang},
+           familyi={W\bibinitperiod},
+           given={Hanrui},
+           giveni={H\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=719dab2a962e155be99c71e799f4b9d5}{%
+           family={Zhang},
+           familyi={Z\bibinitperiod},
+           given={Zhekai},
+           giveni={Z\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=873e4e07ff73d563d2651d20ffaf99e0}{%
+           family={Han},
+           familyi={H\bibinitperiod},
+           given={Song},
+           giveni={S\bibinitperiod},
+           givenun=0}}%
+      }
+      \list{organization}{1}{%
+        {IEEE}%
+      }
+      \strng{namehash}{a4fd679cad4c34ca6057f6363aca8a1c}
+      \strng{fullhash}{b74f43f6e6ad0aa4ab4aa0d7988febc9}
+      \strng{fullhashraw}{b74f43f6e6ad0aa4ab4aa0d7988febc9}
+      \strng{bibnamehash}{b74f43f6e6ad0aa4ab4aa0d7988febc9}
+      \strng{authorbibnamehash}{b74f43f6e6ad0aa4ab4aa0d7988febc9}
+      \strng{authornamehash}{a4fd679cad4c34ca6057f6363aca8a1c}
+      \strng{authorfullhash}{b74f43f6e6ad0aa4ab4aa0d7988febc9}
+      \strng{authorfullhashraw}{b74f43f6e6ad0aa4ab4aa0d7988febc9}
+      \field{sortinit}{W}
+      \field{sortinithash}{4315d78024d0cea9b57a0c6f0e35ed0d}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \true{uniqueprimaryauthor}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{2021 IEEE International Symposium on High Performance Computer Architecture (HPCA)}
+      \field{title}{{SpAtten}: Efficient Sparse Attention Architecture with Cascade Token and Head Pruning}
+      \field{year}{2021}
+    \endentry
+  \enddatalist
+  \datalist[entry]{apa/global//global/global/global}
+    \entry{ainslie2023gqa}{article}{}{}
+      \name{author}{6}{}{%
+        {{un=0,uniquepart=base,hash=c9e841fff6d89d0371c79b8b1eabe203}{%
+           family={Ainslie},
+           familyi={A\bibinitperiod},
+           given={Joshua},
+           giveni={J\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=9e32dc1e151f8ace06bd5dc3dfbedbc9}{%
+           family={Lee-Thorp},
+           familyi={L\bibinithyphendelim T\bibinitperiod},
+           given={James},
+           giveni={J\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=5a1f0ccec451b37fb72708c32163223f}{%
+           family={Jong},
+           familyi={J\bibinitperiod},
+           given={Michiel},
+           giveni={M\bibinitperiod},
+           givenun=0,
+           prefix={de},
+           prefixi={d\bibinitperiod}}}%
+        {{un=0,uniquepart=base,hash=da39fc85c541d52862a83c70fbd9083f}{%
+           family={Zemlyanskiy},
+           familyi={Z\bibinitperiod},
+           given={Yury},
+           giveni={Y\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=c3f0ee71e863e6ee9e0ccbfddf9c3dd3}{%
+           family={Lebrón},
+           familyi={L\bibinitperiod},
+           given={Federico},
+           giveni={F\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=59cda518d9a4ec0ecad7ee2e2df72b91}{%
+           family={Sanghai},
+           familyi={S\bibinitperiod},
+           given={Sumit},
+           giveni={S\bibinitperiod},
+           givenun=0}}%
+      }
+      \list{publisher}{1}{%
+        {Association for Computational Linguistics}%
+      }
+      \strng{namehash}{3cd79115a61b5d67c242c6b1f4c1aa0a}
+      \strng{fullhash}{49ede003a7c782cf662c48fe352880df}
+      \strng{fullhashraw}{49ede003a7c782cf662c48fe352880df}
+      \strng{bibnamehash}{49ede003a7c782cf662c48fe352880df}
+      \strng{authorbibnamehash}{49ede003a7c782cf662c48fe352880df}
+      \strng{authornamehash}{3cd79115a61b5d67c242c6b1f4c1aa0a}
+      \strng{authorfullhash}{49ede003a7c782cf662c48fe352880df}
+      \strng{authorfullhashraw}{49ede003a7c782cf662c48fe352880df}
+      \field{sortinit}{A}
+      \field{sortinithash}{2f401846e2029bad6b3ecc16d50031e2}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \true{uniqueprimaryauthor}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Proceedings of the 2023 Conference on Empirical Methods in Natural Language Processing}
+      \field{title}{{GQA}: Training Generalized Multi-Query Transformer Models from Multi-Head Checkpoints}
+      \field{year}{2023}
+      \field{pages}{4895\bibrangedash 4901}
+      \range{pages}{7}
+      \verb{urlraw}
+      \verb https://aclanthology.org/2023.emnlp-main.298/
+      \endverb
+      \verb{url}
+      \verb https://aclanthology.org/2023.emnlp-main.298/
+      \endverb
+    \endentry
+    \entry{dao2022flashattention}{article}{}{}
+      \name{author}{5}{}{%
+        {{un=0,uniquepart=base,hash=ede2395a7f566a456448fcb5f8222c99}{%
+           family={Dao},
+           familyi={D\bibinitperiod},
+           given={Tri},
+           giveni={T\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=6716abb21ba9752a68430160afff93ec}{%
+           family={Fu},
+           familyi={F\bibinitperiod},
+           given={Daniel\bibnamedelima Y.},
+           giveni={D\bibinitperiod\bibinitdelim Y\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=160929a7e6ceecdf3f7c9a13abd5ea35}{%
+           family={Ermon},
+           familyi={E\bibinitperiod},
+           given={Stefano},
+           giveni={S\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=c02d96ae7fa9b72bff94f3a0c401e570}{%
+           family={Rudra},
+           familyi={R\bibinitperiod},
+           given={Atri},
+           giveni={A\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=eb1f5a2ba08ea12db36c871fe601f5f1}{%
+           family={Ré},
+           familyi={R\bibinitperiod},
+           given={Christopher},
+           giveni={C\bibinitperiod},
+           givenun=0}}%
+      }
+      \strng{namehash}{c6e8806a86a2e83c272c16e8d7d4b3c0}
+      \strng{fullhash}{8e56cf5ff4528ca1d5e266e247465be8}
+      \strng{fullhashraw}{8e56cf5ff4528ca1d5e266e247465be8}
+      \strng{bibnamehash}{8e56cf5ff4528ca1d5e266e247465be8}
+      \strng{authorbibnamehash}{8e56cf5ff4528ca1d5e266e247465be8}
+      \strng{authornamehash}{c6e8806a86a2e83c272c16e8d7d4b3c0}
+      \strng{authorfullhash}{8e56cf5ff4528ca1d5e266e247465be8}
+      \strng{authorfullhashraw}{8e56cf5ff4528ca1d5e266e247465be8}
+      \field{sortinit}{D}
+      \field{sortinithash}{6f385f66841fb5e82009dc833c761848}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \true{uniqueprimaryauthor}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Advances in Neural Information Processing Systems}
+      \field{title}{{FlashAttention}: Fast and Memory-Efficient Exact Attention with {IO}-Awareness}
+      \field{volume}{35}
+      \field{year}{2022}
+    \endentry
+    \entry{ham2020a3}{article}{}{}
+      \true{moreauthor}
+      \true{morelabelname}
+      \name{author}{10}{}{%
+        {{un=0,uniquepart=base,hash=548accfedaf6124c906f7ed657a4c7cf}{%
+           family={Ham},
+           familyi={H\bibinitperiod},
+           given={Tae\bibnamedelima Jun},
+           giveni={T\bibinitperiod\bibinitdelim J\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=074ad20ec592fa8b09b4d0a051606d5b}{%
+           family={Jung},
+           familyi={J\bibinitperiod},
+           given={Sung\bibnamedelima Jun},
+           giveni={S\bibinitperiod\bibinitdelim J\bibinitperiod},
+           givenun=0}}%
+        {{un=1,uniquepart=given,hash=0ac93f49c5b4be6c2726f911fd49165f}{%
+           family={Kim},
+           familyi={K\bibinitperiod},
+           given={Seonghak},
+           giveni={S\bibinitperiod},
+           givenun=1}}%
+        {{un=0,uniquepart=base,hash=6abf6f803fd9db5a802229f4c377e39c}{%
+           family={Oh},
+           familyi={O\bibinitperiod},
+           given={Young\bibnamedelima H.},
+           giveni={Y\bibinitperiod\bibinitdelim H\bibinitperiod},
+           givenun=0}}%
+        {{un=1,uniquepart=given,hash=b20460f2f6bc6e94890359b81929033a}{%
+           family={Park},
+           familyi={P\bibinitperiod},
+           given={Yrongsoo},
+           giveni={Y\bibinitperiod},
+           givenun=1}}%
+        {{un=0,uniquepart=base,hash=f6f97de25467850d183495389b3367fd}{%
+           family={Song},
+           familyi={S\bibinitperiod},
+           given={Youngmin},
+           giveni={Y\bibinitperiod},
+           givenun=0}}%
+        {{un=1,uniquepart=given,hash=b0cbc574fb40433563df9bd7c0af38ef}{%
+           family={Park},
+           familyi={P\bibinitperiod},
+           given={Jung-Hun},
+           giveni={J\bibinithyphendelim H\bibinitperiod},
+           givenun=1}}%
+        {{un=0,uniquepart=base,hash=775d214c02e22871cac2c9eac59f681c}{%
+           family={Lee},
+           familyi={L\bibinitperiod},
+           given={Jaehyung},
+           giveni={J\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=bf1ea194e32bfe999590b6bd27fc35ec}{%
+           family={Deaton},
+           familyi={D\bibinitperiod},
+           given={Daniel},
+           giveni={D\bibinitperiod},
+           givenun=0}}%
+        {{un=1,uniquepart=given,hash=5a1973076033e8823f69cd42eeb15bc9}{%
+           family={Kim},
+           familyi={K\bibinitperiod},
+           given={Tae\bibnamedelima Hoon},
+           giveni={T\bibinitperiod\bibinitdelim H\bibinitperiod},
+           givenun=1}}%
+      }
+      \list{organization}{1}{%
+        {IEEE}%
+      }
+      \strng{namehash}{08d17ecc7d7f018e5f3ed9897c407ac1}
+      \strng{fullhash}{b2065f8113c4fb324ccc076fd89a40fc}
+      \strng{fullhashraw}{b2065f8113c4fb324ccc076fd89a40fc}
+      \strng{bibnamehash}{b2065f8113c4fb324ccc076fd89a40fc}
+      \strng{authorbibnamehash}{b2065f8113c4fb324ccc076fd89a40fc}
+      \strng{authornamehash}{08d17ecc7d7f018e5f3ed9897c407ac1}
+      \strng{authorfullhash}{b2065f8113c4fb324ccc076fd89a40fc}
+      \strng{authorfullhashraw}{b2065f8113c4fb324ccc076fd89a40fc}
+      \field{sortinit}{H}
+      \field{sortinithash}{23a3aa7c24e56cfa16945d55545109b5}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \true{uniqueprimaryauthor}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{2020 IEEE International Symposium on High Performance Computer Architecture (HPCA)}
+      \field{title}{{A\textsuperscript{3}}: Accelerating Attention Mechanisms in Neural Networks with Approximation}
+      \field{year}{2020}
+    \endentry
+    \entry{samajdar2020systematic}{article}{}{}
+      \name{author}{6}{}{%
+        {{un=0,uniquepart=base,hash=356974c3ce43b5d9ad4fdc400d6bb934}{%
+           family={Samajdar},
+           familyi={S\bibinitperiod},
+           given={Ananda},
+           giveni={A\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=6b79931f0cedd80334a05c769b2490c7}{%
+           family={Joseph},
+           familyi={J\bibinitperiod},
+           given={Jan\bibnamedelima Moritz},
+           giveni={J\bibinitperiod\bibinitdelim M\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=8530cd69a6368e147338784103c5c6d8}{%
+           family={Zhu},
+           familyi={Z\bibinitperiod},
+           given={Yuhao},
+           giveni={Y\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=506604a889bf401f9b6dd7ad41d7f68f}{%
+           family={Whatmough},
+           familyi={W\bibinitperiod},
+           given={Paul},
+           giveni={P\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=a2cfc4b2cbd9e4785545c0a1d9dda094}{%
+           family={Mattina},
+           familyi={M\bibinitperiod},
+           given={Matthew},
+           giveni={M\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=e1ce26b15a886cbd409e6a8c2254dd49}{%
+           family={Krishna},
+           familyi={K\bibinitperiod},
+           given={Tushar},
+           giveni={T\bibinitperiod},
+           givenun=0}}%
+      }
+      \list{organization}{1}{%
+        {IEEE}%
+      }
+      \strng{namehash}{da8d17a3796ed312bd61a060cb36128e}
+      \strng{fullhash}{d5af3139197767e98b8bc013ea520e66}
+      \strng{fullhashraw}{d5af3139197767e98b8bc013ea520e66}
+      \strng{bibnamehash}{d5af3139197767e98b8bc013ea520e66}
+      \strng{authorbibnamehash}{d5af3139197767e98b8bc013ea520e66}
+      \strng{authornamehash}{da8d17a3796ed312bd61a060cb36128e}
+      \strng{authorfullhash}{d5af3139197767e98b8bc013ea520e66}
+      \strng{authorfullhashraw}{d5af3139197767e98b8bc013ea520e66}
+      \field{sortinit}{S}
+      \field{sortinithash}{b164b07b29984b41daf1e85279fbc5ab}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \true{uniqueprimaryauthor}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{2020 IEEE International Symposium on Performance Analysis of Systems and Software (ISPASS)}
+      \field{title}{A systematic methodology for characterizing scalability of {DNN} accelerators using {SCALE-Sim}}
+      \field{year}{2020}
+      \field{pages}{58\bibrangedash 68}
+      \range{pages}{11}
+    \endentry
+    \entry{wang2021spatten}{article}{}{}
+      \name{author}{3}{}{%
+        {{un=0,uniquepart=base,hash=2f433fe6a0bc850a3ffbcce2ce293ac4}{%
+           family={Wang},
+           familyi={W\bibinitperiod},
+           given={Hanrui},
+           giveni={H\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=719dab2a962e155be99c71e799f4b9d5}{%
+           family={Zhang},
+           familyi={Z\bibinitperiod},
+           given={Zhekai},
+           giveni={Z\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=873e4e07ff73d563d2651d20ffaf99e0}{%
+           family={Han},
+           familyi={H\bibinitperiod},
+           given={Song},
+           giveni={S\bibinitperiod},
+           givenun=0}}%
+      }
+      \list{organization}{1}{%
+        {IEEE}%
+      }
+      \strng{namehash}{a4fd679cad4c34ca6057f6363aca8a1c}
+      \strng{fullhash}{b74f43f6e6ad0aa4ab4aa0d7988febc9}
+      \strng{fullhashraw}{b74f43f6e6ad0aa4ab4aa0d7988febc9}
+      \strng{bibnamehash}{b74f43f6e6ad0aa4ab4aa0d7988febc9}
+      \strng{authorbibnamehash}{b74f43f6e6ad0aa4ab4aa0d7988febc9}
+      \strng{authornamehash}{a4fd679cad4c34ca6057f6363aca8a1c}
+      \strng{authorfullhash}{b74f43f6e6ad0aa4ab4aa0d7988febc9}
+      \strng{authorfullhashraw}{b74f43f6e6ad0aa4ab4aa0d7988febc9}
+      \field{sortinit}{W}
+      \field{sortinithash}{4315d78024d0cea9b57a0c6f0e35ed0d}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \true{uniqueprimaryauthor}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{2021 IEEE International Symposium on High Performance Computer Architecture (HPCA)}
+      \field{title}{{SpAtten}: Efficient Sparse Attention Architecture with Cascade Token and Head Pruning}
+      \field{year}{2021}
+    \endentry
+  \enddatalist
+\endrefsection
+\endinput
+

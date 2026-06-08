@@ -1,0 +1,113 @@
+\relax 
+\abx@aux@refcontext{apa/global//global/global/global}
+\providecommand\hyper@newdestlabel[2]{}
+\providecommand\HyField@AuxAddToFields[1]{}
+\providecommand\HyField@AuxAddToCoFields[2]{}
+\abx@aux@refcontext{apa/apasortcite//global/global/global}
+\abx@aux@cite{0}{dao2022flashattention}
+\abx@aux@segm{0}{0}{dao2022flashattention}
+\abx@aux@refcontext{apa/apasortcite//global/global/global}
+\abx@aux@cite{0}{ainslie2023gqa}
+\abx@aux@segm{0}{0}{ainslie2023gqa}
+\abx@aux@refcontext{apa/apasortcite//global/global/global}
+\abx@aux@cite{0}{samajdar2020systematic}
+\abx@aux@segm{0}{0}{samajdar2020systematic}
+\abx@aux@refcontext{apa/apasortcite//global/global/global}
+\abx@aux@cite{0}{dao2022flashattention}
+\abx@aux@segm{0}{0}{dao2022flashattention}
+\abx@aux@refcontext{apa/apasortcite//global/global/global}
+\abx@aux@cite{0}{ham2020a3}
+\abx@aux@segm{0}{0}{ham2020a3}
+\abx@aux@refcontext{apa/apasortcite//global/global/global}
+\abx@aux@cite{0}{wang2021spatten}
+\abx@aux@segm{0}{0}{wang2021spatten}
+\abx@aux@refcontext{apa/apasortcite//global/global/global}
+\abx@aux@cite{0}{samajdar2020systematic}
+\abx@aux@segm{0}{0}{samajdar2020systematic}
+\@writefile{toc}{\contentsline {section}{\numberline {1}Introduction}{2}{section.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Motivation.}{2}{section*.1}\protected@file@percent }
+\abx@aux@page{1}{2}
+\@writefile{toc}{\contentsline {paragraph}{Objective.}{2}{section*.2}\protected@file@percent }
+\abx@aux@page{2}{2}
+\abx@aux@page{3}{2}
+\@writefile{toc}{\contentsline {paragraph}{Literature and market review.}{2}{section*.3}\protected@file@percent }
+\abx@aux@page{4}{2}
+\abx@aux@page{5}{2}
+\abx@aux@page{6}{2}
+\abx@aux@page{7}{2}
+\@writefile{toc}{\contentsline {section}{\numberline {2}System Design \& Implementation Details}{2}{section.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.1}Design Evolution}{2}{subsection.2.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.2}Array Layout and PE Structure}{3}{subsection.2.2}\protected@file@percent }
+\newlabel{sec:pe_structure}{{2.2}{3}{Array Layout and PE Structure}{subsection.2.2}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces KV-stationary array. Queries stream left-to-right; KV is stationary; online softmax runs inline, eliminating the $H{\times }T^2$ score-matrix DRAM round-trip.}}{3}{figure.caption.4}\protected@file@percent }
+\providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
+\newlabel{fig:arch}{{1}{3}{KV-stationary array. Queries stream left-to-right; KV is stationary; online softmax runs inline, eliminating the $H{\times }T^2$ score-matrix DRAM round-trip}{figure.caption.4}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.3}Pipeline Timing Model}{3}{subsection.2.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.4}Implementation}{4}{subsection.2.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {3}Experimental Results and Evaluation}{4}{section.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Setup.}{4}{section*.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}SCALE-Sim Validation and the Wavefront Fill}{4}{subsection.3.1}\protected@file@percent }
+\newlabel{sec:wavefront}{{3.1}{4}{SCALE-Sim Validation and the Wavefront Fill}{subsection.3.1}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Lower-MAC SCALE-Sim validation (selected prefill). $\delta \%$ is the measured wavefront fill as a fraction of the analytical MAC bound. Errors below 10\% at $T{\ge }1024$ show the model is accurate for large $T$.}}{4}{table.caption.6}\protected@file@percent }
+\newlabel{tab:mac_validation}{{1}{4}{Lower-MAC SCALE-Sim validation (selected prefill). $\delta \%$ is the measured wavefront fill as a fraction of the analytical MAC bound. Errors below 10\% at $T{\ge }1024$ show the model is accurate for large $T$}{table.caption.6}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}Bandwidth Co-Design: Sizing $lmc$ to Bandwidth}{4}{subsection.3.2}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces $lmc$--bandwidth co-design at $T{=}8{,}192$. At commodity 512\,B/cycle the balance point is $lmc{\approx }4$.}}{5}{figure.caption.7}\protected@file@percent }
+\newlabel{fig:codesign}{{2}{5}{$lmc$--bandwidth co-design at $T{=}8{,}192$. At commodity 512\,B/cycle the balance point is $lmc{\approx }4$}{figure.caption.7}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3}Prefill: KV-stat vs FlashAttention on Equal Silicon}{5}{subsection.3.3}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Prefill: KV-stat vs fused FlashAttention (wavefront model). DRAM-bound = 512\,B/cycle; Compute-only = no memory wall (SCALE-Sim regime). $^\dagger $ = analytical (operand-limit exceeded).}}{5}{table.caption.8}\protected@file@percent }
+\newlabel{tab:prefill_results}{{2}{5}{Prefill: KV-stat vs fused FlashAttention (wavefront model). DRAM-bound = 512\,B/cycle; Compute-only = no memory wall (SCALE-Sim regime). $^\dagger $ = analytical (operand-limit exceeded)}{table.caption.8}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.4}Comparison Against Unfused Baseline}{5}{subsection.3.4}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Two-way speedup: KV-stat ($n{=}3$, $lmc{=}16$) vs unfused baselines, prefill, 512\,B/cycle. The $511\times $ is a MAC-count artifact; the $65\times $ reflects score-matrix DRAM elimination.}}{5}{table.caption.9}\protected@file@percent }
+\newlabel{tab:speedup_3way}{{3}{5}{Two-way speedup: KV-stat ($n{=}3$, $lmc{=}16$) vs unfused baselines, prefill, 512\,B/cycle. The $511\times $ is a MAC-count artifact; the $65\times $ reflects score-matrix DRAM elimination}{table.caption.9}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.5}Physical Cost}{6}{subsection.3.5}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces Physical resource requirements for the best prefill configuration ($n{=}0$, $lmc{=}16$). PE count and SRAM scale linearly with~$T$.}}{6}{table.caption.10}\protected@file@percent }
+\newlabel{tab:physical_cost}{{4}{6}{Physical resource requirements for the best prefill configuration ($n{=}0$, $lmc{=}16$). PE count and SRAM scale linearly with~$T$}{table.caption.10}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {4}Conclusions}{6}{section.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{What worked.}{6}{section*.11}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{What did not work.}{6}{section*.12}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Conclusion.}{7}{section*.13}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {5}Team Contributions and Acknowledgement}{7}{section.5}\protected@file@percent }
+\abx@aux@page{8}{8}
+\abx@aux@page{9}{8}
+\abx@aux@page{10}{8}
+\abx@aux@page{11}{8}
+\abx@aux@page{12}{8}
+\@writefile{toc}{\contentsline {section}{\numberline {A}Future Work: Silicon Re-Use and Two-Pass Decode}{8}{appendix.A}\protected@file@percent }
+\newlabel{sec:future}{{A}{8}{Future Work: Silicon Re-Use and Two-Pass Decode}{appendix.A}{}}
+\@writefile{toc}{\contentsline {paragraph}{Concept.}{8}{section*.17}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Hardware cost.}{8}{section*.18}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces \textbf  {Silicon re-use model ($P{=}2$ passes).} Pass~1: the query stream attends over the first KV slice, producing partial state \texttt  {O\_partial} that is saved. Pass~2: the same query re-enters the second slice; the saved state is re-injected so the online softmax continues from the correct running maximum. \texttt  {O\_final} is the correctly normalised output over all $T$ tokens. The array uses half the columns (and half the SRAM) of a single-pass design.}}{9}{figure.caption.19}\protected@file@percent }
+\newlabel{fig:reuse_model}{{3}{9}{\textbf {Silicon re-use model ($P{=}2$ passes).} Pass~1: the query stream attends over the first KV slice, producing partial state \texttt {O\_partial} that is saved. Pass~2: the same query re-enters the second slice; the saved state is re-injected so the online softmax continues from the correct running maximum. \texttt {O\_final} is the correctly normalised output over all $T$ tokens. The array uses half the columns (and half the SRAM) of a single-pass design}{figure.caption.19}{}}
+\@writefile{toc}{\contentsline {paragraph}{Silicon reduction and the latency trade-off.}{9}{section*.20}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Open questions.}{9}{section*.21}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {B}Architecture Diagrams}{10}{appendix.B}\protected@file@percent }
+\newlabel{sec:arch_diagrams}{{B}{10}{Architecture Diagrams}{appendix.B}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Single-row 1D KV-stationary baseline (Iteration~1). One query vector $Q$ streams left-to-right through $T$ columns; each column holds a stationary $(K_i, V_i)$ pair. This is the starting point before multi-head extension, merge extensions, and interleaved MACs were added.}}{10}{figure.caption.22}\protected@file@percent }
+\newlabel{fig:systolic_single}{{4}{10}{Single-row 1D KV-stationary baseline (Iteration~1). One query vector $Q$ streams left-to-right through $T$ columns; each column holds a stationary $(K_i, V_i)$ pair. This is the starting point before multi-head extension, merge extensions, and interleaved MACs were added}{figure.caption.22}{}}
+\newlabel{fig:final_out_vector}{{5a}{10}{Single-row dataflow. Query $Q_0$ streams left-to-right through MAC columns; each column computes score $s_i = Q_0 \cdot K_i$ and feeds the stationary $V_i$ register above. After the final column, \texttt {OutVectors} accumulates the weighted sum and normalises by $l_N$ to produce \texttt {OutVector\,/\,L}}{figure.caption.23}{}}
+\newlabel{sub@fig:final_out_vector}{{a}{10}{Single-row dataflow. Query $Q_0$ streams left-to-right through MAC columns; each column computes score $s_i = Q_0 \cdot K_i$ and feeds the stationary $V_i$ register above. After the final column, \texttt {OutVectors} accumulates the weighted sum and normalises by $l_N$ to produce \texttt {OutVector\,/\,L}}{figure.caption.23}{}}
+\newlabel{fig:attention_pe}{{5b}{10}{Running Attention PE detail. The PE receives running state $(M_\text {in}, L_\text {in}, O_\text {in})$ and score $s_i = Q_i \cdot K_i$ (computed below by the MAC array), then updates: $M_\text {out}{=}\max (M_\text {in}, s_i)$; $L_\text {out}{=}L_\text {in}\,e^{M_\text {in}-M_\text {out}} + e^{s_i - M_\text {out}}$; $O_\text {out}{=}O_\text {in}\,e^{M_\text {in}-M_\text {out}} + e^{s_i - M_\text {out}}{\cdot }V_i$. Updated state $(M_\text {out}, L_\text {out}, O_\text {out})$ passes right}{figure.caption.23}{}}
+\newlabel{sub@fig:attention_pe}{{b}{10}{Running Attention PE detail. The PE receives running state $(M_\text {in}, L_\text {in}, O_\text {in})$ and score $s_i = Q_i \cdot K_i$ (computed below by the MAC array), then updates: $M_\text {out}{=}\max (M_\text {in}, s_i)$; $L_\text {out}{=}L_\text {in}\,e^{M_\text {in}-M_\text {out}} + e^{s_i - M_\text {out}}$; $O_\text {out}{=}O_\text {in}\,e^{M_\text {in}-M_\text {out}} + e^{s_i - M_\text {out}}{\cdot }V_i$. Updated state $(M_\text {out}, L_\text {out}, O_\text {out})$ passes right}{figure.caption.23}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces KV-stationary dataflow (left) and Running Attention PE internals (right). Together these show how one query head streams through $T$ columns, accumulating online softmax state without materialising any score matrix.}}{10}{figure.caption.23}\protected@file@percent }
+\newlabel{fig:arch_diagrams}{{5}{10}{KV-stationary dataflow (left) and Running Attention PE internals (right). Together these show how one query head streams through $T$ columns, accumulating online softmax state without materialising any score matrix}{figure.caption.23}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Merge Unit internals. Receives partial softmax states $(M_\text  {left}, L_\text  {left}, O_\text  {left})$ from the row accumulation so far and $(M_\text  {top}, L_\text  {top}, O_\text  {top})$ from the top sub-array (or previous re-use pass). The unit also computes the current-token score $s_i{=}Q_i{\cdot }K_i$, making it a combined attention-and-merge PE: $M_\text  {out}{=}\max (s_i, M_\text  {left}, M_\text  {top})$; $L_\text  {out}{=}L_\text  {top}\,e^{M_\text  {top}-M_\text  {out}} + L_\text  {left}\,e^{M_\text  {left}-M_\text  {out}}$; $O_\text  {out}{=}O_\text  {top}\,e^{M_\text  {top}-M_\text  {out}} + O_\text  {left}\,e^{M_\text  {left}-M_\text  {out}}$. Note: when used purely for cross-sub-array merging (no new token), $s_i$ is omitted and the unit reduces to a two-way state combiner. Cost: $2\tau _{\exp } + \lceil 6d/w \rceil = 14$ cycles.}}{11}{figure.caption.24}\protected@file@percent }
+\newlabel{fig:merge_unit}{{6}{11}{Merge Unit internals. Receives partial softmax states $(M_\text {left}, L_\text {left}, O_\text {left})$ from the row accumulation so far and $(M_\text {top}, L_\text {top}, O_\text {top})$ from the top sub-array (or previous re-use pass). The unit also computes the current-token score $s_i{=}Q_i{\cdot }K_i$, making it a combined attention-and-merge PE: $M_\text {out}{=}\max (s_i, M_\text {left}, M_\text {top})$; $L_\text {out}{=}L_\text {top}\,e^{M_\text {top}-M_\text {out}} + L_\text {left}\,e^{M_\text {left}-M_\text {out}}$; $O_\text {out}{=}O_\text {top}\,e^{M_\text {top}-M_\text {out}} + O_\text {left}\,e^{M_\text {left}-M_\text {out}}$. Note: when used purely for cross-sub-array merging (no new token), $s_i$ is omitted and the unit reduces to a two-way state combiner. Cost: $2\tau _{\exp } + \lceil 6d/w \rceil = 14$ cycles}{figure.caption.24}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces Merge-extension binary reduction tree ($n{=}3$, eight sub-arrays). Each leaf sub-array covers $T/2^n$ KV columns and produces a partial $(M, L, O)$ state. Merge Units at each tree level fuse pairs of partial states using the equations in Figure~\ref {fig:merge_unit}, halving the number of active states per level until a single output state remains. Tree depth is $n$ levels, adding $n \times 14$ cycles of merge latency. The same structure is reused at re-use pass boundaries to combine the previous-pass state with the current-pass output.}}{12}{figure.caption.25}\protected@file@percent }
+\newlabel{fig:merge_tree}{{7}{12}{Merge-extension binary reduction tree ($n{=}3$, eight sub-arrays). Each leaf sub-array covers $T/2^n$ KV columns and produces a partial $(M, L, O)$ state. Merge Units at each tree level fuse pairs of partial states using the equations in Figure~\ref {fig:merge_unit}, halving the number of active states per level until a single output state remains. Tree depth is $n$ levels, adding $n \times 14$ cycles of merge latency. The same structure is reused at re-use pass boundaries to combine the previous-pass state with the current-pass output}{figure.caption.25}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {C}Additional Data: Compute-Bound Prefill Results}{12}{appendix.C}\protected@file@percent }
+\newlabel{sec:additional}{{C}{12}{Additional Data: Compute-Bound Prefill Results}{appendix.C}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {8}{\ignorespaces Cycle composition at $T{=}8{,}192$ for all four configurations. $lmc{=}16$ cuts eff\_stagger from 128 to 8 cycles, reducing total cycles from 1{,}106K to 123K ($n{=}0$) and from 1{,}056K to 73K ($n{=}3$). The query-stagger term (orange) is dominant for $lmc{=}1$ ($\ge $95\%) but only 53\% for $n{=}0$, $lmc{=}16$ and 90\% for $n{=}3$, $lmc{=}16$ --- once stagger is suppressed by $lmc$, the upper-PE chain (green, 47\% and 10\% respectively) becomes the next bottleneck.}}{13}{figure.caption.26}\protected@file@percent }
+\newlabel{fig:cycle_breakdown}{{8}{13}{Cycle composition at $T{=}8{,}192$ for all four configurations. $lmc{=}16$ cuts eff\_stagger from 128 to 8 cycles, reducing total cycles from 1{,}106K to 123K ($n{=}0$) and from 1{,}056K to 73K ($n{=}3$). The query-stagger term (orange) is dominant for $lmc{=}1$ ($\ge $95\%) but only 53\% for $n{=}0$, $lmc{=}16$ and 90\% for $n{=}3$, $lmc{=}16$ --- once stagger is suppressed by $lmc$, the upper-PE chain (green, 47\% and 10\% respectively) becomes the next bottleneck}{figure.caption.26}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {9}{\ignorespaces Effect of merge level $n$ at $T{=}8{,}192$, $lmc{=}16$ (compute-bound). Left: absolute cycles fall from 0.12M ($n{=}0$) to 0.07M ($n{=}3$) as the upper-PE chain shortens with sub-array column count. The query-stagger term $(T{-}1){\times }8$ is constant in $n$ (orange); only the upper-PE chain (green, $7{\times }\text  {eff\_cols}$) shrinks. Right: speedup over equal-area FlashAttention (both sides: $H{\times }T$ total PEs; Flash equal-area $= $ flash\_total\,$/\,(T/H)$) rises from $17.8\times $ ($n{=}0$) to $\mathbf  {30.1\times }$ ($n{=}3$). Note that KV-stat performs $4d$ MACs per token pair vs $2d$ for Flash; the per-MAC ceiling is ${\approx }15\times $ at $n{=}3$.}}{13}{figure.caption.27}\protected@file@percent }
+\newlabel{fig:n_sweep}{{9}{13}{Effect of merge level $n$ at $T{=}8{,}192$, $lmc{=}16$ (compute-bound). Left: absolute cycles fall from 0.12M ($n{=}0$) to 0.07M ($n{=}3$) as the upper-PE chain shortens with sub-array column count. The query-stagger term $(T{-}1){\times }8$ is constant in $n$ (orange); only the upper-PE chain (green, $7{\times }\text {eff\_cols}$) shrinks. Right: speedup over equal-area FlashAttention (both sides: $H{\times }T$ total PEs; Flash equal-area $= $ flash\_total\,$/\,(T/H)$) rises from $17.8\times $ ($n{=}0$) to $\mathbf {30.1\times }$ ($n{=}3$). Note that KV-stat performs $4d$ MACs per token pair vs $2d$ for Flash; the per-MAC ceiling is ${\approx }15\times $ at $n{=}3$}{figure.caption.27}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {10}{\ignorespaces \textit  {Raw} compute-only speedup over equal-area FlashAttention (equal-area: KV-stat and Flash each given $H{\times }T$ PEs; no DRAM floor applied). $n{=}3$, $lmc{=}16$ (red) saturates at ${\approx }30\times $ for $T{\ge }512$; $n{=}0$, $lmc{=}16$ (green) at ${\approx }18\times $. The flat profile confirms the speedup is pipeline-limited (stagger + upper-PE terms), not sequence-length-limited. $lmc{=}1$ configurations deliver only $2\times $ regardless of $n$. \textbf  {Note:} this is not the same metric as Table~\ref {tab:prefill_results} (\S  3). Table~\ref {tab:prefill_results} normalises by MAC count; since KV-stat performs $4d$ MACs per token pair vs $2d$ for Flash (a ${\approx }16\times $ MAC ratio at $lmc{=}16$), the per-MAC ceiling is $30\times /16 \approx 1.9\times $, consistent with Table~\ref {tab:prefill_results}'s $1.76\times $.}}{14}{figure.caption.28}\protected@file@percent }
+\newlabel{fig:speedup_summary}{{10}{14}{\textit {Raw} compute-only speedup over equal-area FlashAttention (equal-area: KV-stat and Flash each given $H{\times }T$ PEs; no DRAM floor applied). $n{=}3$, $lmc{=}16$ (red) saturates at ${\approx }30\times $ for $T{\ge }512$; $n{=}0$, $lmc{=}16$ (green) at ${\approx }18\times $. The flat profile confirms the speedup is pipeline-limited (stagger + upper-PE terms), not sequence-length-limited. $lmc{=}1$ configurations deliver only $2\times $ regardless of $n$. \textbf {Note:} this is not the same metric as Table~\ref {tab:prefill_results} (\S 3). Table~\ref {tab:prefill_results} normalises by MAC count; since KV-stat performs $4d$ MACs per token pair vs $2d$ for Flash (a ${\approx }16\times $ MAC ratio at $lmc{=}16$), the per-MAC ceiling is $30\times /16 \approx 1.9\times $, consistent with Table~\ref {tab:prefill_results}'s $1.76\times $}{figure.caption.28}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {11}{\ignorespaces Raw (non-area-normalised) compute-only speedup over a \textit  {single} $H{\times }H = 64{\times }64$ FlashAttention array. Unlike Figure~\ref {fig:speedup_summary}, no area equalization is applied: KV-stat uses $H{\times }T$ PEs while Flash uses $H^2{=}4{,}096$ PEs. Speedup grows $\propto T$ because Flash compute is $O(T^2)$ while the KV-stationary pipeline is $O(T)$. $n{=}3$, $lmc{=}16$ reaches $3{,}857\times $ at $T{=}8{,}192$; $n{=}0$, $lmc{=}16$ reaches $2{,}283\times $. Dividing by the area ratio $T/H$ (128 at $T{=}8{,}192$) recovers the ${\approx }30\times $ equal-area speedup of Figure~\ref {fig:speedup_summary}.}}{14}{figure.caption.29}\protected@file@percent }
+\newlabel{fig:speedup_raw}{{11}{14}{Raw (non-area-normalised) compute-only speedup over a \textit {single} $H{\times }H = 64{\times }64$ FlashAttention array. Unlike Figure~\ref {fig:speedup_summary}, no area equalization is applied: KV-stat uses $H{\times }T$ PEs while Flash uses $H^2{=}4{,}096$ PEs. Speedup grows $\propto T$ because Flash compute is $O(T^2)$ while the KV-stationary pipeline is $O(T)$. $n{=}3$, $lmc{=}16$ reaches $3{,}857\times $ at $T{=}8{,}192$; $n{=}0$, $lmc{=}16$ reaches $2{,}283\times $. Dividing by the area ratio $T/H$ (128 at $T{=}8{,}192$) recovers the ${\approx }30\times $ equal-area speedup of Figure~\ref {fig:speedup_summary}}{figure.caption.29}{}}
+\abx@aux@read@bbl@mdfivesum{5AC972719D03D4CFBEEC8C4DC2C14ED9}
+\abx@aux@defaultrefcontext{0}{ainslie2023gqa}{apa/global//global/global/global}
+\abx@aux@defaultrefcontext{0}{dao2022flashattention}{apa/global//global/global/global}
+\abx@aux@defaultrefcontext{0}{ham2020a3}{apa/global//global/global/global}
+\abx@aux@defaultrefcontext{0}{samajdar2020systematic}{apa/global//global/global/global}
+\abx@aux@defaultrefcontext{0}{wang2021spatten}{apa/global//global/global/global}
+\gdef \@abspage@last{14}

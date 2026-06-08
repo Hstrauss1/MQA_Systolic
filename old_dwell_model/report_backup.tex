@@ -1,0 +1,1403 @@
+\documentclass[11pt]{article}
+
+% ============================================================
+% PACKAGES
+% ============================================================
+
+\usepackage[T1]{fontenc}
+\usepackage{microtype}
+
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subcaption}
+\graphicspath{{documentation/resources/mqa-designs/}{plots/}{plots_prefill_corrected/}{plots_reuse/}{images/}{./}}
+
+\usepackage[style=apa]{biblatex}
+\addbibresource{bib.bib}
+
+\usepackage{geometry}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{float}
+\usepackage[hidelinks]{hyperref}
+
+% ============================================================
+% FORMATTING
+% ============================================================
+
+\geometry{
+    a4paper,
+    total={170mm,257mm},
+    left=20mm,
+    top=20mm,
+}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.45em}
+
+\linespread{1.03}
+
+% ============================================================
+% TITLE
+% ============================================================
+
+\title{
+\textbf{
+Performance Modeling of a Key-Value-Stationary
+Systolic Array for Multi-Query Attention Inference
+}
+\\[1ex]
+\large Final Report
+}
+
+\author{
+Hudson Strauss \and Dhruv Patel
+}
+
+\date{\today}
+
+% ============================================================
+% DOCUMENT
+% ============================================================
+
+\begin{document}
+
+\maketitle
+
+\begin{center}
+High-Performance Computer Architecture and Systems \\
+Santa Clara University
+\end{center}
+
+\vspace{0.5em}
+
+% ============================================================
+\section{Introduction}
+
+Transformer inference has made memory-efficient attention a central
+systems problem. During autoregressive decoding, each generated token
+repeatedly accesses the key-value (KV) cache, causing memory traffic
+to scale with sequence length. As context windows increase, inference
+becomes increasingly memory-bound rather than compute-bound.
+
+Multi-Query Attention (MQA) reduces this overhead by sharing keys and
+values across multiple query heads, substantially lowering KV-cache
+footprint compared to standard multi-head attention
+\parencite{ainslie2023gqa}. However, most accelerators still map
+attention onto generic matrix multiplication hardware despite the
+streaming nature of autoregressive decoding.
+
+Traditional systolic-array dataflows --- output-stationary,
+weight-stationary, and input-stationary --- are optimized for
+dense GEMM workloads and do not exploit the fact that during
+MQA inference, queries stream continuously while keys and
+values remain relatively fixed across heads.
+
+This report presents an analytical performance model of a
+KV-stationary systolic-array mapping for MQA inference,
+validated against SCALE-Sim cycle-accurate simulation.
+We sweep sequence length, merge-extension depth, and
+interleaved-MAC count, comparing the architecture against
+both a roofline baseline and a FlashAttention-style fused
+reference on equal silicon.
+The key finding, under a SCALE-Sim-validated wavefront pipeline-fill
+model, is that prefill on this architecture is \emph{DRAM-bound}: it
+matches a fused FlashAttention baseline on cycles at equal silicon
+(\(\sim\!1\times\)), and the lower-MAC count must be sized to memory
+bandwidth (\(lmc \approx \text{BW}/128\)) rather than maximized ---
+over-provisioning MACs simply leaves them idle against the memory wall.
+An earlier dwell-fill model had suggested a \(\sim\)1.75$\times$
+per-area advantage; SCALE-Sim measurement of the pipeline fill
+(\(\sim\)2.5 vs an assumed 135 cycles/column) overturns that and yields
+the bandwidth-limited picture above.
+Autoregressive decode is not validated in this work;
+the analytical model projects significant DRAM savings
+from holding the KV cache on-chip, and a two-pass decode
+extension is identified as the primary path to reducing
+chip area for practical deployment.
+
+% ============================================================
+\section{Problem Statement}
+
+The goal of this project is to evaluate a KV-stationary systolic-array
+dataflow for MQA inference and determine the conditions under which
+it outperforms conventional systolic mappings.
+
+For each incoming query vector \(Q\), attention decoding proceeds
+in three stages:
+
+\vspace{-0.5em}
+
+\[
+s_i = Q \cdot K_i
+\]
+
+\[
+a_i =
+\frac{e^{s_i}}
+{\sum_j e^{s_j}}
+\]
+
+\[
+O = \sum_i a_i V_i
+\]
+
+\vspace{-0.5em}
+
+where:
+
+\begin{center}
+\begin{tabular}{ll}
+\(Q\) & Incoming query vector \\
+\(K_i\) & Key stored in PE column \(i\) \\
+\(V_i\) & Value vector stored in PE column \(i\) \\
+\(s_i\) & Local attention score \\
+\(a_i\) & Normalized attention weight \\
+\end{tabular}
+\end{center}
+
+A critical bottleneck in conventional hardware is the
+softmax normalization step: computing
+\(\sum_j e^{s_j}\) requires a complete pass over all scores,
+forcing either (a) the full \(T \times T\) score matrix to be
+materialized in DRAM before normalization, or (b) a two-pass
+on-chip tiling strategy as in FlashAttention.
+At \(T = 8{,}192\) with \(H = 64\) heads, materializing scores
+requires writing and re-reading \textbf{16\,GB} of intermediate
+data per prefill pass.
+
+The proposed architecture resolves this by computing the
+online softmax update inline at each PE column, eliminating
+the score matrix entirely.
+
+% ============================================================
+\section{Proposed Architecture}
+
+\subsection{Design Evolution}
+
+The architecture went through four distinct iterations before
+arriving at the final configuration.
+Each iteration was motivated by a measurable inefficiency in
+the previous design.
+
+\textbf{Iteration 1 --- Basic 1D KV-stationary pipeline.}
+The starting point is a single row of processing elements,
+each storing one \((K_i, V_i)\) pair.
+A query vector enters at column~0 and streams left-to-right,
+computing a running attention score at each column using the
+online softmax update described in \S2.
+This eliminates score-matrix DRAM traffic but immediately
+exposes a pipeline drain problem: after the query packet enters
+the last column it must still traverse all remaining
+\(\text{cols} - 1\) columns before the result is available.
+At \(T = 8{,}192\) with no partitioning, drain accounts for
+essentially 100\% of total latency.
+A second problem is also present but less obvious at this stage:
+the dot product in each column takes \(d = 128\) cycles,
+while the upper Running Attention PE needs only 7 cycles to
+process the resulting score.
+The upper PE therefore sits idle for 121 of every 135 column
+cycles --- a utilization of \(\approx\)5\%.
+
+\textbf{Iteration 2 --- 2D multi-head extension.}
+The natural extension is to assign each of the \(H = 64\)
+query heads its own row lane.
+MQA's defining property --- all heads share a single K and V
+cache --- means the same column data is broadcast vertically
+to all rows simultaneously.
+KV is loaded once from DRAM regardless of head count.
+This fills the Y-axis of the array and improves total throughput
+\(H\times\), but does not address the drain problem or the
+5\% upper PE utilization.
+
+\textbf{Iteration 3 --- Merge extensions to shorten the column traversal.}
+A query's latency is dominated by the number of columns it must
+ripple through. Partitioning the KV cache across \(2^n\) sub-arrays
+stacked in the \emph{row} direction lets each sub-array hold
+\(T / 2^n\) tokens and run in parallel, so a query traverses only
+\(T / 2^n\) columns instead of \(T\) --- trading the vertical dimension
+for the horizontal one.
+A binary tree of inline merge PEs (Figure~\ref{fig:merge_reduction})
+recombines the partial \((m, l, O)\) softmax states with no
+post-pipeline overhead.
+With \(n = 3\) the traversal drops \(8\times\) for \(8\times\) more PE
+rows; the PE \emph{count} is unchanged, as the array is merely reshaped
+taller and narrower.
+Whether this pays off is regime-dependent: under the SCALE-Sim-validated
+wavefront model (\S\ref{sec:pipeline}) the column traversal is already
+cheap and prefill is DRAM-bound, so merge extensions help only when the
+design is compute-bound --- the quantitative comparison is deferred to
+\S\ref{sec:equalsilicon}.
+
+\textbf{Iteration 4 --- Interleaved MACs (\(lmc\)) to improve PE utilization.}
+Profiling the cycle breakdown revealed that merge extensions
+were treating the symptom (drain) rather than the root cause
+(idle upper PEs).
+With a single MAC per column the upper PE fires once every
+135 cycles but needs only 7 --- a 95\% idle rate.
+The fix is to time-interleave \(lmc\) independent MAC units
+within each column, each servicing a different query packet
+offset by \(\lceil d / lmc \rceil\) cycles.
+With \(lmc = 16\): a new query packet starts every 8 cycles
+instead of every 128, and upper PE utilization rises from
+5\% to 87.5\%.
+Crucially, this requires \textit{no extra PE rows} ---
+the interleaving is entirely within each existing column.
+The quantitative payoff of \(lmc\) (and how it interacts with \(n\))
+depends on memory bandwidth: the corrected, SCALE-Sim-validated
+comparison is given in \S\ref{sec:equalsilicon}. At commodity
+bandwidth prefill is DRAM-bound and \(lmc\) must be \emph{sized} to it
+(\(lmc \approx \text{BW}/128\)) rather than maximized; with abundant
+bandwidth the array is compute-bound and larger \(lmc\) pays off.
+
+\textbf{Design conclusion.}
+Merge extensions buy a shorter column traversal at the cost of rows;
+interleaved MACs buy utilization at no row cost. Which combination is
+best is \emph{bandwidth-dependent} (\S\ref{sec:equalsilicon}): at
+commodity bandwidth prefill is DRAM-bound and both knobs largely wash
+out (size \(lmc\) to bandwidth; \(n = 0\) suffices), whereas with
+abundant bandwidth the design is compute-bound and both knobs ---
+including merge extensions --- contribute. An earlier dwell-fill timing
+model had instead singled out \(lmc = 16, n = 0\) as universally
+Pareto-optimal; \S\ref{sec:pipeline} explains why that conclusion does
+not survive the corrected fill model.
+
+\subsection{Array Layout and Dataflow}
+
+The array is organized as a 2D grid with
+\textit{rows} = parallel query lanes and
+\textit{columns} = KV-stationary token positions.
+For a configuration with \(H\) heads and merge-extension
+depth \(n\), the physical dimensions are:
+
+\[
+\text{array\_rows} = H \cdot 2^n, \qquad
+\text{array\_cols} = \left\lfloor T \,/\, 2^n \right\rfloor
+\]
+
+Query vectors enter at column 0 and stream left-to-right.
+Keys and values are loaded once into the columns from DRAM
+at the start of each sequence and remain resident throughout
+the pass.
+
+Each column contains two pipeline stages, illustrated in
+Figure~\ref{fig:kv_stationary_architecture}:
+
+\textbf{Stage 1 --- Lower MAC array.}
+\(lmc\) interleaved serial MAC units compute
+\(s_i = Q \cdot K_i\) over \(d\) cycles.
+With \(lmc > 1\), multiple query packets share the column
+in time-interleave, each offset by
+\(\lceil d / lmc \rceil\) cycles (Figure~\ref{fig:pe_utilization}).
+
+\textbf{Stage 2 --- Upper Running Attention PE.}
+Receives the score \(s_i\) from Stage~1 and the running
+state \((m, l, O)\) from the left neighbour, then executes
+the online softmax update:
+
+\[
+m_{\text{out}} = \max(m_{\text{in}},\, s_i)
+\]
+\[
+l_{\text{out}} = l_{\text{in}}\,e^{(m_{\text{in}} - m_{\text{out}})}
+               + e^{(s_i - m_{\text{out}})}
+\]
+\[
+O_{\text{out}} = O_{\text{in}}\,e^{(m_{\text{in}} - m_{\text{out}})}
+               + V_i\,e^{(s_i - m_{\text{out}})}
+\]
+
+After the query packet has traversed all columns,
+the final output is normalized:
+\(\text{Output} = O_N / l_N\).
+
+\subsection{Pipeline Timing Model}
+\label{sec:pipeline}
+
+Let \(d = 128\) (head dimension), \(w = 128\) (upper PE MAC width,
+fully parallel), and \(\tau_{\exp} = 4\) cycles (exp lookup). The two
+stages have the following latencies:
+\[
+\text{upper\_pe} = \tau_{\exp} + \left\lceil \tfrac{3d}{w} \right\rceil = 7
+\;\text{cycles},
+\qquad
+\text{column\_dwell} = d + \text{upper\_pe} = 135 \;\text{cycles}.
+\]
+Here \(\text{column\_dwell}\) is the latency for a \emph{single} packet to
+finish at one column (its full \(d\)-cycle dot product plus the upper PE).
+We stress that these per-stage cycle costs are \emph{modeling assumptions}, not
+figures from a hardware implementation: \(\tau_{\exp} = 4\) (and hence
+\(\text{upper\_pe} = 7\)) is an assumed exp-lookup latency, and the
+\(\lceil 3d/w \rceil\) accumulation term assumes a fully parallel \(w = d\)-wide
+upper PE. A real LUT, exp datapath, or narrower MAC width would change these
+constants. SCALE-Sim validates the \(Q\!\cdot\!K\) traversal structure
+(\S\ref{sec:wavefront}); it does \emph{not} validate the upper-PE latencies,
+which remain analytical throughout (see \S\ref{sec:gaps}).
+The lower MAC interleaves \(lmc\) query packets, emitting one score every
+\(\text{packet\_stagger} = \lceil d / lmc \rceil\) cycles; a shallow score
+buffer then paces delivery to the upper PE at
+\[
+\text{effective\_stagger} = \max(\text{packet\_stagger},\,\text{upper\_pe}),
+\]
+so the upper PE receives exactly one score per \(\text{effective\_stagger}\)
+cycles. Its utilization, \(\text{upper\_pe} / \text{effective\_stagger}\), rises
+from \(\approx\!5\%\) at \(lmc = 1\) (stagger \(= 128\)) to \(87.5\%\) at
+\(lmc = 16\) (stagger \(= 8\)).
+
+The key timing property is that every column owns a \emph{dedicated} lower MAC
+and a stationary \(K_i\). For a single query packet the \(C\) dot products
+\(s_0 \dots s_{C-1}\) are therefore independent: they compute as a pipelined
+\emph{wavefront} as \(Q\) ripples right, one column per register hop. The
+\(d\)-cycle reduction latency is paid \emph{once} as pipeline fill --- not at
+every column --- after which the binding rate is the online-softmax state chain
+running at \(\text{effective\_stagger}\). For a tile with \(R\) active rows,
+\(C\) active columns, and \(P\) packets per row:
+\[
+\text{tile\_cycles}
+= \underbrace{d}_{\text{fill}}
++ \underbrace{(R + C - 1)\cdot\text{effective\_stagger}}_{\text{traversal}}
++ \underbrace{(P - 1)\cdot\text{effective\_stagger}}_{\text{packet stream}}.
+\]
+
+A naive alternative --- assuming a packet \emph{dwells} the full
+\(\text{column\_dwell}\) at each column before advancing, giving
+\((R + C - 1)\cdot\text{column\_dwell}\) --- would overcount the pipeline fill by
+\(\sim\!50\times\). We reject it on measurement: SCALE-Sim reports the per-column
+fill of the \(Q\!\cdot\!K\) stage at \(\sim\!2.5\) cycles, not \(135\)
+(\S\ref{sec:wavefront}), confirming the wavefront model. A direct consequence,
+developed in \S\ref{sec:wavefront}, is that prefill on this array is
+\emph{DRAM-bound}; all cycle counts reported in this paper use the wavefront fill.
+
+\subsection{Merge Extensions}
+
+A query packet's latency is dominated by the \emph{horizontal} traversal: it must
+ripple through all \(C\) columns of its sub-array, so the pipeline depth
+\(R + C - 1\) (\S\ref{sec:pipeline}) grows with the column count for long
+sequences. Merge extensions cut this total cycle time by trading the vertical
+dimension for the horizontal one. The KV cache is split across \(2^n\)
+sub-arrays stacked in the \emph{row} direction
+(Figure~\ref{fig:merge_reduction}): each sub-array holds \(T/2^n\) tokens and is
+processed \emph{in parallel} on its own rows, so a query traverses only
+\(T/2^n\) columns instead of \(T\). A binary tree of inline merge PEs then
+recombines the \(2^n\) partial \((m, l, O)\) states in \(n\) extra pipeline
+levels. The net effect is fewer horizontal layers to pass through --- the
+depth-dominating column term shrinks by \(2^n\) while the row count grows by
+\(2^n\) --- lowering total latency, paid for with \(2^n\times\) more PE rows
+running concurrently.
+
+We introduce merge extensions here for completeness, as they were a central
+design lever under the original (dwell-fill) timing assumption. Under the
+SCALE-Sim-validated wavefront model, however, the column traversal is already
+cheap and prefill is DRAM-bound (\S\ref{sec:pipeline}, \S\ref{sec:wavefront}),
+so merge extensions yield little for prefill --- their benefit is confined to
+the compute-bound regime (low \(lmc\) or high bandwidth), as quantified in
+\S\ref{sec:wavefront}.
+
+% ============================================================
+% ARCHITECTURE FIGURES
+% ============================================================
+
+\begin{figure}[H]
+    \centering
+    % Row 1
+    \begin{subfigure}[t]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{AttentionPE.png}
+        \caption{\textbf{Running Attention PE.}
+        Query \(Q_0\) (blue) streams left-to-right past stationary
+        \(K_i, V_i\) (red). Stage~1 computes \(s_i = Q \cdot K_i\);
+        Stage~2 updates the online softmax state \((m, l, O)\)
+        and forwards it to the next column.}
+        \label{fig:attention_pe}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{FinalOutVector.png}
+        \caption{\textbf{Final output vector.}
+        After traversing all columns the accumulated running state
+        is normalised: \(\text{Output} = O_N / l_N\).
+        No score matrix is written to DRAM at any point.}
+        \label{fig:final_output}
+    \end{subfigure}
+
+    \vspace{0.8em}
+
+    % Row 2
+    \begin{subfigure}[t]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{MultiHeaded.png}
+        \caption{\textbf{Multi-headed MQA mapping.}
+        Each query head occupies a dedicated row lane.
+        All heads share the same stationary \(K_i, V_i\) columns
+        (MQA property), so KV is loaded once regardless of head count.}
+        \label{fig:multiheaded}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{SystolicSingle.png}
+        \caption{\textbf{Single-head systolic operation.}
+        The query vector streams through a MAC row, accumulating
+        \(Q \cdot K\) element-by-element. The completed score
+        propagates upward to its Running Attention PE column.}
+        \label{fig:systolic_single}
+    \end{subfigure}
+
+    \caption{KV-stationary MQA dataflow. Keys and values remain
+    stationary in array columns; query vectors stream left-to-right.
+    Online softmax is computed inline at every column, eliminating
+    the \(H \times T^2\) score-matrix DRAM traffic of an unfused baseline.}
+    \label{fig:kv_stationary_architecture}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.82\textwidth]{MergeReductionGraph.png}
+    \caption{\textbf{High-\(T\) merge reduction graph} (\(n = 2\) levels shown).
+    Four sub-arrays (red KV rows) each process \(T/4\) tokens independently.
+    A two-level binary tree of inline merge PEs (blue) combines partial
+    \((m, l, O)\) states, cutting per-sub-array drain from \(T-1\) to
+    \(T/2^n - 1\) steps at the cost of \(2^n\times\) more PE rows.}
+    \label{fig:merge_reduction}
+\end{figure}
+
+% ============================================================
+\section{Experimental Methodology}
+\label{sec:methodology}
+
+\subsection{Hybrid Analytical and SCALE-Sim Model}
+
+The performance model combines an analytical pipeline timing
+model with SCALE-Sim cycle-accurate validation for the
+compute-dominant GEMM components.
+
+\textbf{SCALE-Sim validated components:}
+\begin{itemize}[noitemsep]
+    \item Lower MAC unit --- the \(Q \cdot K\) dot-product GEMM,
+          mapped as shape \((H \cdot Q_T / lmc) \times d \times \text{eff\_cols}\)
+          on a weight-stationary \(H \times \text{eff\_cols}\) array.
+    \item FlashAttention QK tile and AV tile --- both mapped as
+          independent GEMMs on a \(64 \times 64\) reference array.
+\end{itemize}
+
+\textbf{Analytical components:}
+\begin{itemize}[noitemsep]
+    \item Upper PE latency: \(\tau_{\exp} + \lceil 3d / w \rceil = 7\) cycles.
+    \item Full pipeline timing: fill, traversal, and packet-stream
+          terms computed from the wavefront model (\S\ref{sec:pipeline}).
+    \item Merge-tree synchronization overhead.
+\end{itemize}
+
+The corrected pipeline total substitutes the SCALE-Sim lower-MAC
+measurement for the analytical estimate:
+
+\[
+\text{corrected\_cycles}
+= \text{pipeline\_cycles} - \text{analytical\_mac} + \text{ss\_mac\_cycles}
+\]
+
+\subsection{Validation Error Analysis}
+
+The analytical lower-MAC bound is:
+
+\[
+\text{analytical\_mac} = \left\lceil Q_T \cdot d \;/\; lmc \right\rceil
+\]
+
+This counts pure computation cycles and excludes pipeline drain ---
+the time the last packet takes to flush through the remaining
+\(\text{eff\_cols} - 1\) columns after the array stops accepting
+new work.
+SCALE-Sim includes this drain, so its cycle count is always
+\(\geq\) the analytical prediction.
+The percentage error is:
+
+\[
+\delta\% = 100 \cdot
+\frac{\text{ss\_mac\_cycles} - \text{analytical\_mac}}
+     {\text{analytical\_mac}}
+\]
+
+As sequence length grows, the computation term dominates and
+drain becomes a smaller fraction of total cycles;
+error converges toward zero at large \(T\).
+Observed errors for the prefill configurations:
+\(lmc = 1\): \(<3\%\) at \(T \geq 512\);
+\(lmc = 16\): \(4\)--\(9\%\) at \(T \geq 1{,}024\).
+
+We emphasize that this \(\delta\%\) is not modeling noise --- it \emph{is} the
+physical pipeline fill, and measuring it settles the dwell-vs-wavefront question
+of \S\ref{sec:pipeline}. Across \(40\) SCALE-Sim \(Q\!\cdot\!K\) GEMMs spanning
+\(lmc \in \{1,2,4,8,16\}\), the drain corresponds to only \(\sim\!2.5\) cycles per
+column (and is independent of \(lmc\), being set by the systolic geometry). The
+dwell model's \(135\) cycles per column is therefore wrong by \(\sim\!50\times\);
+the wavefront fill is the validated one. We develop this and its consequences in
+\S\ref{sec:wavefront}.
+
+Decode configurations show errors of hundreds to thousands
+of percent because the analytical lower-MAC formula counts only
+\(d = 128\) MAC cycles while SCALE-Sim measures the full
+\(\text{eff\_cols}\)-column pipeline traversal.
+Decode behavior is therefore \textbf{not validated} in this work.
+Validating the full decode pipeline --- including the interaction
+between on-chip KV retention, SRAM capacity constraints, and
+multi-pass scheduling --- is left as future work (\S\ref{sec:future}).
+
+\subsection{Fixed Hardware Parameters}
+
+All experiments use the following hardware constants,
+chosen to model a realistic edge-inference accelerator:
+
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+Parameter & Value \\
+\midrule
+Query heads \(H\) & 64 \\
+Head dimension \(d\) & 128 \\
+Precision & FP16 (2 bytes/element) \\
+DRAM bandwidth & 512 B/cycle \\
+Upper PE MAC width \(w\) & 128 (fully parallel) \\
+Exp lookup latency \(\tau_{\exp}\) & 4 cycles \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Parameter Sweep}
+
+A total of 29 configurations were swept, covering all
+combinations of:
+
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+Parameter & Values \\
+\midrule
+Sequence length \(T\) & 128, 512, 1024, 2048, 4096, 8192 \\
+Merge extensions \(n\) & 0 (flat array), 3 (binary tree) \\
+MACs per PE column (\(lmc\)) & 1, 16 \\
+Mode & Prefill (\(Q_T = T\)), Decode (\(Q_T = 1\)) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+SCALE-Sim validation was run where memory constraints
+permitted (operand matrices below 500\,MB).
+Configurations exceeding this limit are reported from the
+analytical model only and are flagged accordingly.
+
+\subsection{Experiments Conducted}
+
+Three distinct experiments were run, each targeting a different
+layer of the model.
+
+\textbf{Experiment 1 --- Lower MAC validation (29 configurations).}
+Each configuration maps the Q·K dot-product GEMM onto SCALE-Sim
+as a weight-stationary array of shape \(H \times \text{eff\_cols}\)
+with GEMM dimensions \(M = H \cdot Q_T / lmc\), \(N = \text{eff\_cols}\),
+\(K = d\).
+The analytical prediction \(\lceil Q_T \cdot d / lmc \rceil\) (pure compute)
+is compared against SCALE-Sim compute cycles;
+the delta \(\delta\%\) is the \emph{pipeline fill} SCALE-Sim measures beyond
+that bound --- the quantity that decides the dwell-vs-wavefront question of
+\S\ref{sec:pipeline} (analyzed in \S\ref{sec:wavefront}), not a modeling error.
+Of 29 configurations, 16 prefill runs completed successfully;
+decode runs were excluded after all 12 showed divergence exceeding
+200\% (see \S4.2).
+Selected prefill validation results are shown in
+Table~\ref{tab:mac_validation}.
+
+\begin{table}[H]
+\centering
+\caption{Lower MAC SCALE-Sim validation --- selected prefill configurations.
+\(\delta\%\) = SCALE-Sim pipeline fill as a percentage of the analytical MAC
+bound (the measured wavefront fill, \S\ref{sec:wavefront}).
+Mac frac = SCALE-Sim MAC cycles as a fraction of the (dwell-model) total
+pipeline cycles.}
+\label{tab:mac_validation}
+\begin{tabular}{rrrrrrr}
+\toprule
+\(T\) & \(n\) & \(lmc\) & Analytical & SCALE-Sim & \(\delta\%\) & Mac frac \\
+\midrule
+128  & 0 &  1 & 16,384 & 16,891 & 3.1\%  & 40.2\% \\
+128  & 0 & 16 &  1,024 &  1,531 & 49.5\% &  5.7\% \\
+512  & 0 &  1 & 65,536 & 66,811 & 1.9\%  & 46.7\% \\
+512  & 0 & 16 &  4,096 &  5,371 & 31.1\% &  6.6\% \\
+1024 & 0 & 16 &  8,192 & 10,491 & 28.1\% &  6.8\% \\
+2048 & 0 & 16 & 16,384 & 20,731 & 26.5\% &  6.9\% \\
+2048 & 3 & 16 & 16,384 & 17,147 &  4.7\% &  3.6\% \\
+4096 & 3 & 16 & 32,768 & 34,043 &  3.9\% &  3.9\% \\
+8192 & 3 & 16 & 65,536 & 67,835 &  3.5\% &  4.0\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Two patterns are visible, and both follow from the fill being small and
+roughly constant per column (\(\sim\!2.5\) cycles, \S\ref{sec:wavefront})
+rather than from any error that ``converges.''
+First, for \(lmc = 1\) the compute bound is large (\(128\) cycles per packet),
+so the fixed fill is a small fraction --- \(\delta\% < 3\%\) at \(T \geq 512\).
+Second, for \(lmc = 16\) the compute bound is \(8\times\) smaller, so the same
+small fill is a larger \emph{fraction} at small \(T\) (\(49\%\) at \(T = 128\));
+as \(T\) grows the throughput term grows and the fraction falls below \(7\%\)
+by \(T = 1{,}024\).
+The Mac frac column reports the lower MAC as only 4--7\% of the
+\emph{dwell-model} pipeline total; because that total over-counts the fill by
+\(\sim\!50\times\) (\S\ref{sec:pipeline}), it should \emph{not} be read as
+evidence that the upper PE or pipeline fill is the bottleneck. Under the
+corrected wavefront model the fill is cheap and prefill is DRAM-bound
+(\S\ref{sec:wavefront}).
+
+\textbf{Experiment 2 --- Prefill vs FlashAttention sweep (24 configurations).}
+KV-stat is compared against a FlashAttention-style fused reference
+across all \((T, n, lmc)\) combinations.
+Both architectures use a \(64 \times 64\) FlashAttention tile
+(SRAM-constrained to \(H = 64\) tile size).
+The KV-stat corrected cycle count from Experiment~1 is used where
+SCALE-Sim was available; the analytical pipeline total is used
+otherwise.
+Results are reported as raw speedup, MAC ratio, and per-physical-MAC
+speedup, for both the DRAM-bound and compute-only bandwidth regimes
+(Table~\ref{tab:prefill_results}).
+Of 24 configurations, 15 use SCALE-Sim-corrected KV-stat cycles;
+9 use analytical estimates only (flagged in the table).
+
+\textbf{Experiment 3 --- Cycle breakdown decomposition.}
+For each validated configuration the total pipeline cycles are
+decomposed into three additive terms:
+(i) SCALE-Sim lower MAC cycles (\texttt{ss\_lower\_mac}),
+(ii) within-row stagger cost \((P-1) \cdot \text{packet\_stagger}\),
+and (iii) upper PE and pipeline fill/drain overhead.
+This decomposition is \emph{compute-only} (SCALE-Sim runs at infinite
+bandwidth): for \(n=3, lmc=16\) the lower-MAC and stagger terms are
+roughly balanced, while for \(n=0, lmc=16\) at large \(T\) the within-row
+stagger term dominates the compute. Once DRAM bandwidth is modelled,
+however, this entire compute total falls below the memory floor and
+prefill is DRAM-bound (\S\ref{sec:wavefront}) --- so the throughput
+bottleneck is DRAM, not the upper PE.
+
+% ============================================================
+% PE UTILIZATION FIGURE
+% ============================================================
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.82\textwidth]{PEUtilization.png}
+    \caption{\textbf{PE utilization with \(lmc = 16\) interleaved MACs.}
+    Each column is fed by two streams: a \emph{Q stream} of query packets entering
+    from the left, and a \emph{K stream} supplying the stationary key \(K_i\) at
+    the top of each column. The sixteen MAC units time-multiplex sixteen query
+    packets (\(Q_0\)--\(Q_{15}\), with \(Q_{16}\)--\(Q_{31}\) queued behind), each
+    staggered by \(\lceil d/16 \rceil = 8\) cycles, and every MAC emits a score
+    \(Q\cdot K\) up to its Running Attention PE. All sixteen share the column's
+    single on-chip K register, so no \(K\) duplication is needed. The initiation
+    interval drops from 128 to 8 cycles, raising upper-PE utilisation from
+    \(\approx\)5\% to \(\approx\)87.5\%.}
+    \label{fig:pe_utilization}
+\end{figure}
+
+% ============================================================
+\section{Results}
+\label{sec:results}
+
+\subsection{Baseline Characterization}
+\label{subsec:baseline}
+
+Three baseline variants are used throughout the comparison,
+each representing a distinct hardware or software assumption.
+
+\textbf{Variant~1 --- Original \(64 \times 64\), unfused.}
+A 4,096 MAC weight-stationary array running two sequential GEMMs
+(Q·K\(^\top\), then scores·V) with the full score matrix written
+to and read back from DRAM between them.
+This is the default SCALE-Sim reference configuration.
+
+\textbf{Variant~2 --- MAC-normalized, unfused.}
+Same two-GEMM structure with the array resized to match
+KV-stat's MAC count: \(8{,}192 \times (T/8)\) = 8.4M MACs
+at \(T = 8{,}192\).
+This isolates architectural efficiency from raw compute budget.
+
+\textbf{Variant~3 --- MAC-normalized, fused.}
+Same large array as Variant~2 with FlashAttention-style tiling:
+no score matrix written to DRAM.
+This is the fairest possible comparison --- equal MACs,
+equal memory discipline.
+
+\subsubsection*{The \(64 \times 64\) Baseline Is Compute-Bound at Every \(T\)}
+
+The original \(64 \times 64\) array is perpetually compute-bound:
+its 4,096 MACs cannot keep pace with the prefill workload at any
+tested sequence length.
+
+\begin{table}[H]
+\centering
+\caption{Original \(64 \times 64\) unfused baseline roofline analysis
+across all sequence lengths (prefill, \(H=64\), \(d=128\), FP16).}
+\label{tab:baseline_orig}
+\begin{tabular}{rrrrr}
+\toprule
+\(T\) & Compute cycles & Memory cycles & Estimated cycles & Bottleneck \\
+\midrule
+128   &      65,536 &      16,512 &      65,536 & COMPUTE \\
+512   &   1,048,576 &     164,352 &   1,048,576 & COMPUTE \\
+1,024 &   4,194,304 &     590,848 &   4,194,304 & COMPUTE \\
+2,048 &  16,777,216 &   2,230,272 &  16,777,216 & COMPUTE \\
+4,096 &  67,108,864 &   8,654,848 &  67,108,864 & COMPUTE \\
+8,192 & 268,435,456 &  34,086,912 & 268,435,456 & COMPUTE \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+At \(T = 8{,}192\) the compute bottleneck is \(7.8\times\) worse
+than the memory bottleneck.
+Comparing KV-stat (memory-bound, 8.4M MACs) against this baseline
+guarantees a large speedup regardless of architectural quality;
+the 511$\times$ speedup figure is almost entirely a MAC-count artifact.
+
+\subsubsection*{Score-Matrix Dominance}
+
+Once MACs are equalized, the unfused baseline immediately flips
+to memory-bound --- and the score matrix accounts for essentially
+all of the DRAM traffic.
+At \(T = 8{,}192\):
+
+\begin{table}[H]
+\centering
+\caption{DRAM traffic breakdown for the MAC-normalized unfused baseline
+at \(T = 8{,}192\), \(H=64\), \(d=128\), FP16.}
+\label{tab:dram_breakdown}
+\begin{tabular}{lrr}
+\toprule
+Traffic component & Size (MB) & \% of total \\
+\midrule
+Score matrix (write + read) & 17,179.9 & 98.4\% \\
+Q reads                     &    134.2 &  0.77\% \\
+Output writes               &    134.2 &  0.77\% \\
+K reads                     &      2.1 &  0.01\% \\
+V reads                     &      2.1 &  0.01\% \\
+\midrule
+\textbf{Total}              & \textbf{17,452.5} & \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The score matrix scales as
+\(H \times T^2 \times \text{bpe} \times 2 = 64 \times 8192^2 \times 2 \times 2\)
+bytes.
+This is why the unfused MAC-normalized baseline is \(65\times\)
+slower than KV-stat: 17.45\,GB vs 0.27\,GB at the same bandwidth
+(Figure~\ref{fig:dram_breakdown}).
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.72\textwidth]{fig18_dram_breakdown.png}
+    \caption{DRAM traffic at \(T = 8{,}192\). The unfused baseline is dominated by
+    the \(H\times T^2\) score matrix (98.4\% of \(17.45\,\)GB); both fused designs
+    --- KV-stat and FlashAttention --- eliminate it, dropping to \(0.27\,\)GB. The
+    \(65\times\) advantage is score-matrix elimination, not the KV-stationary
+    dataflow itself.}
+    \label{fig:dram_breakdown}
+\end{figure}
+
+\subsubsection*{Fused Baseline Closes the Gap}
+
+The fused (FlashAttention-style) baseline eliminates score-matrix
+traffic entirely, dropping total DRAM to 272.6\,MB --- identical
+to KV-stat.
+Arithmetic intensity jumps from 63 to 4,033 MACs/byte.
+Table~\ref{tab:ai_comparison} compares all four architectures
+at \(T = 8{,}192\).
+
+\begin{table}[H]
+\centering
+\caption{Arithmetic intensity at \(T = 8{,}192\), \(H=64\), \(d=128\), FP16.
+KV-stat has \(2\times\) the MACs of the baselines (dot product + value accumulation)
+but the same 0.27\,GB DRAM as the fused baseline, giving \(2\times\) higher AI.}
+\label{tab:ai_comparison}
+\begin{tabular}{lrrr}
+\toprule
+Configuration & Total MACs & Total DRAM & AI (MACs/byte) \\
+\midrule
+\(64 \times 64\) unfused    & 1.10T & 17.45\,GB & 63 \\
+MAC-norm unfused            & 1.10T & 17.45\,GB & 63 \\
+MAC-norm fused              & 1.10T &  0.27\,GB & 4,033 \\
+KV-stat \(n=3,\;lmc=16\)   & 2.20T &  0.27\,GB & 8,066 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection*{Three-Way Speedup Summary}
+
+Table~\ref{tab:speedup_3way} shows the speedup of KV-stat
+(\(n=3, lmc=16\), pipeline cycles) against all three baseline
+variants.
+The three columns tell three different stories:
+the first is misleading, the second is real but driven by
+score-matrix traffic, and the third is the honest comparison
+after equal fusion.
+
+\begin{table}[H]
+\centering
+\caption{Three-way prefill speedup: KV-stat \(n=3,\;lmc=16\)
+cycles vs each baseline variant, wavefront model at \(512\,\)B/cycle.
+Under the wavefront fill KV-stat is DRAM-bound at every \(T\), so it
+matches the fused baseline (\(\sim\!1.01\times\)) throughout --- the
+small-\(T\) deficit of the dwell model is gone.}
+\label{tab:speedup_3way}
+\begin{tabular}{rrrr}
+\toprule
+\(T\) & vs \(64{\times}64\) unfused & vs MAC-norm unfused & vs MAC-norm fused \\
+\midrule
+128   &   8.0$\times$ &  2.0$\times$ & \textbf{1.01$\times$} \\
+512   &  31.9$\times$ &  5.0$\times$ & \textbf{1.01$\times$} \\
+1,024 &  63.9$\times$ &  9.0$\times$ & \textbf{1.01$\times$} \\
+2,048 & 127.8$\times$ & 17.0$\times$ & \textbf{1.01$\times$} \\
+4,096 & 255.5$\times$ & 33.0$\times$ & \textbf{1.01$\times$} \\
+8,192 & 511.0$\times$ & 64.9$\times$ & \textbf{1.01$\times$} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Under the wavefront fill there is no crossover: KV-stat is memory-bound
+at all \(T\) and, sharing the fused baseline's DRAM footprint exactly,
+it tracks that baseline at \(\sim\!1.01\times\) everywhere. The large
+multiples against the unfused baselines are unchanged --- the
+\(\sim\!511\times\) figure is a MAC-count artifact of the compute-bound
+\(64{\times}64\) array, and the \(\sim\!65\times\) is the
+\(17.45\,\)GB score-matrix DRAM that the unfused baseline pays and both
+fused designs eliminate. The honest equal-silicon comparison remains
+\(\sim\!1\times\): KV-stat neither beats nor trails FlashAttention on
+cycles when both eliminate the score matrix and run at the same
+bandwidth.
+
+\subsection{Prefill: KV-Stationary vs FlashAttention on Equal Silicon}
+\label{sec:equalsilicon}
+
+The primary comparison pairs KV-stat against a FlashAttention-style
+fused baseline.
+Both architectures eliminate score-matrix DRAM traffic and have
+identical DRAM footprints; the comparison is therefore on
+cycles and silicon area.
+The FlashAttention reference uses a fixed \(64 \times 64\) array
+(4{,}096 PEs, one MAC each); KV-stat scales with \(T\) as described in \S3.
+All cycle counts below use the SCALE-Sim-validated wavefront fill
+(\S\ref{sec:wavefront}) at a commodity bandwidth of \(512\,\)B/cycle.
+
+The honest area metric is \textit{speedup per physical MAC}:
+raw cycle speedup divided by the physical-MAC ratio. We deliberately
+do \emph{not} normalize by PE \emph{count}, because each KV-stat PE packs
+\(lmc\) lower MACs while each FlashAttention PE is a single MAC --- so
+PE-count normalization understates KV-stat's silicon by a factor of \(lmc\).
+We take \(\text{kv\_MACs} = \text{PE} \times lmc\) and
+\(\text{flash\_MACs} = \text{PE} \times 1\). A per-MAC value above 1.0 means
+KV-stat delivers more throughput per multiplier than FlashAttention.
+
+\begin{table}[H]
+\centering
+\caption{Prefill --- KV-stat vs FlashAttention, both bandwidth regimes side by side
+(wavefront model). \emph{Per-MAC} \(=\) raw speedup \(\div\) MAC ratio, where
+MAC ratio \(= \tfrac{T}{64}\!\cdot\! lmc\) is KV-stat's physical multiplier count
+vs the \(64{\times}64\) flash array. \textbf{DRAM-bound} is the commodity
+\(512\,\)B/cycle point; \textbf{Compute-only} removes the DRAM floor (the
+infinite-bandwidth / SCALE-Sim limit, reached with HBM-class bandwidth,
+\S\ref{sec:wavefront}). The PE-\emph{count} ratio is \(T/64\) for all rows
+(merge- and lmc-invariant), so the silicon difference lives entirely in MACs per
+PE --- hence we normalize by MACs. \(Q\!\cdot\!K\) fill was SCALE-Sim-validated for
+all rows except \(n=0, lmc=16\) at \(T \geq 4{,}096\) (operand-limit; analytical).
+DRAM footprints are equal (both fused).}
+\label{tab:prefill_results}
+\begin{tabular}{lr rr rr r}
+\toprule
+& & \multicolumn{2}{c}{DRAM-bound (512\,B/cyc)} & \multicolumn{2}{c}{Compute-only} & \\
+\cmidrule(lr){3-4}\cmidrule(lr){5-6}
+Configuration & \(T\) & Raw & per-MAC & Raw & per-MAC & MAC ratio \\
+\midrule
+\(n=0,\;lmc=1\)  &  512 &   7.9$\times$ & 0.99$\times$ &   7.9$\times$ & 0.99$\times$ &     8$\times$ \\
+\(n=0,\;lmc=1\)  & 2048 &  33.0$\times$ & 1.03$\times$ &  33.0$\times$ & 1.03$\times$ &    32$\times$ \\
+\(n=0,\;lmc=1\)  & 8192 & 133.4$\times$ & 1.04$\times$ & 133.4$\times$ & 1.04$\times$ &   128$\times$ \\
+\midrule
+\(n=0,\;lmc=16\) &  512 &  33.0$\times$ & 0.26$\times$ &   124$\times$ & 0.97$\times$ &   128$\times$ \\
+\(n=0,\;lmc=16\) & 2048 & 131.9$\times$ & 0.26$\times$ &   526$\times$ & 1.03$\times$ &   512$\times$ \\
+\(n=0,\;lmc=16\) & 8192 & 527.4$\times$ & 0.26$\times$ & 2{,}133$\times$ & 1.04$\times$ & 2{,}048$\times$ \\
+\midrule
+\(n=3,\;lmc=16\) &  512 &  33.4$\times$ & 0.26$\times$ &   124$\times$ & 0.97$\times$ &   128$\times$ \\
+\(n=3,\;lmc=16\) & 2048 & 133.7$\times$ & 0.26$\times$ &   775$\times$ & \textbf{1.51$\times$} &   512$\times$ \\
+\(n=3,\;lmc=16\) & 8192 & 534.6$\times$ & 0.26$\times$ & 3{,}604$\times$ & \textbf{1.76$\times$} & 2{,}048$\times$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{fig20_prefill_both_regimes.png}
+    \caption{Table~\ref{tab:prefill_results} visualized, both regimes side by side.
+    \textbf{Left (a, c) --- DRAM-bound (512\,B/cyc):} raw speedup is large (up to
+    \(\sim\!527\times\); \(n=0\) and \(n=3\) coincide), but per MAC the \(lmc = 16\)
+    designs sit flat at \(0.26\times\) (below break-even, \(75\%\) idle), while lean
+    \(lmc = 1\) hovers at \(\sim\!1.0\times\). \textbf{Right (b, d) --- compute-only
+    (memory wall removed):} raw speedup jumps (to \(\sim\!2{,}133\times\) for \(n=0\),
+    \(\sim\!3{,}604\times\) for \(n=3\)) and the curves diverge; per MAC the
+    \(lmc = 16\) designs reach break-even (\(n=0 \approx 1.0\times\)) and merge
+    extensions exceed it (\(n=3 \to 1.76\times\)).}
+    \label{fig:prefill_permac}
+\end{figure}
+
+Three findings stand out from the DRAM-bound columns of
+Table~\ref{tab:prefill_results} (left of Figure~\ref{fig:prefill_permac}), and they
+revise the earlier (dwell-model) conclusions.
+
+\textbf{(1) Large raw speedup, but it is bought with silicon.}
+At \(512\,\)B/cycle the \(lmc = 16\) array finishes its compute well below the DRAM
+floor, so its wall-clock speedup is large (up to \(527\times\) at \(T = 8{,}192\)).
+Per physical MAC, however, it sits at only \(0.26\times\): it spends \(16\times\) the
+multipliers of FlashAttention and, being memory-bound, leaves \(\sim\!75\%\) of them
+idle (\S\ref{sec:codesign}). The lean \(lmc = 1\) array, though \(\sim\!4\times\)
+slower in wall-clock, is compute-bound and lands at \(\sim\!1.0\times\) per MAC ---
+more silicon-efficient. The per-MAC optimum is the balance point \(lmc \approx
+\text{BW}/128\) (here \(lmc = 4\); Figure~\ref{fig:codesign}).
+
+\textbf{(2) Merge extensions no longer help.}
+Under the wavefront fill, \(n = 3, lmc = 16\) is indistinguishable from
+\(n = 0, lmc = 16\) (both \(0.26\times\) per MAC, both memory-bound). Reshaping the
+array to cut pipeline drain buys nothing once the design is DRAM-bound; merge
+extensions only mattered in the dwell-model's compute-bound regime.
+
+\textbf{(3) Per-MAC efficiency is sequence-length-invariant.}
+Because prefill is DRAM-bound and both raw speedup and the MAC ratio scale linearly
+with \(T\), per-MAC efficiency is flat across \(T\) (\(0.26\times\) for \(lmc = 16\),
+\(\sim\!1.0\times\) for \(lmc = 1\)). The earlier ``advantage grows with \(T\)''
+trend was an artifact of the dwell-model's drain term shrinking relative to compute.
+
+\paragraph{The compute-bound limit (right-hand columns).}
+The \emph{Compute-only} columns of Table~\ref{tab:prefill_results} --- and panels
+(b, d) of Figure~\ref{fig:prefill_permac} --- remove the DRAM floor (the
+infinite-bandwidth regime SCALE-Sim itself runs in, and the asymptote of the
+bandwidth sweep in \S\ref{sec:wavefront}). Two reversals stand out. First,
+\(lmc = 16\) is no longer wasteful: with every MAC fed, its per-MAC efficiency rises
+from \(0.26\times\) to \(\sim\!1.0\times\), matching \(lmc = 1\) (per-MAC is
+\(lmc\)-invariant once compute-bound). Second, merge extensions return ---
+\(n = 3, lmc = 16\) reaches \(\mathbf{1.76\times}\) per MAC at \(T = 8{,}192\),
+\emph{above} break-even --- because at equal MAC count its taller, narrower array
+shortens the pipeline traversal (\(512 + 1024\) vs \(64 + 8192\)) and finishes its
+compute sooner; the margin grows with \(T\) as the \(n = 0\) traversal it removes
+grows. These are the conclusions a compute-bound (or HBM-provisioned) accelerator
+would see; at commodity bandwidth the left-hand columns govern. The truth for a
+given system is wherever its bandwidth places it on the \(lmc \approx \text{BW}/128\)
+ladder (\S\ref{sec:wavefront}).
+
+\subsection{Prefill: Comparison Against Unfused Baseline}
+
+The full baseline characterization is presented in
+\S\ref{subsec:baseline}.
+In summary: the 65$\times$ cycle speedup against the MAC-normalized
+unfused baseline at \(T = 8{,}192\) is entirely explained by the
+17.45\,GB score-matrix DRAM that the unfused baseline incurs
+(98.4\% of its total traffic) vs the 0.27\,GB footprint of KV-stat.
+This advantage collapses to \(\sim\)1$\times$ when the baseline
+adopts fused (FlashAttention-style) tiling, confirming that the
+gain is not unique to the KV-stationary dataflow --- it is the
+same score-matrix elimination that FlashAttention achieves in
+software.
+
+\subsection{Autoregressive Decode: Analytical Projection (Unvalidated)}
+
+The analytical model projects a significant DRAM reduction for
+autoregressive decode if the KV cache is held in on-chip SRAM
+across generated tokens.
+\textbf{This projection has not been validated with SCALE-Sim};
+it is included to motivate the design direction described in
+Section~\ref{sec:future}.
+
+At \(T = 8{,}192\), \(H = 64\), \(d = 128\), FP16, the
+per-token DRAM costs under the analytical model are:
+
+\begin{center}
+\begin{tabular}{lrl}
+\toprule
+Component & Per-step DRAM & Notes \\
+\midrule
+Conventional (KV reloaded) & 6.0\,MB & K + V + Q + scores + output \\
+KV-stat model (KV in SRAM) & 32\,KB  & Q + output only \\
+\midrule
+Projected reduction & \textbf{188$\times$} & analytical only \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The 188$\times$ figure assumes the full KV cache fits in on-chip
+SRAM throughout the generation run.
+At \(T = 8{,}192\) this requires 128\,MB of on-chip SRAM ---
+a substantial area commitment that motivates the two-pass
+extension discussed in Section~\ref{sec:future}.
+
+\subsection{Physical Cost}
+
+The area savings implied by the speedup numbers require
+substantial silicon.
+For the best prefill configuration (\(n = 0, lmc = 16\)) at
+\(T = 8{,}192\):
+
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+Resource & Quantity \\
+\midrule
+Total PEs & 524{,}288 \\
+Total MACs & 8{,}388{,}608 \\
+On-chip K-buffer SRAM & 128\,MB \\
+Estimated die area & \(\sim\)20\,mm\textsuperscript{2} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The 128\,MB K-buffer alone is a significant on-chip memory
+commitment --- roughly the L3 cache of a mid-range embedded
+processor.
+For the validated \(n = 0, lmc = 16, T = 2{,}048\) configuration,
+requirements are 131{,}072 PEs and 34\,MB SRAM, which is
+more tractable for edge deployment.
+
+% ============================================================
+\subsection{Corrected Pipeline Fill and Bandwidth Co-Design}
+\label{sec:wavefront}
+
+The timing model of \S\ref{sec:pipeline} originally charged the full
+\(\text{column\_dwell} = 135\) cycles to every step of the pipeline fill. Because
+each column has a dedicated lower MAC and a stationary \(K_i\), a single packet's
+per-column dot products are independent and pipeline as a wavefront, so the
+\(d\)-cycle reduction should be paid only \emph{once}. We tested which model is
+physically correct using SCALE-Sim, which runs the \(Q\!\cdot\!K\) GEMM on a
+cycle-accurate systolic array.
+
+\paragraph{SCALE-Sim rules out the dwell model.}
+We extend the Experiment~1 lower-MAC validation (\S\ref{sec:methodology}) from
+\(lmc \in \{1,16\}\) to the full ladder \(lmc \in \{1,2,4,8,16\}\), to probe the
+fill across the balance points of \S\ref{sec:codesign}. Across the resulting
+\(40\) prefill \(Q\!\cdot\!K\) GEMMs (all fitting the \(500\,\)MB operand limit),
+the measured per-column fill is \(2.1\)--\(3.0\) cycles for \(T \geq 512\) and is
+independent of \(lmc\) (it is set by the \(H\times\text{eff\_cols}\) array
+geometry). The dwell model's \(135\) cycles
+per column overshoots by \(26\)--\(65\times\) and is decisively ruled out
+(Figure~\ref{fig:fill_val}). The wavefront fill is the validated model; it is in fact
+\emph{conservative} relative to SCALE-Sim. This validation covers the lower-MAC
+compute only --- the same scope SCALE-Sim is used for throughout this work --- and runs
+at infinite bandwidth to isolate compute.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{fig13_scalesim_fill_validation.png}
+    \caption{\textbf{SCALE-Sim validates the wavefront fill.} Measured per-column
+    fill of the \(Q\!\cdot\!K\) stage clusters at \(\sim\!2.5\) cycles/column,
+    versus the dwell model's \(135\). \(40\) cycle-accurate GEMM runs.}
+    \label{fig:fill_val}
+\end{figure}
+
+\paragraph{Consequence: prefill is DRAM-bound.}
+\label{sec:codesign}
+With the wavefront fill, compute at \(T = 8{,}192\) drops far below the DRAM floor
+of \(\sim\!525\)K cycles (moving \(273\,\)MB of \(Q\) and \(O\) at \(512\,\)B/cycle).
+The array's compute scales as \(1/lmc\) while the DRAM floor is fixed by bandwidth,
+so the two cross at a balance point \(lmc \approx \text{BW}/128\)
+(Figure~\ref{fig:floor}). Below this point the design is memory-bound and additional
+MACs sit idle --- at \(lmc = 16\) and \(512\,\)B/cycle the array is \(75\%\) idle.
+The implication inverts the earlier recommendation: \(lmc\) must be sized to
+bandwidth, not maximized. At commodity \(512\,\)B/cycle the efficient choice is
+\(lmc \le 4\); \(lmc = 16\) is correct only with \(\sim\!2\,\)TB/s (HBM-class)
+bandwidth, where it then runs \(4\times\) faster (Figures~\ref{fig:codesign},
+\ref{fig:bwsweep}). Per physical MAC, every doubling of \(lmc\) past the balance
+point halves efficiency, while at or below it efficiency is \(lmc\)-invariant and
+\(lmc\) only buys lower wall-clock latency.
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[t]{0.49\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{fig15_compute_vs_dram_floor.png}
+        \caption{Compute (\(\propto 1/lmc\)) crosses below the fixed DRAM floor at
+        \(lmc \approx \text{BW}/128\); past it the array idles.}
+        \label{fig:floor}
+    \end{subfigure}\hfill
+    \begin{subfigure}[t]{0.49\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{fig14_lmc_bw_codesign.png}
+        \caption{Per-MAC efficiency vs \(lmc\) per bandwidth. The balance point
+        (\(\star\)) marches right as bandwidth grows.}
+        \label{fig:codesign}
+    \end{subfigure}
+    \caption{\textbf{The \(lmc\)--bandwidth co-design.} \(T = 8{,}192\), single pass.}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{fig16_speedup_vs_bandwidth.png}
+    \caption{\textbf{Speedup saturates at the compute floor.} For \(lmc = 16\),
+    bandwidth helps up to \(\sim\!2\,\)TB/s (a \(4\times\) gain), then stops mattering
+    --- past the knee the design is compute-bound and extra bandwidth is wasted.}
+    \label{fig:bwsweep}
+\end{figure}
+
+\paragraph{The compute-bound limit.}
+The asymptote of Figure~\ref{fig:bwsweep} --- the same configurations with the
+memory wall removed (the compute-only, infinite-bandwidth regime SCALE-Sim itself
+runs in) --- is reported in the \emph{Compute-only} columns of
+Table~\ref{tab:prefill_results} (\S\ref{sec:equalsilicon}), side by side with the
+DRAM-bound results. There, \(lmc = 16\) reaches break-even and merge extensions
+exceed it; here we have shown \emph{why} --- that limit is only realized once
+bandwidth feeds the array.
+
+% ============================================================
+\section{Discussion}
+
+\subsection{What Makes the Advantage Real}
+
+Both KV-stat and FlashAttention eliminate score-matrix DRAM traffic;
+this is the shared insight underlying both architectures.
+KV-stat's additional advantage is structural: it physically
+prevents score materialization by keeping KV resident in the
+compute fabric, rather than relying on tiling software to avoid it.
+The analytical model suggests this property could extend to decode
+--- where FlashAttention still reloads the full KV cache from DRAM
+on every generated token --- but this has not been validated and
+is left for future work.
+
+\subsection{Design Space Findings}
+\label{sec:findings}
+
+The single most important design finding is that the right
+configuration is \emph{bandwidth-dependent}, because under the
+SCALE-Sim-validated wavefront fill (\S\ref{sec:pipeline}) prefill
+compute is cheap and the design is normally DRAM-bound.
+
+\textbf{Size \(lmc\) to bandwidth.}
+Compute scales as \(1/lmc\) while the DRAM floor is fixed by bandwidth,
+so the two balance at \(lmc \approx \text{BW}/128\) (\S\ref{sec:codesign}).
+Below this point the array is memory-bound and the extra MACs sit idle
+--- at \(lmc = 16\) on commodity \(512\,\)B/cycle DRAM, \(75\%\) of the
+multipliers are stalled, and per-MAC efficiency is only \(0.26\times\).
+At or above the balance point the design is compute-bound, per-MAC
+efficiency is \(lmc\)-invariant (\(\sim\!1\times\)), and larger \(lmc\)
+buys lower wall-clock latency. So \(lmc \le 4\) is correct at commodity
+bandwidth; \(lmc = 16\) is justified only with HBM-class
+(\(\sim\!2\,\)TB/s) bandwidth, where it then runs \(4\times\) faster.
+
+\textbf{Merge extensions help only when compute-bound.}
+Because merge extensions cut the column traversal (a \emph{compute}
+term) without changing DRAM, they are inert once the design is
+DRAM-bound: at \(512\,\)B/cycle \(n = 3\) and \(n = 0\) are
+indistinguishable (both \(0.26\times\) per MAC). In the compute-bound
+regime they return and are beneficial --- \(n = 3, lmc = 16\) reaches
+\(1.76\times\) per MAC at \(T = 8{,}192\), above break-even
+(Table~\ref{tab:prefill_results}, compute-only columns). This reverses
+the earlier dwell-model claim that \(n = 0\) is universally
+area-optimal.
+
+\subsection{Validation Gaps}
+\label{sec:gaps}
+
+SCALE-Sim validation in this work covers the lower-MAC \(Q\!\cdot\!K\)
+compute and its pipeline fill (\S\ref{sec:wavefront}); it runs at
+infinite bandwidth to isolate compute and therefore does \emph{not}
+validate the DRAM-bound cycle totals that govern the prefill results,
+nor the \(lmc\)--bandwidth balance --- those rest on a roofline DRAM
+model. Some large configurations (\(n = 0, lmc = 16\) at \(T \geq
+4{,}096\)) exceed the \(500\,\)MB operand-matrix limit and so their fill
+is extrapolated within the same validated model rather than directly
+measured. Finally, the upper PE (exp lookup and \(V\) accumulation) and
+the online-softmax state chain are modeled analytically throughout; a
+hardware implementation may show different latency for the exp unit, and
+the state-chain rate (assumed \(\le\) the measured \(\sim\)2.5\,cyc/col
+fill) is not independently measured.
+
+% ============================================================
+\section{Conclusion}
+
+This project built and validated an analytical performance model
+of a KV-stationary 2D systolic array for MQA inference,
+cross-checked against SCALE-Sim simulation across 29 configurations.
+
+The principal findings are:
+
+\begin{enumerate}[noitemsep]
+    \item \textbf{Prefill (validated):} With the SCALE-Sim-validated
+          wavefront fill, prefill is DRAM-bound and KV-stat matches a
+          fused FlashAttention baseline on cycles at equal silicon
+          (\(\sim\!1\times\)); per physical MAC it is below break-even
+          for any over-provisioned \(lmc\) at commodity bandwidth.
+          Both designs win their large multiples over an \emph{unfused}
+          baseline (up to \(511\times\)) purely by eliminating the
+          \(17\,\)GB score-matrix DRAM --- not from the dataflow itself.
+          (An earlier dwell-fill model reported a \(\sim\)1.75--1.86$\times$
+          per-area advantage; the wavefront correction removes it.)
+
+    \item \textbf{Design recommendation (bandwidth-dependent):} Under the
+          SCALE-Sim-validated wavefront fill (\S\ref{sec:wavefront}), prefill is
+          DRAM-bound, and the lower-MAC count must be \emph{sized to bandwidth}
+          rather than maximized: \(lmc \approx \text{BW}/128\) (so \(lmc \le 4\) at
+          commodity \(512\,\)B/cycle, and \(lmc = 16\) only with HBM-class
+          \(\sim\!2\,\)TB/s, where it then runs \(4\times\) faster). In this regime
+          merge extensions (\(n = 3\)) collapse onto the flat array, since cutting
+          drain buys nothing once memory-bound; their earlier advantage holds only
+          where the design is compute-bound (small \(lmc\) or high bandwidth).
+
+    \item \textbf{Decode (future work):} Autoregressive decode was not
+          validated in this work.
+          The analytical model projects a 188$\times$ per-token DRAM
+          reduction if the KV cache is held on-chip, but this requires
+          up to 128\,MB of SRAM.
+          A two-pass decode scheme is the proposed path to making
+          this practical at lower chip area (Section~\ref{sec:future}).
+\end{enumerate}
+
+\textbf{The central limitation of this architecture is physical scaling.}
+The headline speedup numbers --- 165$\times$ at \(T = 8{,}192\) ---
+require \textbf{524{,}288 PEs} and \textbf{128\,MB of on-chip SRAM}
+just for the K-buffer, before routing, control logic, or the upper
+Running Attention PEs are counted.
+At the validated \(T = 2{,}048\) operating point the requirements
+are more modest (131K PEs, 34\,MB SRAM), but even here the array
+is 32$\times$ larger in PEs than the FlashAttention reference while
+matching it on cycles. The wavefront analysis sharpens this point:
+because prefill is DRAM-bound, the large raw speedups buy no
+per-silicon advantage --- per physical MAC the architecture sits at
+break-even (\(\sim\!1\times\) for a bandwidth-matched \(lmc\)) and
+strictly below it for any over-provisioned \(lmc\). No configuration
+in the tested space exceeds \(\sim\!1\times\) per MAC, and the PE count
+and SRAM still double with every doubling of~\(T\).
+
+In short: the KV-stationary dataflow is architecturally sound and its
+score-matrix elimination is real, but on equal silicon and equal
+bandwidth it matches rather than beats FlashAttention, and the chip
+cost of supporting the raw speedup numbers grows too fast with
+sequence length to be practical at large~\(T\) without the kind of
+multi-pass scheduling described in Section~\ref{sec:future}.
+
+% ============================================================
+\section{Future Work: Two-Pass Decode}
+\label{sec:future}
+
+The primary barrier to practical decode deployment is on-chip SRAM.
+At \(T = 8{,}192\) the full KV cache requires 128\,MB of on-chip
+storage --- prohibitive for edge or embedded targets.
+A \textbf{two-pass decode scheme} addresses this directly.
+
+\textbf{Concept.}
+Rather than holding the entire KV cache on-chip across all tokens,
+the sequence is partitioned into \(P\) equal slices of
+\(T / P\) tokens each.
+Each decode step makes \(P\) passes over the array, one per slice,
+accumulating the running softmax state \((m, l, O)\) across passes
+using the same online-softmax merge formula used by the merge-tree
+for prefill.
+After all \(P\) passes the final output is produced identically
+to the single-pass case.
+
+Figure~\ref{fig:reuse_model} shows the \(P = 2\) case concretely.
+In Pass~1 the query stream enters the first slice of KV columns
+(\texttt{KV0--KV15}) and produces a partial softmax state
+\texttt{O\_partial} --- the running \((m, l, O)\) vector after
+attending over the first \(T/2\) tokens.
+This state is saved to a small output register (green box).
+In Pass~2 the same query stream re-enters, this time through
+the second slice (\texttt{KV16--KV31}).
+Before the stream reaches the first PE of the second slice,
+the saved \texttt{O\_partial} state is re-injected via
+\texttt{PE0} --- a single merge PE that combines the partial
+state with the incoming running state using the standard
+online-softmax update.
+The second slice then continues accumulating from the correct
+starting point, and the final column produces
+\texttt{O\_final}: the correctly normalised attention output
+over all \(T\) tokens.
+
+The hardware change relative to a single-pass design is minimal:
+one additional merge PE at the slice boundary and a small
+register to hold the \((m, l, O)\) state between passes
+(\(d + 2\) elements = 258 bytes at FP16).
+The array itself is unchanged --- the same \(H \times T/P\)
+physical columns are reused across both passes.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.82\textwidth]{ReuseModel.png}
+    \caption{\textbf{Silicon Reduction and Re-Use Model (\(P = 2\) passes).}
+    Pass~1: the query stream attends over the first KV slice (\texttt{KV0--KV15}),
+    producing a partial softmax state \texttt{O\_partial} that is saved.
+    Pass~2: the same query re-enters and attends over the second slice
+    (\texttt{KV16--KV31}); the saved partial state is re-injected via \texttt{PE0}
+    so the online softmax continues from the correct running maximum and denominator.
+    \texttt{O\_final} is the correctly normalised output over all \(T\) tokens.
+    The array uses half the columns (and half the SRAM) of a single-pass design
+    at the cost of running each decode token twice.}
+    \label{fig:reuse_model}
+\end{figure}
+
+\textbf{Silicon reduction and the latency trade-off.}
+The re-use model applies to both prefill and decode.
+In either phase, using \(P\) passes over a \(T/P\)-column
+array instead of one pass over a \(T\)-column array reduces
+PE count and SRAM by \(P\times\):
+
+\[
+\text{columns} = T / P, \qquad
+\text{SRAM\_required} = \frac{2 \cdot T \cdot d \cdot \text{bpe}}{P}
+\]
+
+The cost is \textbf{latency}, not DRAM.
+Each pass requires the query stream to traverse the array
+a second time, and at each pass boundary the partial softmax
+state \((m, l, O)\) must be written to a register and
+re-injected via \texttt{PE0} at the start of the next pass.
+This save-and-reinject overhead is small --- 258 bytes at
+FP16 --- but the \(P\times\) pipeline repetition is a real
+latency multiplier for both prefill and decode.
+There is no DRAM penalty: the KV slices are already resident
+on-chip and no additional DRAM traffic is incurred by
+the re-use itself.
+
+\begin{center}
+\begin{tabular}{lrrll}
+\toprule
+Passes \(P\) & Columns & On-chip SRAM & Cycle cost & Applies to \\
+\midrule
+1 & \(T\)     & 128\,MB & \(1\times\) & prefill + decode \\
+2 & \(T/2\)   &  64\,MB & \(2\times\) + reinject & prefill + decode \\
+4 & \(T/4\)   &  32\,MB & \(4\times\) + reinject & prefill + decode \\
+8 & \(T/8\)   &  16\,MB & \(8\times\) + reinject & prefill + decode \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{Why this is worth building.}
+The primary value is silicon area reduction, not DRAM savings.
+The fundamental scaling problem identified in \S7 is that
+PE count and SRAM grow linearly with \(T\): at \(T = 8{,}192\)
+the single-pass design requires 524K PEs and 128\,MB SRAM.
+With \(P = 4\) passes the same computation fits in a
+\(T/4 = 2{,}048\)-column array --- 131K PEs and 32\,MB SRAM
+--- which is the validated operating point from the prefill
+experiments, requiring only \(4\times\) more cycles per token.
+In effect, the re-use model lets the designer trade latency
+for chip area at a known, controllable ratio, making the
+architecture viable at sequence lengths that would otherwise
+be physically impractical.
+
+\textbf{Open questions for future validation.}
+\begin{itemize}[noitemsep]
+    \item SCALE-Sim cycle validation of a single-pass decode step
+          (currently divergent due to pipeline drain, as noted in \S\ref{sec:methodology}).
+    \item Extending the analytical pipeline model to multi-pass decode,
+          including the inter-pass softmax merge cost.
+    \item Determining the optimal \(P\) that balances SRAM budget
+          against acceptable decode latency for the target workload.
+\end{itemize}
+
+% ============================================================
+\section{References}
+
+\printbibliography[heading=none]
+
+\end{document}
