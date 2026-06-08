@@ -477,16 +477,33 @@ step while SCALE-Sim measures the full $T$-column pipeline traversal, producing
 divergence of thousands of percent.
 
 \paragraph{Conclusion.}
-The KV-stationary dataflow eliminates score-matrix DRAM by construction and
-delivers up to $\mathbf{1.76\times}$ per-MAC advantage over fused FlashAttention
-in the compute-bound regime using merge extensions and interleaved MACs.
-At commodity 512\,B/cycle both architectures are DRAM-bound with identical
-traffic, collapsing the advantage to ${\sim}1\times$ --- the memory wall, not
-compute efficiency, is the binding constraint.
-The actionable design rules are: size $lmc$ to bandwidth ($lmc{\approx}
-\text{BW}/128$); deploy merge extensions only when compute-bound; and use the
-multi-pass re-use model to reduce on-chip SRAM by $P\times$ at a sub-linear
-latency cost (Appendix~\ref{sec:future}).
+The headline speedup of $511\times$ over a naive unfused baseline is real but
+misleading: $98.4\%$ of that baseline's DRAM is the $H{\times}T^2$ score matrix,
+which any fused kernel eliminates.
+The honest figure is $\mathbf{65\times}$ --- the gain from moving that matrix
+off DRAM entirely by computing online softmax inline.
+Against a fused FlashAttention baseline on equal silicon, the advantage collapses
+to ${\sim}1\times$ at commodity bandwidth, because both architectures are pinned
+to the same 273\,MB DRAM floor.
+
+The deeper constraint is \emph{silicon cost}: the array requires one column of
+PEs per KV token, so PE count and on-chip SRAM both grow \textbf{linearly with
+$T$}.
+At $T{=}8{,}192$ that is 524K PEs and 128\,MB of SRAM --- roughly 20\,mm$^2$ of
+die area --- with no tested configuration exceeding a $2\times$ area-normalised
+advantage.
+Scaling context length by $2\times$ doubles the chip.
+
+The multi-pass re-use scheme (Appendix~\ref{sec:future}) breaks this coupling.
+Running $P$ passes over $T/P$ physical columns reuses the same array $P$ times,
+delivering $P\times$ smaller chip and $P^2\times$ better area-normalised
+throughput.
+Crucially, the latency cost is sub-linear: at $T{=}8{,}192$ and $P{=}4$ the
+pipeline adds only $+2.3\%$ more cycles than a chip $4\times$ larger, because
+pipeline drain already dominates at large $T$.
+The practical consequence is that validated $T{=}2{,}048$ silicon --- 64 rows,
+2{,}048 columns, 32\,MB SRAM --- can serve $T{=}8{,}192$ inference in four
+passes at effectively the same latency.
 
 % ============================================================
 \section{Team Contributions and Acknowledgement}

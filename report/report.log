@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.3.22)  7 JUN 2026 19:34
+This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.3.22)  7 JUN 2026 20:02
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -888,7 +888,7 @@ File: ../documentation/resources/mqa-designs/ReuseModel.png Graphic file (type
 png)
 <use ../documentation/resources/mqa-designs/ReuseModel.png>
 Package pdftex.def Info: ../documentation/resources/mqa-designs/ReuseModel.png 
- used on input line 567.
+ used on input line 584.
 (pdftex.def)             Requested size: 396.63495pt x 217.58716pt.
  [8
 
@@ -899,7 +899,7 @@ File: ../documentation/resources/mqa-designs/SystolicSingle.png Graphic file (t
 ype png)
 <use ../documentation/resources/mqa-designs/SystolicSingle.png>
 Package pdftex.def Info: ../documentation/resources/mqa-designs/SystolicSingle.
-png  used on input line 623.
+png  used on input line 640.
 (pdftex.def)             Requested size: 348.26231pt x 108.37927pt.
  [9 <../documentation/resources/mqa-designs/ReuseModel.png>]
 <../documentation/resources/mqa-designs/FinalOutVector.png, id=211, 695.7192pt 
@@ -908,7 +908,7 @@ File: ../documentation/resources/mqa-designs/FinalOutVector.png Graphic file (t
 ype png)
 <use ../documentation/resources/mqa-designs/FinalOutVector.png>
 Package pdftex.def Info: ../documentation/resources/mqa-designs/FinalOutVector.
-png  used on input line 636.
+png  used on input line 653.
 (pdftex.def)             Requested size: 232.17241pt x 108.52713pt.
 <../documentation/resources/mqa-designs/AttentionPE.png, id=212, 749.9217pt x 3
 54.6048pt>
@@ -916,7 +916,7 @@ File: ../documentation/resources/mqa-designs/AttentionPE.png Graphic file (type
  png)
 <use ../documentation/resources/mqa-designs/AttentionPE.png>
 Package pdftex.def Info: ../documentation/resources/mqa-designs/AttentionPE.png
-  used on input line 646.
+  used on input line 663.
 (pdftex.def)             Requested size: 232.17241pt x 109.78566pt.
 <../documentation/resources/mqa-designs/Merge_unit.png, id=213, 443.4969pt x 42
 4.9476pt>
@@ -924,7 +924,7 @@ File: ../documentation/resources/mqa-designs/Merge_unit.png Graphic file (type
 png)
 <use ../documentation/resources/mqa-designs/Merge_unit.png>
 Package pdftex.def Info: ../documentation/resources/mqa-designs/Merge_unit.png 
- used on input line 667.
+ used on input line 684.
 (pdftex.def)             Requested size: 348.26231pt x 333.71428pt.
 
 [10 <../documentation/resources/mqa-designs/SystolicSingle.png> <../documentati
@@ -936,27 +936,27 @@ File: ../documentation/resources/mqa-designs/MergeReductionGraph.png Graphic fi
 le (type png)
 <use ../documentation/resources/mqa-designs/MergeReductionGraph.png>
 Package pdftex.def Info: ../documentation/resources/mqa-designs/MergeReductionG
-raph.png  used on input line 686.
+raph.png  used on input line 703.
 (pdftex.def)             Requested size: 348.26231pt x 292.74547pt.
  [11 <../documentation/resources/mqa-designs/Merge_unit.png>]
 <../results/figures/fig3_cycle_breakdown.png, id=237, 939.51pt x 397.485pt>
 File: ../results/figures/fig3_cycle_breakdown.png Graphic file (type png)
 <use ../results/figures/fig3_cycle_breakdown.png>
 Package pdftex.def Info: ../results/figures/fig3_cycle_breakdown.png  used on i
-nput line 713.
+nput line 730.
 (pdftex.def)             Requested size: 483.69684pt x 204.6373pt.
  [12 <../documentation/resources/mqa-designs/MergeReductionGraph.png>]
 <../results/figures/fig4_breakdown_n_sweep.png, id=243, 932.283pt x 387.849pt>
 File: ../results/figures/fig4_breakdown_n_sweep.png Graphic file (type png)
 <use ../results/figures/fig4_breakdown_n_sweep.png>
 Package pdftex.def Info: ../results/figures/fig4_breakdown_n_sweep.png  used on
- input line 726.
+ input line 743.
 (pdftex.def)             Requested size: 483.69684pt x 201.23285pt.
 <../results/figures/fig5_speedup_summary.png, id=244, 939.51pt x 397.485pt>
 File: ../results/figures/fig5_speedup_summary.png Graphic file (type png)
 <use ../results/figures/fig5_speedup_summary.png>
 Package pdftex.def Info: ../results/figures/fig5_speedup_summary.png  used on i
-nput line 742.
+nput line 759.
 (pdftex.def)             Requested size: 483.69684pt x 204.6373pt.
 
 [13 <../results/figures/fig3_cycle_breakdown.png> <../results/figures/fig4_brea
@@ -965,7 +965,7 @@ kdown_n_sweep.png>]
 File: ../results/figures/fig7_speedup_raw.png Graphic file (type png)
 <use ../results/figures/fig7_speedup_raw.png>
 Package pdftex.def Info: ../results/figures/fig7_speedup_raw.png  used on input
- line 760.
+ line 777.
 (pdftex.def)             Requested size: 483.69684pt x 295.60205pt.
  [14 <../results/figures/fig5_speedup_summary.png> <../results/figures/fig7_spe
 edup_raw.png>] (./report.aux)
@@ -980,11 +980,11 @@ Package logreq Info: Writing requests to 'report.run.xml'.
 
  ) 
 Here is how much of TeX's memory you used:
- 22911 strings out of 467525
- 402717 string characters out of 5418982
+ 22915 strings out of 467525
+ 402755 string characters out of 5418982
  1377542 words of memory out of 5000000
  51168 multiletter control sequences out of 15000+600000
- 664341 words of font info for 278 fonts, out of 8000000 for 9000
+ 664513 words of font info for 280 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  63i,11n,67p,1019b,5050s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb
@@ -1024,7 +1024,7 @@ er/sfti1000.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/cm-super
 ftt0900.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/cm-super/sft
 t1000.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/cm-super/sftt1
 095.pfb>
-Output written on report.pdf (14 pages, 1748246 bytes).
+Output written on report.pdf (14 pages, 1749665 bytes).
 PDF statistics:
  442 PDF objects out of 1000 (max. 8388607)
  314 compressed objects within 4 object streams
