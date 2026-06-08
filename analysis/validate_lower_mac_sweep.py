@@ -1,3 +1,4 @@
+import sys, os; sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 """Full lower-MAC SCALE-Sim sweep matching full_results.csv parameter space.
 
 Validates the analytical lower-MAC bound (ceil(Q_T * d / lmc)) against

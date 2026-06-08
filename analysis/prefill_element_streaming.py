@@ -1,3 +1,4 @@
+import sys, os; sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 """Corrected KV-stationary cycle model: element-streaming architecture.
 
 Previous model (WRONG):

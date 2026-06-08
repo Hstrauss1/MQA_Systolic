@@ -1,3 +1,0 @@
-LayerID, Total Cycles (incl. prefetch), Total Cycles, Stall Cycles, Overall Util %, Mapping Efficiency %, Compute Util %,
-0, 145659, 32511, 0, 50.395250838177844, 100.0, 50.39370078740157,
-1, 125814, 16635, 0, 98.49113315299068, 100.0, 98.48521279153643,

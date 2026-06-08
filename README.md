@@ -42,7 +42,7 @@ pip3 install numpy matplotlib
 ```
 MQA_SCALE_SIM/
 │
-├── analysis/                     # All project Python files — run scripts from here
+├── analysis/                     # All project Python — run scripts from here
 │   ├── kv_stationary_model.py    # Core analytical pipeline model (wavefront fill)
 │   ├── kv_reuse_model.py         # Multi-pass silicon re-use extension
 │   ├── baseline_mqa_model.py     # Roofline baseline (fused / unfused FlashAttention)
@@ -67,7 +67,8 @@ MQA_SCALE_SIM/
 │   │   ├── validate_sweep_scalesim.csv     # 40-run wavefront fill validation
 │   │   ├── prefill_element_streaming.csv   # Cycle breakdowns per config
 │   │   └── reuse_full_sweep.csv            # 750-row full sweep
-│   └── figures/                   # All publication figures (26 PNGs)
+│   ├── figures/                   # All publication figures (26 PNGs)
+│   └── rundir-accelergy/          # Accelergy energy estimation output
 │
 ├── report/
 │   ├── report.tex                 # LaTeX source (14 pages)
@@ -75,13 +76,19 @@ MQA_SCALE_SIM/
 │   └── report.pdf                 # Compiled PDF
 │
 ├── documentation/
-│   └── resources/mqa-designs/    # Architecture diagram PNGs
-│       └── kv_stationary_architecture.html  # Interactive architecture view
+│   ├── kv_stationary_architecture.html   # Interactive architecture diagram
+│   └── resources/mqa-designs/            # Architecture diagram PNGs
 │
 ├── old_dwell_model/               # Archived superseded work (dwell fill model)
 │   └── old_plots/                 # Old figures from dwell-model era
 │
-└── configs/   topologies/   scale/   scalesim/   …  # SCALE-Sim infrastructure
+├── scale/                         # Python virtual environment (SCALE-Sim)
+├── scalesim/                      # SCALE-Sim package source (editable install)
+└── scalesim_base/                 # All other SCALE-Sim infrastructure
+    ├── configs/    topologies/    layouts/
+    ├── scripts/    submodules/    code-examples/
+    ├── CPP__Simulation/           verify_outputs/
+    └── scalesim_artifacts/        # Base repo READMEs, Makefile, shell scripts
 ```
 
 ---
