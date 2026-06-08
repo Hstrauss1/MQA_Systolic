@@ -13,12 +13,26 @@ and remain stationary; Query vectors stream left-to-right computing an inline
 online softmax at every column. Validated against SCALE-Sim cycle-accurate
 simulation for the Q·K compute stage.
 
-**Central finding:** Under the SCALE-Sim–validated wavefront fill model,
-prefill is DRAM-bound at 512 B/cycle. KV-stationary and fused FlashAttention
-hit the same 273 MB DRAM floor and achieve roughly equal cycle counts on equal
-silicon. A multi-pass silicon re-use scheme (P passes over T/P columns) trades
-P× latency overhead for P× smaller chip and P²× better area-normalised
-throughput, with sub-linear latency cost at large T.
+**The headline numbers look extraordinary.** Against a naive unfused baseline,
+KV-stationary achieves up to **511× speedup** at T=8192 — because the unfused
+baseline must write and re-read an H×T² score matrix (17.18 GB at T=8192),
+while KV-stationary computes online softmax inline and never materialises it.
+Strip that score-matrix artifact and the honest number is **~65×**, driven
+entirely by eliminating the score-matrix DRAM round-trip.
+
+**The hard limit is silicon cost.** The array needs one column of PEs per KV
+token: PE count and on-chip SRAM both scale **linearly with T**. At T=8192
+that means 524K PEs and 128 MB of SRAM — roughly 20 mm² of die area.
+Against a fused FlashAttention baseline on equal silicon, KV-stationary
+achieves only **~1×** at commodity 512 B/cycle bandwidth, because both
+architectures are pinned to the same 273 MB DRAM floor.
+
+**The exit from that trap is the multi-pass re-use scheme.** Running P passes
+over T/P physical columns reuses the same array P times — delivering P× smaller
+chip and P²× better area-normalised throughput. Critically, the latency overhead
+is sub-linear: at T=8192, P=4 costs only +2.3% more cycles than a chip 4×
+larger, because the pipeline drain already dominates at large T. This makes
+the validated T=2048 silicon a practical substrate for T=8192 inference.
 
 ---
 
