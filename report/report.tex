@@ -53,7 +53,7 @@ for Multi-Query Attention Inference}
 }
 
 \author{
-Hudson Strauss \and Dhruv Patel
+Hudson Strauss
 }
 
 \date{June 7, 2026}
@@ -221,8 +221,9 @@ SCALE-Sim measures $\sim\!2.5$ cycles/column of fill, confirming the wavefront m
 At $T{=}8{,}192$: $Q$ reads $+$ $KV$ load $+$ $O$ writes $\approx 273$ MB (FP16),
 identical to a fused FlashAttention baseline.
 An \emph{unfused} baseline adds the score matrix
-($H{\times}T^2{\times}\text{bpe} = 17.18\,\text{GB}$ written then re-read $= 17.18\,\text{GB}$),
-bringing total unfused DRAM to 17.45\,GB of which the score matrix is 98.4\%.
+($2{\times}H{\times}T^2{\times}\text{bpe} = 17.18\,\text{GB}$: written to DRAM after
+GEMM$_1$, re-read for GEMM$_2$), bringing total unfused DRAM to 17.45\,GB of which
+the score matrix is 98.4\%.
 Arithmetic intensity (MACs/byte) at $T{=}8{,}192$: unfused baseline 63 (compute-bound);
 fused FlashAttention 4,033 (memory-bound); KV-stationary 8,066 (memory-bound,
 2$\times$ higher due to the additional $3d$ V-accumulation MACs per token pair).
@@ -274,7 +275,9 @@ Under the wavefront fill, prefill is DRAM-bound at every tested configuration.
 \centering
 \caption{Lower-MAC SCALE-Sim validation (selected prefill).
 $\delta\%$ is the measured wavefront fill as a fraction of the analytical MAC
-bound. Errors below 10\% at $T{\ge}1024$ show the model is accurate for large $T$.}
+bound. Errors are large for $n{=}0$, $lmc{=}16$ (flat array, short drain) but
+converge below 5\% for $n{=}3$ or $lmc{=}1$ at $T{\ge}2048$, where computation
+dominates the drain overhead.}
 \label{tab:mac_validation}
 \small
 \begin{tabular}{rrrrrr}
@@ -451,7 +454,9 @@ units per column, each staggered by $\lceil d/lmc\rceil$ cycles, raises upper-PE
 utilization from 5\% to 87.5\% with no extra rows.
 \emph{(3) Merge extensions ($n$):} stacking $2^n$ sub-arrays and combining
 partial softmax states via a binary merge tree shortens pipeline drain from
-$T{-}1$ to $T/2^n{-}1$ column traversals.
+$T{-}1$ to $T/2^n{-}1$ column traversals --- effective only in the
+compute-bound regime (\S\ref{sec:wavefront}), where drain is the binding term;
+inert when DRAM-bound, as both $n{=}0$ and $n{=}3$ pin to the same 273\,MB floor.
 The hybrid SCALE-Sim/analytical methodology confirmed wavefront pipelining
 at ${\sim}2.5$ cycles/column and established the regime boundary.
 
@@ -504,41 +509,6 @@ pipeline drain already dominates at large $T$.
 The practical consequence is that validated $T{=}2{,}048$ silicon --- 64 rows,
 2{,}048 columns, 32\,MB SRAM --- can serve $T{=}8{,}192$ inference in four
 passes at effectively the same latency.
-
-% ============================================================
-\section{Team Contributions and Acknowledgement}
-
-\subsection*{Task Allocation}
-
-\begin{center}
-\small
-\begin{tabular}{ll}
-\toprule
-Component & Completed by \\
-\midrule
-Architecture conception \& design iteration & Hudson \\
-Analytical pipeline model (\texttt{kv\_stationary\_model.py}) & Hudson \\
-Baseline roofline model (\texttt{baseline\_mqa\_model.py}) & Dhruv \\
-SCALE-Sim validation harness & Dhruv \\
-Architecture diagrams \& visualizations & Hudson \\
-Wavefront fill analysis \& BW co-design & Dhruv \\
-Sweep scripts \& result CSV generation & Hudson \\
-Figure-plotting scripts & Dhruv \\
-DRAM traffic analysis \& energy estimation & Hudson \\
-Report writing \& editing & Both \\
-\bottomrule
-\end{tabular}
-\end{center}
-
-\subsection*{Contributions}
-
-\textbf{Hudson Strauss --- $\sim\!50\%$.}
-Led analytical model development, SCALE-Sim validation pipeline, wavefront fill
-discovery, bandwidth co-design analysis, and primary report structure.
-
-\textbf{Dhruv Patel --- $\sim\!50\%$.}
-Led baseline model implementation, architecture diagrams, DRAM traffic and energy
-analysis, result figure generation, and report review.
 
 \clearpage
 

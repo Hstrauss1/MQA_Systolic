@@ -1,7 +1,7 @@
 # KV-Stationary MQA Accelerator
 
 **Course:** CSEN 318 — High-Performance Computer Architecture, SCU Spring 2026  
-**Authors:** Hudson Strauss & Dhruv Patel
+**Author:** Hudson Strauss
 
 ---
 

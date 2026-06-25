@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.3.22)  7 JUN 2026 20:02
+This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.3.22)  24 JUN 2026 18:34
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -814,7 +814,7 @@ File: mt-msb.cfg 2005/06/01 v1.0 microtype config. file: AMS symbols (b) (RS)
 al/texlive/2026/texmf-dist/fonts/enc/dvips/cm-super/cm-super-t1.enc}] [2
 
 ]
-<../documentation/resources/mqa-designs/MultiHeaded.png, id=121, 711.3777pt x 3
+<../documentation/resources/mqa-designs/MultiHeaded.png, id=117, 711.3777pt x 3
 11.7246pt>
 File: ../documentation/resources/mqa-designs/MultiHeaded.png Graphic file (type
  png)
@@ -822,7 +822,7 @@ File: ../documentation/resources/mqa-designs/MultiHeaded.png Graphic file (type
 Package pdftex.def Info: ../documentation/resources/mqa-designs/MultiHeaded.png
   used on input line 185.
 (pdftex.def)             Requested size: 237.0141pt x 103.85878pt.
-<../documentation/resources/mqa-designs/PEUtilization.png, id=123, 542.025pt x 
+<../documentation/resources/mqa-designs/PEUtilization.png, id=119, 542.025pt x 
 415.5525pt>
 File: ../documentation/resources/mqa-designs/PEUtilization.png Graphic file (ty
 pe png)
@@ -835,14 +835,14 @@ Package microtype Info: Loading generic protrusion settings for font family
 (microtype)             For optimal results, create family-specific settings.
 (microtype)             See the microtype manual for details.
 
-Overfull \hbox (20.74188pt too wide) in paragraph at lines 234--243
+Overfull \hbox (20.74188pt too wide) in paragraph at lines 235--244
 \T1/cmr/m/n/10.95 (-20) wave-front fill model, multi-pass re-use ex-ten-sion), 
 \T1/cmtt/m/n/10.95 baseline_mqa_model.py \T1/cmr/m/n/10.95 (-20) (roofline base
 -line, fused/unfused),
  []
 
 
-Overfull \hbox (74.95477pt too wide) in paragraph at lines 234--243
+Overfull \hbox (74.95477pt too wide) in paragraph at lines 235--244
 \T1/cmtt/m/n/10.95 validate_lower_mac_sweep.py \T1/cmr/m/n/10.95 (-20) and \T1/
 cmtt/m/n/10.95 validate_sweep_scalesim.py \T1/cmr/m/n/10.95 (-20) (SCALE-Sim ha
 r-ness), and \T1/cmtt/m/n/10.95 reuse_full_sweep.py
@@ -852,29 +852,29 @@ r-ness), and \T1/cmtt/m/n/10.95 reuse_full_sweep.py
 esources/mqa-designs/PEUtilization.png>]
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 295.
+(hyperref)                removing `math shift' on input line 298.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 295.
+(hyperref)                removing `math shift' on input line 298.
 
-<../results/figures/fig15_compute_vs_dram_floor.png, id=143, 578.16pt x 361.35p
+<../results/figures/fig15_compute_vs_dram_floor.png, id=139, 578.16pt x 361.35p
 t>
 File: ../results/figures/fig15_compute_vs_dram_floor.png Graphic file (type png
 )
 <use ../results/figures/fig15_compute_vs_dram_floor.png>
 Package pdftex.def Info: ../results/figures/fig15_compute_vs_dram_floor.png  us
-ed on input line 312.
+ed on input line 315.
 (pdftex.def)             Requested size: 237.0141pt x 148.1324pt.
-<../results/figures/fig14_lmc_bw_codesign.png, id=144, 578.16pt x 361.35pt>
+<../results/figures/fig14_lmc_bw_codesign.png, id=140, 578.16pt x 361.35pt>
 File: ../results/figures/fig14_lmc_bw_codesign.png Graphic file (type png)
 <use ../results/figures/fig14_lmc_bw_codesign.png>
 Package pdftex.def Info: ../results/figures/fig14_lmc_bw_codesign.png  used on 
-input line 318.
+input line 321.
 (pdftex.def)             Requested size: 237.0141pt x 148.1324pt.
 [4] [5 <../results/figures/fig15_compute_vs_dram_floor.png> <../results/figures
 /fig14_lmc_bw_codesign.png>]
-Overfull \hbox (11.29799pt too wide) in paragraph at lines 472--478
+Overfull \hbox (11.29799pt too wide) in paragraph at lines 477--483
  []\T1/cmr/bx/n/10.95 (-20) What did not work.[] \T1/cmr/m/n/10.95 (-20) At com
 -mod-ity 512B/cycle, max-i-miz-ing $\OML/cmm/m/it/10.95 lmc$ \T1/cmr/m/n/10.95 
 (-20) past the bal-ance point ($\OML/cmm/m/it/10.95 lmc[][]=\OT1/cmr/m/n/10.95 
@@ -882,90 +882,90 @@ Overfull \hbox (11.29799pt too wide) in paragraph at lines 472--478
  []
 
 [6] [7]
-<../documentation/resources/mqa-designs/ReuseModel.png, id=193, 597.6729pt x 32
+<../documentation/resources/mqa-designs/ReuseModel.png, id=187, 597.6729pt x 32
 7.8649pt>
 File: ../documentation/resources/mqa-designs/ReuseModel.png Graphic file (type 
 png)
 <use ../documentation/resources/mqa-designs/ReuseModel.png>
 Package pdftex.def Info: ../documentation/resources/mqa-designs/ReuseModel.png 
- used on input line 584.
+ used on input line 554.
 (pdftex.def)             Requested size: 396.63495pt x 217.58716pt.
  [8
 
 ]
-<../documentation/resources/mqa-designs/SystolicSingle.png, id=201, 711.3777pt 
+<../documentation/resources/mqa-designs/SystolicSingle.png, id=195, 711.3777pt 
 x 221.3871pt>
 File: ../documentation/resources/mqa-designs/SystolicSingle.png Graphic file (t
 ype png)
 <use ../documentation/resources/mqa-designs/SystolicSingle.png>
 Package pdftex.def Info: ../documentation/resources/mqa-designs/SystolicSingle.
-png  used on input line 640.
+png  used on input line 610.
 (pdftex.def)             Requested size: 348.26231pt x 108.37927pt.
  [9 <../documentation/resources/mqa-designs/ReuseModel.png>]
-<../documentation/resources/mqa-designs/FinalOutVector.png, id=211, 695.7192pt 
+<../documentation/resources/mqa-designs/FinalOutVector.png, id=206, 695.7192pt 
 x 325.215pt>
 File: ../documentation/resources/mqa-designs/FinalOutVector.png Graphic file (t
 ype png)
 <use ../documentation/resources/mqa-designs/FinalOutVector.png>
 Package pdftex.def Info: ../documentation/resources/mqa-designs/FinalOutVector.
-png  used on input line 653.
+png  used on input line 623.
 (pdftex.def)             Requested size: 232.17241pt x 108.52713pt.
-<../documentation/resources/mqa-designs/AttentionPE.png, id=212, 749.9217pt x 3
+<../documentation/resources/mqa-designs/AttentionPE.png, id=207, 749.9217pt x 3
 54.6048pt>
 File: ../documentation/resources/mqa-designs/AttentionPE.png Graphic file (type
  png)
 <use ../documentation/resources/mqa-designs/AttentionPE.png>
 Package pdftex.def Info: ../documentation/resources/mqa-designs/AttentionPE.png
-  used on input line 663.
+  used on input line 633.
 (pdftex.def)             Requested size: 232.17241pt x 109.78566pt.
-<../documentation/resources/mqa-designs/Merge_unit.png, id=213, 443.4969pt x 42
+<../documentation/resources/mqa-designs/Merge_unit.png, id=208, 443.4969pt x 42
 4.9476pt>
 File: ../documentation/resources/mqa-designs/Merge_unit.png Graphic file (type 
 png)
 <use ../documentation/resources/mqa-designs/Merge_unit.png>
 Package pdftex.def Info: ../documentation/resources/mqa-designs/Merge_unit.png 
- used on input line 684.
+ used on input line 654.
 (pdftex.def)             Requested size: 348.26231pt x 333.71428pt.
 
 [10 <../documentation/resources/mqa-designs/SystolicSingle.png> <../documentati
 on/resources/mqa-designs/FinalOutVector.png> <../documentation/resources/mqa-de
 signs/AttentionPE.png>]
-<../documentation/resources/mqa-designs/MergeReductionGraph.png, id=228, 822.19
+<../documentation/resources/mqa-designs/MergeReductionGraph.png, id=223, 822.19
 17pt x 691.1421pt>
 File: ../documentation/resources/mqa-designs/MergeReductionGraph.png Graphic fi
 le (type png)
 <use ../documentation/resources/mqa-designs/MergeReductionGraph.png>
 Package pdftex.def Info: ../documentation/resources/mqa-designs/MergeReductionG
-raph.png  used on input line 703.
+raph.png  used on input line 673.
 (pdftex.def)             Requested size: 348.26231pt x 292.74547pt.
  [11 <../documentation/resources/mqa-designs/Merge_unit.png>]
-<../results/figures/fig3_cycle_breakdown.png, id=237, 939.51pt x 397.485pt>
+<../results/figures/fig3_cycle_breakdown.png, id=232, 939.51pt x 397.485pt>
 File: ../results/figures/fig3_cycle_breakdown.png Graphic file (type png)
 <use ../results/figures/fig3_cycle_breakdown.png>
 Package pdftex.def Info: ../results/figures/fig3_cycle_breakdown.png  used on i
-nput line 730.
+nput line 700.
 (pdftex.def)             Requested size: 483.69684pt x 204.6373pt.
  [12 <../documentation/resources/mqa-designs/MergeReductionGraph.png>]
-<../results/figures/fig4_breakdown_n_sweep.png, id=243, 932.283pt x 387.849pt>
+<../results/figures/fig4_breakdown_n_sweep.png, id=238, 932.283pt x 387.849pt>
 File: ../results/figures/fig4_breakdown_n_sweep.png Graphic file (type png)
 <use ../results/figures/fig4_breakdown_n_sweep.png>
 Package pdftex.def Info: ../results/figures/fig4_breakdown_n_sweep.png  used on
- input line 743.
+ input line 713.
 (pdftex.def)             Requested size: 483.69684pt x 201.23285pt.
-<../results/figures/fig5_speedup_summary.png, id=244, 939.51pt x 397.485pt>
+<../results/figures/fig5_speedup_summary.png, id=239, 939.51pt x 397.485pt>
 File: ../results/figures/fig5_speedup_summary.png Graphic file (type png)
 <use ../results/figures/fig5_speedup_summary.png>
 Package pdftex.def Info: ../results/figures/fig5_speedup_summary.png  used on i
-nput line 759.
+nput line 729.
 (pdftex.def)             Requested size: 483.69684pt x 204.6373pt.
 
 [13 <../results/figures/fig3_cycle_breakdown.png> <../results/figures/fig4_brea
 kdown_n_sweep.png>]
-<../results/figures/fig7_speedup_raw.png, id=259, 650.43pt x 397.485pt>
+<../results/figures/fig7_speedup_raw.png, id=254, 650.43pt x 397.485pt>
 File: ../results/figures/fig7_speedup_raw.png Graphic file (type png)
 <use ../results/figures/fig7_speedup_raw.png>
 Package pdftex.def Info: ../results/figures/fig7_speedup_raw.png  used on input
- line 777.
+ line 747.
 (pdftex.def)             Requested size: 483.69684pt x 295.60205pt.
  [14 <../results/figures/fig5_speedup_summary.png> <../results/figures/fig7_spe
 edup_raw.png>] (./report.aux)
@@ -974,17 +974,17 @@ LaTeX2e <2025-11-01>
 L3 programming layer <2026-01-19>
  ***********
 Package rerunfilecheck Info: File `report.out' has not changed.
-(rerunfilecheck)             Checksum: D633532E198767B20FE91FEAA688A81D;3585.
+(rerunfilecheck)             Checksum: B4CCD00BB661159866874664B2F0196D;3342.
 Package logreq Info: Writing requests to 'report.run.xml'.
 \openout1 = `report.run.xml'.
 
  ) 
 Here is how much of TeX's memory you used:
- 22915 strings out of 467525
- 402755 string characters out of 5418982
- 1377542 words of memory out of 5000000
- 51168 multiletter control sequences out of 15000+600000
- 664513 words of font info for 280 fonts, out of 8000000 for 9000
+ 22907 strings out of 467525
+ 402671 string characters out of 5418982
+ 1377633 words of memory out of 5000000
+ 51167 multiletter control sequences out of 15000+600000
+ 664380 words of font info for 278 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  63i,11n,67p,1019b,5050s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb
@@ -1024,10 +1024,10 @@ er/sfti1000.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/cm-super
 ftt0900.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/cm-super/sft
 t1000.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/cm-super/sftt1
 095.pfb>
-Output written on report.pdf (14 pages, 1749665 bytes).
+Output written on report.pdf (14 pages, 1738372 bytes).
 PDF statistics:
- 442 PDF objects out of 1000 (max. 8388607)
- 314 compressed objects within 4 object streams
- 66 named destinations out of 1000 (max. 500000)
- 67279 words of extra memory for PDF output out of 74296 (max. 10000000)
+ 437 PDF objects out of 1000 (max. 8388607)
+ 309 compressed objects within 4 object streams
+ 63 named destinations out of 1000 (max. 500000)
+ 67271 words of extra memory for PDF output out of 74296 (max. 10000000)
 
